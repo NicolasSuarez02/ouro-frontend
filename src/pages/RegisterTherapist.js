@@ -1,0 +1,99 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { createTherapist, getTherapistByUserId, getUserById } from '../services/api';
+import TherapistForm from '../components/TherapistForm';
+
+const RegisterTherapist = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [apiError, setApiError] = useState('');
+
+  useEffect(() => {
+    const userData = localStorage.getItem('ouro_user');
+    if (!userData) {
+      navigate('/login');
+      return;
+    }
+    const parsed = JSON.parse(userData);
+
+    if (parsed.role === 'THERAPIST') {
+      // Ya es terapeuta — verificar si ya tiene perfil
+      getTherapistByUserId(parsed.id)
+        .then(() => navigate('/dashboard'))
+        .catch(() => {
+          // No tiene perfil aún, puede continuar con el formulario
+          setUser(parsed);
+          setLoading(false);
+        });
+    } else {
+      setUser(parsed);
+      setLoading(false);
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (data) => {
+    setApiError('');
+    setSaving(true);
+    try {
+      await createTherapist({ userId: user.id, ...data });
+
+      // Re-fetchear el usuario para obtener el rol actualizado del backend
+      const updatedUser = await getUserById(user.id);
+      localStorage.setItem('ouro_user', JSON.stringify(updatedUser));
+
+      navigate('/dashboard');
+    } catch (err) {
+      setApiError(err.response?.data?.message || 'Error al enviar la solicitud. Intenta nuevamente.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4 py-12">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center space-x-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-mystic-500 to-primary-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-2xl">O</span>
+            </div>
+            <span className="text-3xl font-bold text-gray-800">URO</span>
+          </Link>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">Ser terapeuta</h2>
+          <p className="mt-2 text-gray-600">Completá tu perfil profesional</p>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          <TherapistForm
+            onSubmit={handleSubmit}
+            saving={saving}
+            apiError={apiError}
+            submitLabel="Enviar solicitud"
+            userId={user?.id}
+          />
+          <div className="mt-6 text-center">
+            <Link to="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">
+              ← Volver al dashboard
+            </Link>
+          </div>
+        </div>
+
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Tu solicitud será revisada por nuestro equipo. Te notificaremos por email.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterTherapist;
