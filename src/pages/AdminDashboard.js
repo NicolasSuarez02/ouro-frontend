@@ -31,7 +31,7 @@ const AdminDashboard = () => {
       cargarPendientes();
       cargarRecursosPendientes();
     }
-  }, [admin]);
+  }, [admin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const cargarPendientes = async () => {
     try {

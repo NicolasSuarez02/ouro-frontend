@@ -55,6 +55,7 @@ const formatDayLabel = (dateStr) => {
 };
 
 // ─── Pagination ───────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
 const Pagination = ({ page, totalPages, onChange }) => {
   if (totalPages <= 1) return null;
   return (
