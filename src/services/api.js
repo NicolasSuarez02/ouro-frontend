@@ -9,10 +9,24 @@ const api = axios.create({
   },
 });
 
-// Interceptor para manejar errores globalmente
+// Adjuntar el token JWT en cada request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('ouro_token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Manejar errores globalmente; limpiar sesión si el token expiró
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('ouro_token');
+      localStorage.removeItem('ouro_user');
+      window.location.href = '/login';
+    }
     console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
   }
@@ -97,18 +111,18 @@ export const updateTherapist = async (id, therapistData) => {
   return response.data;
 };
 
-export const getPendingTherapists = async (adminUserId) => {
-  const response = await api.get(`/therapists/pending?adminUserId=${adminUserId}`);
+export const getPendingTherapists = async () => {
+  const response = await api.get('/therapists/pending');
   return response.data;
 };
 
-export const approveTherapist = async (id, adminUserId) => {
-  const response = await api.put(`/therapists/${id}/approve?adminUserId=${adminUserId}`);
+export const approveTherapist = async (id) => {
+  const response = await api.put(`/therapists/${id}/approve`);
   return response.data;
 };
 
-export const rejectTherapist = async (id, adminUserId) => {
-  const response = await api.put(`/therapists/${id}/reject?adminUserId=${adminUserId}`);
+export const rejectTherapist = async (id) => {
+  const response = await api.put(`/therapists/${id}/reject`);
   return response.data;
 };
 
@@ -119,8 +133,8 @@ export const createClient = async (clientData) => {
   return response.data;
 };
 
-export const getAllClients = async () => {
-  const response = await api.get('/clients');
+export const getAllClients = async ({ page = 0, size = 20 } = {}) => {
+  const response = await api.get(`/clients?page=${page}&size=${size}`);
   return response.data;
 };
 
@@ -168,23 +182,28 @@ export const bookAppointment = async (data) => {
   return response.data;
 };
 
-export const cancelAppointment = async (id, userId) => {
-  const response = await api.put(`/appointments/${id}/cancel?userId=${userId}`);
+export const cancelAppointment = async (id) => {
+  const response = await api.put(`/appointments/${id}/cancel`);
   return response.data;
 };
 
-export const completeAppointment = async (id, userId) => {
-  const response = await api.put(`/appointments/${id}/complete?userId=${userId}`);
+export const completeAppointment = async (id) => {
+  const response = await api.put(`/appointments/${id}/complete`);
+  return response.data;
+};
+
+export const getAppointmentById = async (id) => {
+  const response = await api.get(`/appointments/${id}`);
   return response.data;
 };
 
 export const getAppointmentsByUser = async (userId) => {
-  const response = await api.get(`/appointments/user/${userId}?requestingUserId=${userId}`);
+  const response = await api.get(`/appointments/user/${userId}`);
   return response.data;
 };
 
-export const getAppointmentsByTherapist = async (therapistId, userId) => {
-  const response = await api.get(`/appointments/therapist/${therapistId}?requestingUserId=${userId}`);
+export const getAppointmentsByTherapist = async (therapistId) => {
+  const response = await api.get(`/appointments/therapist/${therapistId}`);
   return response.data;
 };
 
@@ -197,44 +216,44 @@ export const uploadResource = async (formData) => {
   return response.data;
 };
 
-export const getResources = async (category, userId) => {
-  const response = await api.get(`/resources?category=${category}&userId=${userId}`);
+export const getResources = async (category) => {
+  const response = await api.get(`/resources?category=${encodeURIComponent(category)}`);
   return response.data;
 };
 
-export const getPendingResources = async (adminUserId) => {
-  const response = await api.get(`/resources/pending?adminUserId=${adminUserId}`);
+export const getPendingResources = async () => {
+  const response = await api.get('/resources/pending');
   return response.data;
 };
 
-export const approveResource = async (id, adminUserId) => {
-  const response = await api.put(`/resources/${id}/approve?adminUserId=${adminUserId}`);
+export const approveResource = async (id) => {
+  const response = await api.put(`/resources/${id}/approve`);
   return response.data;
 };
 
-export const rejectResource = async (id, adminUserId) => {
-  const response = await api.put(`/resources/${id}/reject?adminUserId=${adminUserId}`);
+export const rejectResource = async (id) => {
+  const response = await api.put(`/resources/${id}/reject`);
   return response.data;
 };
 
-export const downloadResource = async (id, userId) => {
-  const response = await api.get(`/resources/${id}/download?userId=${userId}`, {
+export const downloadResource = async (id) => {
+  const response = await api.get(`/resources/${id}/download`, {
     responseType: 'blob',
   });
   return response;
 };
 
-export const deleteResource = async (id, userId) => {
-  const response = await api.delete(`/resources/${id}?userId=${userId}`);
+export const deleteResource = async (id) => {
+  const response = await api.delete(`/resources/${id}`);
   return response.data;
 };
 
 // ==================== PHOTO UPLOAD ====================
 
-export const uploadTherapistPhoto = async (userId, file) => {
+export const uploadTherapistPhoto = async (file) => {
   const formData = new FormData();
   formData.append('photo', file);
-  const response = await api.post(`/therapists/upload-photo?userId=${userId}`, formData, {
+  const response = await api.post('/therapists/upload-photo', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return response.data;
@@ -242,13 +261,44 @@ export const uploadTherapistPhoto = async (userId, file) => {
 
 // ==================== TIME SLOT ENDPOINTS ====================
 
-export const getTherapistTimeSlots = async (therapistId, userId) => {
-  const response = await api.get(`/timeslots/therapist/${therapistId}?userId=${userId}`);
+export const getTherapistTimeSlots = async (therapistId) => {
+  const response = await api.get(`/timeslots/therapist/${therapistId}`);
   return response.data;
 };
 
-export const deleteTimeSlot = async (slotId, userId) => {
-  const response = await api.delete(`/timeslots/${slotId}?userId=${userId}`);
+export const deleteTimeSlot = async (slotId) => {
+  const response = await api.delete(`/timeslots/${slotId}`);
+  return response.data;
+};
+
+// ==================== RATING ENDPOINTS ====================
+
+export const crearCalificacion = async (data) => {
+  const response = await api.post('/ratings', data);
+  return response.data;
+};
+
+export const getRatingEstado = async (therapistId) => {
+  const response = await api.get(`/ratings/therapist/${therapistId}/estado`);
+  return response.data;
+};
+
+export const getCalificacionesTerapeuta = async (therapistId) => {
+  const response = await api.get(`/ratings/therapist/${therapistId}`);
+  return response.data;
+};
+
+// ==================== ADMIN USER ENDPOINTS ====================
+
+export const getAllUsersPaginados = async ({ search = '', role = '', page = 0, size = 20 }) => {
+  const response = await api.get(
+    `/users/admin?search=${encodeURIComponent(search)}&role=${role}&page=${page}&size=${size}`
+  );
+  return response.data;
+};
+
+export const adminDeleteUser = async (userId) => {
+  const response = await api.delete(`/users/${userId}/admin`);
   return response.data;
 };
 

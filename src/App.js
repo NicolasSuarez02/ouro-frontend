@@ -21,6 +21,9 @@ import Recursos from './pages/Recursos';
 import SubirRecurso from './pages/SubirRecurso';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentPending from './pages/PaymentPending';
+import PaymentFailure from './pages/PaymentFailure';
 import PrivateRoute from './components/PrivateRoute';
 
 function App() {
@@ -43,6 +46,9 @@ function App() {
         <Route path="/formaciones" element={<Recursos category="FORMACIONES" titulo="Formaciones" />} />
         <Route path="/terminos" element={<TermsPage />} />
         <Route path="/privacidad" element={<PrivacyPage />} />
+        <Route path="/pago/exitoso" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
+        <Route path="/pago/pendiente" element={<PrivateRoute><PaymentPending /></PrivateRoute>} />
+        <Route path="/pago/fallido" element={<PrivateRoute><PaymentFailure /></PrivateRoute>} />
 
         {/* Protegidas — requieren sesión */}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />

@@ -1,13 +1,28 @@
 import React, { useState, useRef } from 'react';
 import { uploadTherapistPhoto } from '../services/api';
 
-const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitLabel = 'Guardar', userId }) => {
+const LEAD_TIME_OPTIONS = [
+  { value: 1,   label: '1 hora' },
+  { value: 2,   label: '2 horas' },
+  { value: 4,   label: '4 horas' },
+  { value: 6,   label: '6 horas' },
+  { value: 12,  label: '12 horas' },
+  { value: 24,  label: '24 horas (1 día)' },
+  { value: 48,  label: '48 horas (2 días)' },
+  { value: 72,  label: '72 horas (3 días)' },
+  { value: 96,  label: '96 horas (4 días)' },
+  { value: 120, label: '120 horas (5 días)' },
+];
+
+const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitLabel = 'Guardar', userId, mpTokenConfigurado }) => {
   const [formData, setFormData] = useState({
     bio: initialValues.bio || '',
     specialty: initialValues.specialty || '',
     photoUrl: initialValues.photoUrl || '',
     precioEnPesos: initialValues.precioEnPesos || '',
     priceCurrency: initialValues.priceCurrency || 'ARS',
+    mpAccessToken: '',
+    minBookingLeadHours: initialValues.minBookingLeadHours || 1,
   });
   const [localError, setLocalError] = useState('');
   const [photoFile, setPhotoFile] = useState(null);
@@ -16,7 +31,8 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
   const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const value = e.target.name === 'minBookingLeadHours' ? Number(e.target.value) : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value });
     setLocalError('');
   };
 
@@ -53,11 +69,10 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
 
     let finalPhotoUrl = formData.photoUrl;
 
-    // Si hay un archivo nuevo, subirlo primero
-    if (photoFile && userId) {
+    if (photoFile) {
       setUploadingPhoto(true);
       try {
-        const result = await uploadTherapistPhoto(userId, photoFile);
+        const result = await uploadTherapistPhoto(photoFile);
         finalPhotoUrl = result.photoUrl;
       } catch (err) {
         setLocalError(err.response?.data?.message || 'Error al subir la foto');
@@ -68,13 +83,20 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
       }
     }
 
-    onSubmit({
+    const payload = {
       bio: formData.bio,
       specialty: formData.specialty,
       photoUrl: finalPhotoUrl || null,
       priceAmountCents: Math.round(precio * 100),
       priceCurrency: formData.priceCurrency,
-    });
+      minBookingLeadHours: formData.minBookingLeadHours,
+    };
+
+    if (formData.mpAccessToken.trim()) {
+      payload.mpAccessToken = formData.mpAccessToken.trim();
+    }
+
+    onSubmit(payload);
   };
 
   const displayError = localError || apiError;
@@ -156,13 +178,62 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
         </div>
       </div>
 
+      {/* Anticipo mínimo para reservas */}
+      <div>
+        <label htmlFor="minBookingLeadHours" className="block text-sm font-medium text-gray-700 mb-1">
+          Anticipación mínima para reservar <span className="text-red-500">*</span>
+        </label>
+        <p className="text-xs text-gray-500 mb-2">
+          Los clientes solo podrán reservar turnos con al menos esta anticipación.
+        </p>
+        <select
+          id="minBookingLeadHours"
+          name="minBookingLeadHours"
+          value={formData.minBookingLeadHours}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
+        >
+          {LEAD_TIME_OPTIONS.map(({ value, label }) => (
+            <option key={value} value={value}>{label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Mercado Pago */}
+      <div className="border border-amber-200 rounded-lg p-4 bg-amber-50">
+        <div className="flex items-center justify-between mb-1">
+          <label htmlFor="mpAccessToken" className="block text-sm font-semibold text-amber-900">
+            Token de Mercado Pago <span className="text-gray-400 font-normal text-xs">(recomendado)</span>
+          </label>
+          {mpTokenConfigurado && (
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+              Configurado
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-amber-800 mb-2">
+          Pegá tu <strong>Access Token de producción</strong> de Mercado Pago para recibir los pagos de tus clientes directamente en tu cuenta.
+          Encontralo en <em>mpago.com/developers → Tu aplicación → Credenciales de producción</em>.
+          {mpTokenConfigurado ? ' Dejá en blanco para conservar el token actual.' : ' Sin token, los clientes no podrán pagarte online.'}
+        </p>
+        <input
+          id="mpAccessToken"
+          name="mpAccessToken"
+          type="password"
+          value={formData.mpAccessToken}
+          onChange={handleChange}
+          autoComplete="new-password"
+          className="w-full px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all font-mono text-sm bg-white"
+          placeholder="APP_USR-..."
+        />
+      </div>
+
       {/* Foto de perfil */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Foto de perfil <span className="text-gray-400">(opcional)</span>
         </label>
         <div className="flex items-center gap-4">
-          {/* Preview */}
           <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-mystic-400 to-primary-500 flex items-center justify-center flex-shrink-0 ring-2 ring-gray-100">
             {photoPreview ? (
               <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />

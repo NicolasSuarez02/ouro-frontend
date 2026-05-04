@@ -258,6 +258,22 @@ const Dashboard = () => {
                   </div>
                 )}
 
+                {/* Alerta token MP */}
+                {!therapist.mpTokenConfigurado && therapist.approvalStatus === 'APPROVED' && (
+                  <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                    <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                    </svg>
+                    <div>
+                      <p className="text-xs font-semibold text-amber-800">Configurá tu cuenta de Mercado Pago</p>
+                      <p className="text-xs text-amber-700 mt-0.5">
+                        Para recibir pagos necesitás cargar tu Access Token en{' '}
+                        <Link to="/edit-therapist" className="underline font-medium">Editar perfil</Link>.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Estado */}
                 {badge && (
                   <div className="pt-1 border-t border-gray-100">

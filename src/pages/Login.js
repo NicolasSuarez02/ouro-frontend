@@ -51,6 +51,7 @@ const Login = () => {
     try {
       const response = await loginUser(formData);
       if (response.success) {
+        localStorage.setItem('ouro_token', response.token);
         localStorage.setItem('ouro_user', JSON.stringify(response.user));
         navigate(from, { replace: true });
       }

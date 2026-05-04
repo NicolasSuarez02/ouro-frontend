@@ -2,8 +2,9 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 const PrivateRoute = ({ children, requiredRole }) => {
   const location = useLocation();
+  const token = localStorage.getItem('ouro_token');
   const raw = localStorage.getItem('ouro_user');
-  if (!raw) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  if (!token || !raw) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
 
   if (requiredRole) {
     try {

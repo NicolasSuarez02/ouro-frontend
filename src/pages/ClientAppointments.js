@@ -81,7 +81,7 @@ const ClientAppointments = () => {
     if (parsed.role === 'THERAPIST') {
       setIsTherapist(true);
       getTherapistByUserId(parsed.id)
-        .then((t) => getAppointmentsByTherapist(t.id, parsed.id))
+        .then((t) => getAppointmentsByTherapist(t.id))
         .then((agenda) => { setProximos(agenda.proximos || []); setPasados(agenda.pasados || []); })
         .catch(() => setErrorMsg('No se pudieron cargar los turnos.'))
         .finally(() => setLoading(false));
@@ -98,7 +98,7 @@ const ClientAppointments = () => {
     setCancellingId(appointmentId);
     setErrorMsg('');
     try {
-      const updated = await cancelAppointment(appointmentId, user.id);
+      const updated = await cancelAppointment(appointmentId);
       const updateList = (list) =>
         list.map((a) => (a.id === appointmentId ? { ...a, status: updated.status } : a));
       setProximos(updateList);
@@ -114,7 +114,7 @@ const ClientAppointments = () => {
     setCompletingId(appointmentId);
     setErrorMsg('');
     try {
-      const updated = await completeAppointment(appointmentId, user.id);
+      const updated = await completeAppointment(appointmentId);
       const updateList = (list) =>
         list.map((a) => (a.id === appointmentId ? { ...a, status: updated.status } : a));
       setProximos(updateList);
@@ -198,6 +198,21 @@ const ClientAppointments = () => {
                 </span>
               )}
             </div>
+
+            {/* Link de Zoom (solo en próximos con sesión confirmada) */}
+            {isFutureSection && appt.zoomJoinUrl && (
+              <a
+                href={appt.zoomJoinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 mt-3 text-xs font-medium text-primary-600 hover:text-primary-800 transition-colors"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.069A1 1 0 0121 8.867v6.266a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Unirse a la sesión (Zoom)
+              </a>
+            )}
           </div>
 
           {(canCancel || canComplete) && confirmId !== appt.id && (

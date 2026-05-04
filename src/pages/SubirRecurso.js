@@ -45,7 +45,6 @@ const SubirRecurso = () => {
     formData.append('archivo', archivo);
     formData.append('title', form.title);
     formData.append('category', form.category);
-    formData.append('uploadedByUserId', user.id);
     if (form.description) {
       formData.append('description', form.description);
     }

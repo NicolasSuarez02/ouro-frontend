@@ -21,6 +21,7 @@ const Register = () => {
       navigate('/dashboard', { replace: true });
     }
   }, [navigate]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,6 +30,7 @@ const Register = () => {
     email: '',
     phone: '',
     dateOfBirth: '',
+    timeOfBirth: '',
     password: '',
     confirmPassword: '',
   });
@@ -45,8 +47,8 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.dateOfBirth || !formData.password) {
-      setError('Todos los campos son obligatorios');
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password) {
+      setError('Todos los campos obligatorios deben completarse');
       return;
     }
 
@@ -72,14 +74,15 @@ const Register = () => {
       });
 
       if (response.success) {
+        // Guardar datos de nacimiento para crear el perfil de cliente tras verificar email
+        localStorage.setItem('ouro_pending_client', JSON.stringify({
+          dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth} 00:00:00` : null,
+          timeOfBirth: formData.timeOfBirth ? `${formData.timeOfBirth}:00` : null,
+        }));
+
         setSuccess(true);
         setTimeout(() => {
-          navigate('/verification-sent', {
-            state: {
-              email: formData.email,
-              dateOfBirth: formData.dateOfBirth,
-            },
-          });
+          navigate('/verification-sent', { state: { email: formData.email } });
         }, 2000);
       }
     } catch (err) {
@@ -131,11 +134,11 @@ const Register = () => {
               </div>
             )}
 
-            {/* Nombre y Apellido en fila */}
+            {/* Nombre y Apellido */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre
+                  Nombre <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="firstName"
@@ -150,7 +153,7 @@ const Register = () => {
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Apellido
+                  Apellido <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="lastName"
@@ -167,7 +170,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
+                Email <span className="text-red-500">*</span>
               </label>
               <input
                 id="email"
@@ -183,7 +186,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Teléfono
+                Teléfono <span className="text-red-500">*</span>
               </label>
               <input
                 id="phone"
@@ -197,24 +200,44 @@ const Register = () => {
               />
             </div>
 
-            <div>
-              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha de nacimiento
-              </label>
-              <input
-                id="dateOfBirth"
-                name="dateOfBirth"
-                type="date"
-                required
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-              />
+            {/* Fecha y hora de nacimiento */}
+            <div className="p-4 bg-mystic-50 border border-mystic-100 rounded-xl">
+              <p className="text-xs text-mystic-700 mb-3">
+                En Ouro trabajamos con terapias holísticas que incluyen astrología. Tu fecha y hora de nacimiento permiten a los terapeutas personalizar la sesión.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
+                    Fecha de nacimiento
+                  </label>
+                  <input
+                    id="dateOfBirth"
+                    name="dateOfBirth"
+                    type="date"
+                    value={formData.dateOfBirth}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="timeOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
+                    Hora de nacimiento
+                  </label>
+                  <input
+                    id="timeOfBirth"
+                    name="timeOfBirth"
+                    type="time"
+                    value={formData.timeOfBirth}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
+                  />
+                </div>
+              </div>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Contraseña
+                Contraseña <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -235,7 +258,7 @@ const Register = () => {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirmar contraseña
+                Confirmar contraseña <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <input

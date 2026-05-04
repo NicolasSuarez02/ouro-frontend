@@ -145,7 +145,7 @@ const ManageAvailability = () => {
     if (!therapist || !user) return;
     setLoadingSlots(true);
     setSlotError('');
-    getTherapistTimeSlots(therapist.id, user.id)
+    getTherapistTimeSlots(therapist.id)
       .then(setSlots)
       .catch((err) => setSlotError(err.response?.data?.message || 'Error al cargar los turnos'))
       .finally(() => setLoadingSlots(false));
@@ -235,7 +235,7 @@ const ManageAvailability = () => {
     });
 
     try {
-      await saveTherapistAvailability(therapist.id, { userId: user.id, slots: slotsData });
+      await saveTherapistAvailability(therapist.id, { slots: slotsData });
       setSuccessMsg('Disponibilidad guardada. Los turnos se generaron para los próximos 60 días.');
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'Error al guardar la disponibilidad.');
@@ -250,7 +250,7 @@ const ManageAvailability = () => {
     setCancellingSlot(slot.id);
     setSlotError('');
     try {
-      await deleteTimeSlot(slot.id, user.id);
+      await deleteTimeSlot(slot.id);
       setSlots((prev) => prev.filter((s) => s.id !== slot.id));
     } catch (err) {
       setSlotError(err.response?.data?.message || 'No se pudo cancelar el turno.');
@@ -264,7 +264,7 @@ const ManageAvailability = () => {
     const slotsDelDia = slotsByDate[fecha] || [];
     setSlotError('');
     for (const slot of slotsDelDia) {
-      try { await deleteTimeSlot(slot.id, user.id); } catch { /* continuar */ }
+      try { await deleteTimeSlot(slot.id); } catch { /* continuar */ }
     }
     setSlots((prev) => prev.filter((s) => s.startAt.slice(0, 10) !== fecha));
     setSelectedDate(null);

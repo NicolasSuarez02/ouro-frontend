@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { verifyEmail } from '../services/api';
+import { verifyEmail, createClient } from '../services/api';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -23,13 +23,29 @@ const VerifyEmail = () => {
         const response = await verifyEmail(token);
         
         if (response.success) {
+          if (response.token) {
+            localStorage.setItem('ouro_token', response.token);
+            localStorage.setItem('ouro_user', JSON.stringify(response.user));
+          }
+
+          // Crear perfil de cliente con los datos guardados durante el registro
+          const pending = localStorage.getItem('ouro_pending_client');
+          if (pending) {
+            try {
+              const clientData = JSON.parse(pending);
+              await createClient({ userId: response.user.id, ...clientData });
+            } catch (_) {
+              // no es crítico si falla
+            }
+            localStorage.removeItem('ouro_pending_client');
+          }
+
           setStatus('success');
           setMessage(response.message);
           setUser(response.user);
-          
-          // Redirigir al registro de cliente después de 3 segundos
+
           setTimeout(() => {
-            navigate('/register-client', { state: { user: response.user } });
+            navigate('/dashboard');
           }, 3000);
         } else {
           setStatus('error');

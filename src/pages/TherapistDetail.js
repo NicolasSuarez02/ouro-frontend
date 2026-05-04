@@ -7,7 +7,34 @@ import {
   getAvailableDays,
   getAvailableSlots,
   bookAppointment,
+  getRatingEstado,
+  crearCalificacion,
 } from '../services/api';
+
+// Componente de estrellas reutilizable
+const Estrellas = ({ score, max = 5, size = 'md', interactive = false, onSelect }) => {
+  const sizes = { sm: 'w-3.5 h-3.5', md: 'w-5 h-5', lg: 'w-7 h-7' };
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: max }, (_, i) => {
+        const filled = i < score;
+        return (
+          <svg
+            key={i}
+            className={`${sizes[size]} ${filled ? 'text-amber-400' : 'text-gray-200'} ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
+            fill={filled ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            strokeWidth="1.5"
+            viewBox="0 0 24 24"
+            onClick={() => interactive && onSelect && onSelect(i + 1)}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+          </svg>
+        );
+      })}
+    </div>
+  );
+};
 
 const MESES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -47,6 +74,15 @@ const TherapistDetail = () => {
   const [bookingSuccess, setBookingSuccess] = useState('');
   const [bookingError, setBookingError] = useState('');
 
+  // Estado de calificación
+  const [ratingEstado, setRatingEstado] = useState(null); // { puedeCalificar, calificacionExistente }
+  const [ratingSeleccionado, setRatingSeleccionado] = useState(0);
+  const [ratingHover, setRatingHover] = useState(0);
+  const [ratingComentario, setRatingComentario] = useState('');
+  const [enviandoRating, setEnviandoRating] = useState(false);
+  const [ratingExito, setRatingExito] = useState('');
+  const [ratingError, setRatingError] = useState('');
+
   const currentUser = JSON.parse(localStorage.getItem('ouro_user') || 'null');
 
   // El terapeuta no puede reservar su propio turno
@@ -68,6 +104,15 @@ const TherapistDetail = () => {
       .catch(() => setError('No se pudo cargar el perfil del terapeuta.'))
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Cargar estado de calificación cuando hay usuario y terapeuta cargados
+  useEffect(() => {
+    if (currentUser && therapist && !isOwnProfile) {
+      getRatingEstado(therapist.id)
+        .then(setRatingEstado)
+        .catch(() => setRatingEstado(null));
+    }
+  }, [therapist, currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Cargar días disponibles cuando cambia mes o terapeuta
   useEffect(() => {
@@ -115,10 +160,17 @@ const TherapistDetail = () => {
     setBooking(true);
     setBookingError('');
     try {
-      await bookAppointment({ timeSlotId: selectedSlot.id, userId: currentUser.id });
+      const result = await bookAppointment({ timeSlotId: selectedSlot.id });
+
+      // Si hay URL de pago, redirigir a Mercado Pago
+      if (result.paymentUrl) {
+        window.location.href = result.paymentUrl;
+        return;
+      }
+
+      // Sin precio (sesión gratuita): mostrar éxito directo
       setBookingSuccess('¡Turno reservado con éxito!');
       setSelectedSlot(null);
-      // Refrescar días y slots disponibles
       const [newDays, newSlots] = await Promise.all([
         getAvailableDays(id, calYear, calMonth),
         getAvailableSlots(id, selectedDate),
@@ -129,6 +181,27 @@ const TherapistDetail = () => {
       setBookingError(err.response?.data?.message || 'No se pudo reservar el turno.');
     } finally {
       setBooking(false);
+    }
+  };
+
+  const handleEnviarRating = async () => {
+    if (!ratingSeleccionado) return;
+    setEnviandoRating(true);
+    setRatingError('');
+    try {
+      await crearCalificacion({
+        therapistId: therapist.id,
+        score: ratingSeleccionado,
+        comment: ratingComentario.trim() || null,
+      });
+      setRatingExito('¡Gracias por tu calificación!');
+      setRatingEstado({ puedeCalificar: false, calificacionExistente: { score: ratingSeleccionado, comment: ratingComentario } });
+      // Refrescar el promedio del terapeuta
+      getTherapistById(id).then(setTherapist).catch(() => {});
+    } catch (err) {
+      setRatingError(err.response?.data?.message || 'No se pudo enviar la calificación.');
+    } finally {
+      setEnviandoRating(false);
     }
   };
 
@@ -234,6 +307,17 @@ const TherapistDetail = () => {
                 </span>
               )}
 
+              {/* Calificación promedio */}
+              {therapist.ratingCount > 0 && (
+                <div className="mt-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <Estrellas score={Math.round(therapist.averageRating)} size="md" />
+                    <span className="text-sm font-semibold text-gray-700">{therapist.averageRating?.toFixed(1)}</span>
+                    <span className="text-xs text-gray-400">({therapist.ratingCount})</span>
+                  </div>
+                </div>
+              )}
+
               {therapist.priceAmountCents != null && (
                 <div className="border-t border-gray-100 mt-5 pt-5">
                   <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Precio por sesión</p>
@@ -256,6 +340,80 @@ const TherapistDetail = () => {
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">Sobre mí</h2>
                 <p className="text-gray-600 leading-relaxed whitespace-pre-line">{therapist.bio}</p>
+              </div>
+            )}
+
+            {/* Sección de calificación */}
+            {currentUser && !isOwnProfile && ratingEstado && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Calificación</h2>
+
+                {ratingEstado.calificacionExistente ? (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Tu calificación:</p>
+                    <div className="flex items-center gap-2">
+                      <Estrellas score={ratingEstado.calificacionExistente.score} size="md" />
+                      <span className="text-sm font-medium text-gray-700">{ratingEstado.calificacionExistente.score}/5</span>
+                    </div>
+                    {ratingEstado.calificacionExistente.comment && (
+                      <p className="mt-2 text-sm text-gray-500 italic">"{ratingEstado.calificacionExistente.comment}"</p>
+                    )}
+                    {ratingExito && <p className="mt-2 text-sm text-green-600 font-medium">{ratingExito}</p>}
+                  </div>
+                ) : ratingEstado.puedeCalificar ? (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-3">¿Cómo fue tu experiencia con {therapist.userFullName?.split(' ')[0]}?</p>
+
+                    {/* Selector de estrellas interactivo */}
+                    <div className="flex items-center gap-1 mb-4"
+                         onMouseLeave={() => setRatingHover(0)}>
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        const activo = star <= (ratingHover || ratingSeleccionado);
+                        return (
+                          <svg
+                            key={star}
+                            className={`w-8 h-8 cursor-pointer transition-all hover:scale-110 ${activo ? 'text-amber-400' : 'text-gray-200'}`}
+                            fill={activo ? 'currentColor' : 'none'}
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            viewBox="0 0 24 24"
+                            onMouseEnter={() => setRatingHover(star)}
+                            onClick={() => setRatingSeleccionado(star)}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                          </svg>
+                        );
+                      })}
+                      {ratingSeleccionado > 0 && (
+                        <span className="ml-2 text-sm text-gray-500">
+                          {['', 'Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'][ratingSeleccionado]}
+                        </span>
+                      )}
+                    </div>
+
+                    <textarea
+                      value={ratingComentario}
+                      onChange={(e) => setRatingComentario(e.target.value)}
+                      placeholder="Comentario opcional..."
+                      rows={2}
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    />
+
+                    {ratingError && <p className="mt-2 text-sm text-red-600">{ratingError}</p>}
+
+                    <button
+                      onClick={handleEnviarRating}
+                      disabled={!ratingSeleccionado || enviandoRating}
+                      className={`mt-3 w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all ${ratingSeleccionado && !enviandoRating ? 'bg-gradient-to-r from-mystic-500 to-primary-600 hover:from-mystic-600 hover:to-primary-700' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                    >
+                      {enviandoRating ? 'Enviando...' : 'Enviar calificación'}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">
+                    Podrás calificar a este terapeuta una vez que tengas un turno completado con él/ella.
+                  </p>
+                )}
               </div>
             )}
 
@@ -452,7 +610,10 @@ const TherapistDetail = () => {
                     }
                   `}
                 >
-                  {booking ? 'Reservando...' : 'Reservar turno'}
+                  {booking
+                    ? 'Procesando...'
+                    : (therapist.priceAmountCents > 0 ? 'Reservar y pagar' : 'Reservar turno')
+                  }
                 </button>
 
                 {!currentUser && (

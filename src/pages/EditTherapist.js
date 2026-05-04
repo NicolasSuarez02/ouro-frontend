@@ -37,6 +37,8 @@ const EditTherapist = () => {
             ? (therapist.priceAmountCents / 100).toString()
             : '',
           priceCurrency: therapist.priceCurrency || 'ARS',
+          mpTokenConfigurado: therapist.mpTokenConfigurado || false,
+          minBookingLeadHours: therapist.minBookingLeadHours || 1,
         });
       })
       .catch(() => navigate('/dashboard'))
@@ -94,6 +96,7 @@ const EditTherapist = () => {
             apiError={apiError}
             submitLabel="Guardar cambios"
             userId={user?.id}
+            mpTokenConfigurado={initialValues.mpTokenConfigurado}
           />
           <div className="mt-6 text-center">
             <Link to="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">

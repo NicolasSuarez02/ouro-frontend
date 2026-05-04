@@ -71,7 +71,7 @@ const Recursos = ({ category, titulo }) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getResources(category, user.id);
+      const data = await getResources(category);
       setRecursos(data);
     } catch (err) {
       setError(err.response?.data?.message || 'Error al cargar los recursos');
@@ -84,7 +84,7 @@ const Recursos = ({ category, titulo }) => {
     setActionError('');
     setDescargando((prev) => ({ ...prev, [recurso.id]: true }));
     try {
-      const response = await downloadResource(recurso.id, user.id);
+      const response = await downloadResource(recurso.id);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -105,7 +105,7 @@ const Recursos = ({ category, titulo }) => {
     setActionError('');
     setEliminando((prev) => ({ ...prev, [recurso.id]: true }));
     try {
-      await deleteResource(recurso.id, user.id);
+      await deleteResource(recurso.id);
       setRecursos((prev) => prev.filter((r) => r.id !== recurso.id));
     } catch (err) {
       setActionError(err.response?.data?.message || 'Error al eliminar el recurso');
