@@ -111,6 +111,11 @@ export const updateTherapist = async (id, therapistData) => {
   return response.data;
 };
 
+export const getMpConnectUrl = async () => {
+  const response = await api.get('/therapists/mp-connect');
+  return response.data;
+};
+
 export const getPendingTherapists = async () => {
   const response = await api.get('/therapists/pending');
   return response.data;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser } from '../services/api';
+import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getMpConnectUrl } from '../services/api';
 
 const badgeConfig = {
   PENDING: {
@@ -20,12 +20,15 @@ const badgeConfig = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [therapist, setTherapist] = useState(null);
   const [client, setClient] = useState(null);
   const [nextAppointment, setNextAppointment] = useState(null);
   const [loadingTherapist, setLoadingTherapist] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [mpStatus, setMpStatus] = useState(null); // 'success' | 'error' | null
+  const [connectingMp, setConnectingMp] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('ouro_user');
@@ -36,7 +39,14 @@ const Dashboard = () => {
     const parsed = JSON.parse(userData);
     setUser(parsed);
     setPageLoading(false);
-  }, [navigate]);
+
+    const params = new URLSearchParams(location.search);
+    const mp = params.get('mp');
+    if (mp === 'success' || mp === 'error') {
+      setMpStatus(mp);
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, [navigate, location.search]);
 
   useEffect(() => {
     if (user?.role === 'THERAPIST') {
@@ -58,6 +68,17 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('ouro_user');
     navigate('/');
+  };
+
+  const handleConnectMp = async () => {
+    try {
+      setConnectingMp(true);
+      const { authUrl } = await getMpConnectUrl();
+      window.location.href = authUrl;
+    } catch {
+      setMpStatus('error');
+      setConnectingMp(false);
+    }
   };
 
   if (pageLoading) {
@@ -83,6 +104,38 @@ const Dashboard = () => {
           </h1>
           <p className="mt-1 text-gray-500">Tu espacio personal en Ouro</p>
         </div>
+
+        {/* Banner resultado MP OAuth */}
+        {mpStatus === 'success' && (
+          <div className="mb-6 flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+            <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <p className="text-sm font-medium text-green-800">
+              ¡Tu cuenta de Mercado Pago fue conectada exitosamente! Ya podés recibir pagos.
+            </p>
+            <button onClick={() => setMpStatus(null)} className="ml-auto text-green-500 hover:text-green-700">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+        {mpStatus === 'error' && (
+          <div className="mb-6 flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <p className="text-sm font-medium text-red-800">
+              No se pudo conectar con Mercado Pago. Intentá de nuevo.
+            </p>
+            <button onClick={() => setMpStatus(null)} className="ml-auto text-red-500 hover:text-red-700">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         {/* Card datos del usuario */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
@@ -258,19 +311,47 @@ const Dashboard = () => {
                   </div>
                 )}
 
-                {/* Alerta token MP */}
-                {!therapist.mpTokenConfigurado && therapist.approvalStatus === 'APPROVED' && (
-                  <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                    <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                    </svg>
-                    <div>
-                      <p className="text-xs font-semibold text-amber-800">Configurá tu cuenta de Mercado Pago</p>
-                      <p className="text-xs text-amber-700 mt-0.5">
-                        Para recibir pagos necesitás cargar tu Access Token en{' '}
-                        <Link to="/edit-therapist" className="underline font-medium">Editar perfil</Link>.
-                      </p>
+                {/* Mercado Pago */}
+                {therapist.approvalStatus === 'APPROVED' && (
+                  <div className={`flex items-center justify-between gap-3 p-3 rounded-xl border ${
+                    therapist.mpTokenConfigurado
+                      ? 'bg-green-50 border-green-200'
+                      : 'bg-amber-50 border-amber-200'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <svg className={`w-5 h-5 flex-shrink-0 ${therapist.mpTokenConfigurado ? 'text-green-500' : 'text-amber-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {therapist.mpTokenConfigurado
+                          ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                        }
+                      </svg>
+                      <div>
+                        <p className={`text-xs font-semibold ${therapist.mpTokenConfigurado ? 'text-green-800' : 'text-amber-800'}`}>
+                          {therapist.mpTokenConfigurado ? 'Mercado Pago conectado' : 'Conectá tu Mercado Pago'}
+                        </p>
+                        {!therapist.mpTokenConfigurado && (
+                          <p className="text-xs text-amber-700 mt-0.5">Necesario para recibir pagos de tus clientes.</p>
+                        )}
+                      </div>
                     </div>
+                    {!therapist.mpTokenConfigurado && (
+                      <button
+                        onClick={handleConnectMp}
+                        disabled={connectingMp}
+                        className="flex-shrink-0 bg-[#009ee3] hover:bg-[#0080c0] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-60"
+                      >
+                        {connectingMp ? 'Redirigiendo...' : 'Conectar'}
+                      </button>
+                    )}
+                    {therapist.mpTokenConfigurado && (
+                      <button
+                        onClick={handleConnectMp}
+                        disabled={connectingMp}
+                        className="flex-shrink-0 text-xs text-green-700 hover:text-green-900 font-medium underline transition-colors disabled:opacity-60"
+                      >
+                        {connectingMp ? 'Redirigiendo...' : 'Reconectar'}
+                      </button>
+                    )}
                   </div>
                 )}
 
