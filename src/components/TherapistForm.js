@@ -14,14 +14,13 @@ const LEAD_TIME_OPTIONS = [
   { value: 120, label: '120 horas (5 días)' },
 ];
 
-const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitLabel = 'Guardar', userId, mpTokenConfigurado }) => {
+const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitLabel = 'Guardar', userId }) => {
   const [formData, setFormData] = useState({
     bio: initialValues.bio || '',
     specialty: initialValues.specialty || '',
     photoUrl: initialValues.photoUrl || '',
     precioEnPesos: initialValues.precioEnPesos || '',
     priceCurrency: initialValues.priceCurrency || 'ARS',
-    mpAccessToken: '',
     minBookingLeadHours: initialValues.minBookingLeadHours || 1,
   });
   const [localError, setLocalError] = useState('');
@@ -83,20 +82,14 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
       }
     }
 
-    const payload = {
+    onSubmit({
       bio: formData.bio,
       specialty: formData.specialty,
       photoUrl: finalPhotoUrl || null,
       priceAmountCents: Math.round(precio * 100),
       priceCurrency: formData.priceCurrency,
       minBookingLeadHours: formData.minBookingLeadHours,
-    };
-
-    if (formData.mpAccessToken.trim()) {
-      payload.mpAccessToken = formData.mpAccessToken.trim();
-    }
-
-    onSubmit(payload);
+    });
   };
 
   const displayError = localError || apiError;
@@ -197,35 +190,6 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
             <option key={value} value={value}>{label}</option>
           ))}
         </select>
-      </div>
-
-      {/* Mercado Pago */}
-      <div className="border border-amber-200 rounded-lg p-4 bg-amber-50">
-        <div className="flex items-center justify-between mb-1">
-          <label htmlFor="mpAccessToken" className="block text-sm font-semibold text-amber-900">
-            Token de Mercado Pago <span className="text-gray-400 font-normal text-xs">(recomendado)</span>
-          </label>
-          {mpTokenConfigurado && (
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-              Configurado
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-amber-800 mb-2">
-          Pegá tu <strong>Access Token de producción</strong> de Mercado Pago para recibir los pagos de tus clientes directamente en tu cuenta.
-          Encontralo en <em>mpago.com/developers → Tu aplicación → Credenciales de producción</em>.
-          {mpTokenConfigurado ? ' Dejá en blanco para conservar el token actual.' : ' Sin token, los clientes no podrán pagarte online.'}
-        </p>
-        <input
-          id="mpAccessToken"
-          name="mpAccessToken"
-          type="password"
-          value={formData.mpAccessToken}
-          onChange={handleChange}
-          autoComplete="new-password"
-          className="w-full px-4 py-3 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all font-mono text-sm bg-white"
-          placeholder="APP_USR-..."
-        />
       </div>
 
       {/* Foto de perfil */}
