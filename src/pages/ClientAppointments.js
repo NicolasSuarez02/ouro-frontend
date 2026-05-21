@@ -70,6 +70,9 @@ const ClientAppointments = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [isTherapist, setIsTherapist] = useState(false);
   const [historialPage, setHistorialPage] = useState(1);
+  const [proximosCliente, setProximosCliente] = useState([]);
+  const [pasadosCliente, setPasadosCliente] = useState([]);
+  const [historialClientePage, setHistorialClientePage] = useState(1);
 
   useEffect(() => {
     const userData = localStorage.getItem('ouro_user');
@@ -80,9 +83,16 @@ const ClientAppointments = () => {
 
     if (parsed.role === 'THERAPIST') {
       setIsTherapist(true);
-      getTherapistByUserId(parsed.id)
-        .then((t) => getAppointmentsByTherapist(t.id))
-        .then((agenda) => { setProximos(agenda.proximos || []); setPasados(agenda.pasados || []); })
+      Promise.all([
+        getTherapistByUserId(parsed.id).then((t) => getAppointmentsByTherapist(t.id)),
+        getAppointmentsByUser(parsed.id),
+      ])
+        .then(([agendaTerapeuta, agendaCliente]) => {
+          setProximos(agendaTerapeuta.proximos || []);
+          setPasados(agendaTerapeuta.pasados || []);
+          setProximosCliente(agendaCliente.proximos || []);
+          setPasadosCliente(agendaCliente.pasados || []);
+        })
         .catch(() => setErrorMsg('No se pudieron cargar los turnos.'))
         .finally(() => setLoading(false));
     } else {
@@ -137,10 +147,11 @@ const ClientAppointments = () => {
   const totalHistorialPages = Math.ceil(pasados.length / PAGE_SIZE);
   const pasadosPagina = pasados.slice((historialPage - 1) * PAGE_SIZE, historialPage * PAGE_SIZE);
 
-  const AppointmentCard = ({ appt, isFutureSection }) => {
+  const AppointmentCard = ({ appt, isFutureSection, forceClientView = false }) => {
     const cfg = STATUS_CONFIG[appt.status] || STATUS_CONFIG.RESERVED;
+    const actingAsTherapist = isTherapist && !forceClientView;
     const canCancel = isFutureSection && appt.status !== 'CANCELLED';
-    const canComplete = isTherapist && isFutureSection && appt.status === 'RESERVED';
+    const canComplete = actingAsTherapist && isFutureSection && appt.status === 'RESERVED';
 
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
@@ -171,11 +182,11 @@ const ClientAppointments = () => {
               {formatDatetime(appt.startAt)}
             </p>
             <p className="text-sm text-gray-500 mt-1">
-              {isTherapist ? appt.clientFullName : appt.therapistFullName}
+              {actingAsTherapist ? appt.clientFullName : appt.therapistFullName}
             </p>
 
             {/* Contacto del cliente (solo vista terapeuta) */}
-            {isTherapist && (appt.clientPhone || appt.clientEmail) && (
+            {actingAsTherapist && (appt.clientPhone || appt.clientEmail) && (
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
                 {appt.clientPhone && (
                   <span className="text-xs text-gray-400">{appt.clientPhone}</span>
@@ -316,6 +327,50 @@ const ClientAppointments = () => {
               {pasadosPagina.map((a) => <AppointmentCard key={a.id} appt={a} isFutureSection={false} />)}
             </div>
             <Pagination page={historialPage} totalPages={totalHistorialPages} onChange={setHistorialPage} />
+          </div>
+        )}
+
+        {/* Sección "Mis reservas como cliente" — solo para terapeutas */}
+        {isTherapist && (proximosCliente.length > 0 || pasadosCliente.length > 0) && (
+          <div className="mt-10">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex-1 h-px bg-gray-200" />
+              <h2 className="text-base font-semibold text-gray-500 whitespace-nowrap">Mis reservas como cliente</h2>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+
+            {proximosCliente.length > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-700">Próximas</h3>
+                  <span className="text-xs text-gray-400">{proximosCliente.length} sesión{proximosCliente.length !== 1 ? 'es' : ''}</span>
+                </div>
+                <div className="space-y-3">
+                  {proximosCliente.map((a) => (
+                    <AppointmentCard key={`cliente-${a.id}`} appt={a} isFutureSection={true} forceClientView={true} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {pasadosCliente.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-gray-700">Historial</h3>
+                  <span className="text-xs text-gray-400">{pasadosCliente.length} sesión{pasadosCliente.length !== 1 ? 'es' : ''}</span>
+                </div>
+                <div className="space-y-3">
+                  {pasadosCliente
+                    .slice((historialClientePage - 1) * PAGE_SIZE, historialClientePage * PAGE_SIZE)
+                    .map((a) => <AppointmentCard key={`cliente-hist-${a.id}`} appt={a} isFutureSection={false} forceClientView={true} />)}
+                </div>
+                <Pagination
+                  page={historialClientePage}
+                  totalPages={Math.ceil(pasadosCliente.length / PAGE_SIZE)}
+                  onChange={setHistorialClientePage}
+                />
+              </div>
+            )}
           </div>
         )}
 
