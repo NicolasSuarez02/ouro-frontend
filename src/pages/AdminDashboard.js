@@ -184,7 +184,15 @@ const AdminDashboard = () => {
             </div>
             <span className="text-xl font-bold text-gray-800">Panel de administración</span>
           </div>
-          <span className="text-sm text-gray-500">{admin.email}</span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500 hidden sm:block">{admin.email}</span>
+            <button
+              onClick={() => { localStorage.removeItem('ouro_user'); localStorage.removeItem('ouro_token'); navigate('/'); }}
+              className="text-sm text-gray-500 hover:text-red-600 font-medium transition-colors"
+            >
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </div>
 
