@@ -154,7 +154,7 @@ const TherapistDetail = () => {
 
   const handleBook = async () => {
     if (!currentUser) {
-      navigate('/login', { state: { from: `/terapeutas/${id}` } });
+      navigate('/login', { state: { from: `/terapeutas/${slug}` } });
       return;
     }
     if (!selectedSlot) return;
