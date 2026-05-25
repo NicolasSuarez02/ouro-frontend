@@ -38,6 +38,7 @@ const EditTherapist = () => {
             : '',
           priceCurrency: therapist.priceCurrency || 'ARS',
           minBookingLeadHours: therapist.minBookingLeadHours || 1,
+          specialties: therapist.specialties || [],
         });
       })
       .catch(() => navigate('/dashboard'))

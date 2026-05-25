@@ -41,7 +41,7 @@ function App() {
         <Route path="/register-client" element={<RegisterClient />} />
         <Route path="/success" element={<Success />} />
         <Route path="/terapeutas" element={<Terapeutas />} />
-        <Route path="/terapeutas/:id" element={<TherapistDetail />} />
+        <Route path="/terapeutas/:slug" element={<TherapistDetail />} />
         <Route path="/biblioteca" element={<Recursos category="BIBLIOTECA" titulo="Biblioteca de Alejandría" />} />
         <Route path="/formaciones" element={<Recursos category="FORMACIONES" titulo="Formaciones" />} />
         <Route path="/terminos" element={<TermsPage />} />

@@ -23,6 +23,9 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
     priceCurrency: initialValues.priceCurrency || 'ARS',
     minBookingLeadHours: initialValues.minBookingLeadHours || 1,
   });
+  const [specialties, setSpecialties] = useState(initialValues.specialties || []);
+  const [newSpecName, setNewSpecName] = useState('');
+  const [newSpecLeadHours, setNewSpecLeadHours] = useState(1);
   const [localError, setLocalError] = useState('');
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(initialValues.photoUrl || '');
@@ -89,6 +92,7 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
       priceAmountCents: Math.round(precio * 100),
       priceCurrency: formData.priceCurrency,
       minBookingLeadHours: formData.minBookingLeadHours,
+      specialties: specialties.length > 0 ? specialties : null,
     });
   };
 
@@ -239,6 +243,64 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
           onChange={handlePhotoChange}
           className="hidden"
         />
+      </div>
+
+
+      {/* Especialidades adicionales (opcional, para terapeutas con múltiples tipos de sesión) */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Especialidades adicionales <span className="text-gray-400">(opcional)</span>
+        </label>
+        <p className="text-xs text-gray-500 mb-2">
+          Si ofrecés distintos tipos de sesión con diferente anticipación requerida, agregalas acá.
+        </p>
+        {specialties.length > 0 && (
+          <div className="space-y-2 mb-3">
+            {specialties.map((sp, i) => (
+              <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                <span className="flex-1 text-sm text-gray-800 font-medium">{sp.name}</span>
+                <span className="text-xs text-gray-400">{sp.minBookingLeadHours}h</span>
+                <button
+                  type="button"
+                  onClick={() => setSpecialties(specialties.filter((_, j) => j !== i))}
+                  className="text-red-400 hover:text-red-600 text-xs ml-2"
+                >
+                  Quitar
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newSpecName}
+            onChange={(e) => setNewSpecName(e.target.value)}
+            placeholder="Ej: Carta natal, Lecturas"
+            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+          <select
+            value={newSpecLeadHours}
+            onChange={(e) => setNewSpecLeadHours(Number(e.target.value))}
+            className="px-2 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+          >
+            {LEAD_TIME_OPTIONS.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => {
+              if (!newSpecName.trim()) return;
+              setSpecialties([...specialties, { name: newSpecName.trim(), minBookingLeadHours: newSpecLeadHours }]);
+              setNewSpecName('');
+              setNewSpecLeadHours(1);
+            }}
+            className="px-3 py-2 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-200 transition-colors"
+          >
+            Agregar
+          </button>
+        </div>
       </div>
 
       <button

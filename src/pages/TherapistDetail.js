@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import {
-  getTherapistById,
+  getTherapistBySlug,
   getAvailableDays,
   getAvailableSlots,
   bookAppointment,
@@ -50,7 +50,7 @@ const toDateStr = (date) => {
 };
 
 const TherapistDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   const [therapist, setTherapist] = useState(null);
@@ -70,6 +70,7 @@ const TherapistDetail = () => {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null); // { id, startTime, endTime }
 
+  const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [booking, setBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState('');
   const [bookingError, setBookingError] = useState('');
@@ -99,11 +100,11 @@ const TherapistDetail = () => {
 
   // Cargar perfil del terapeuta
   useEffect(() => {
-    getTherapistById(id)
+    getTherapistBySlug(slug)
       .then(setTherapist)
       .catch(() => setError('No se pudo cargar el perfil del terapeuta.'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [slug]);
 
   // Cargar estado de calificación cuando hay usuario y terapeuta cargados
   useEffect(() => {
@@ -114,20 +115,20 @@ const TherapistDetail = () => {
     }
   }, [therapist, currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Cargar días disponibles cuando cambia mes o terapeuta
+  // Cargar días disponibles cuando cambia mes, terapeuta o especialidad seleccionada
   useEffect(() => {
-    if (!id) return;
+    if (!therapist) return;
     setLoadingDays(true);
     setSelectedDate(null);
     setSelectedSlot(null);
     setAvailableSlots([]);
     setBookingSuccess('');
     setBookingError('');
-    getAvailableDays(id, calYear, calMonth)
+    getAvailableDays(therapist.id, calYear, calMonth, selectedSpecialty)
       .then(setAvailableDays)
       .catch(() => setAvailableDays([]))
       .finally(() => setLoadingDays(false));
-  }, [id, calYear, calMonth]);
+  }, [therapist, calYear, calMonth, selectedSpecialty]);
 
   const handleDayClick = async (dateStr) => {
     if (selectedDate === dateStr) {
@@ -142,7 +143,7 @@ const TherapistDetail = () => {
     setBookingSuccess('');
     setLoadingSlots(true);
     try {
-      const slots = await getAvailableSlots(id, dateStr);
+      const slots = await getAvailableSlots(therapist.id, dateStr, selectedSpecialty);
       setAvailableSlots(slots);
     } catch {
       setAvailableSlots([]);
@@ -160,7 +161,7 @@ const TherapistDetail = () => {
     setBooking(true);
     setBookingError('');
     try {
-      const result = await bookAppointment({ timeSlotId: selectedSlot.id });
+      const result = await bookAppointment({ timeSlotId: selectedSlot.id, specialtyName: selectedSpecialty });
 
       // Si hay URL de pago, redirigir a Mercado Pago
       if (result.paymentUrl) {
@@ -172,8 +173,8 @@ const TherapistDetail = () => {
       setBookingSuccess('¡Turno reservado con éxito!');
       setSelectedSlot(null);
       const [newDays, newSlots] = await Promise.all([
-        getAvailableDays(id, calYear, calMonth),
-        getAvailableSlots(id, selectedDate),
+        getAvailableDays(therapist.id, calYear, calMonth, selectedSpecialty),
+        getAvailableSlots(therapist.id, selectedDate, selectedSpecialty),
       ]);
       setAvailableDays(newDays);
       setAvailableSlots(newSlots);
@@ -197,7 +198,7 @@ const TherapistDetail = () => {
       setRatingExito('¡Gracias por tu calificación!');
       setRatingEstado({ puedeCalificar: false, calificacionExistente: { score: ratingSeleccionado, comment: ratingComentario } });
       // Refrescar el promedio del terapeuta
-      getTherapistById(id).then(setTherapist).catch(() => {});
+      getTherapistBySlug(slug).then(setTherapist).catch(() => {});
     } catch (err) {
       setRatingError(err.response?.data?.message || 'No se pudo enviar la calificación.');
     } finally {
@@ -428,6 +429,33 @@ const TherapistDetail = () => {
               )}
 
               {!isOwnProfile && (<>
+              {/* Selector de especialidad (solo si el terapeuta tiene múltiples especialidades) */}
+              {therapist.specialties && therapist.specialties.length > 1 && (
+                <div className="mb-5">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Seleccioná el tipo de sesión:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {therapist.specialties.map((sp) => (
+                      <button
+                        key={sp.name}
+                        onClick={() => setSelectedSpecialty(sp.name === selectedSpecialty ? null : sp.name)}
+                        className={"px-4 py-2 rounded-full text-sm font-medium border transition-all " + (
+                          selectedSpecialty === sp.name
+                            ? 'bg-primary-600 text-white border-primary-600'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-primary-400 hover:text-primary-600'
+                        )}
+                      >
+                        {sp.name}
+                      </button>
+                    ))}
+                  </div>
+                  {selectedSpecialty && (
+                    <p className="mt-2 text-xs text-gray-400">
+                      Anticipación mínima: {therapist.specialties.find(s => s.name === selectedSpecialty)?.minBookingLeadHours}h
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Navegación de mes */}
               <div className="flex items-center justify-between mb-4">
                 <button

@@ -171,7 +171,7 @@ const Terapeutas = () => {
               {terapeutasPagina.map((therapist) => (
                 <Link
                   key={therapist.id}
-                  to={`/terapeutas/${therapist.id}`}
+                  to={`/terapeutas/${therapist.slug || therapist.id}`}
                   className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all block"
                 >
                   {/* Foto o inicial */}
