@@ -432,29 +432,34 @@ const TherapistDetail = () => {
               {/* Selector de especialidad (solo si el terapeuta tiene múltiples especialidades) */}
               {therapist.specialties && therapist.specialties.length > 1 && (
                 <div className="mb-5">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Seleccioná el tipo de sesión:</p>
-                  <div className="flex flex-wrap gap-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de sesión</label>
+                  <select
+                    value={selectedSpecialty || ''}
+                    onChange={(e) => setSelectedSpecialty(e.target.value || null)}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all"
+                  >
+                    <option value="">— Elegí un tipo de sesión —</option>
                     {therapist.specialties.map((sp) => (
-                      <button
-                        key={sp.name}
-                        onClick={() => setSelectedSpecialty(sp.name === selectedSpecialty ? null : sp.name)}
-                        className={"px-4 py-2 rounded-full text-sm font-medium border transition-all " + (
-                          selectedSpecialty === sp.name
-                            ? 'bg-primary-600 text-white border-primary-600'
-                            : 'bg-white text-gray-700 border-gray-200 hover:border-primary-400 hover:text-primary-600'
-                        )}
-                      >
-                        {sp.name}
-                      </button>
+                      <option key={sp.name} value={sp.name}>{sp.name}</option>
                     ))}
-                  </div>
+                  </select>
                   {selectedSpecialty && (
-                    <p className="mt-2 text-xs text-gray-400">
+                    <p className="mt-1.5 text-xs text-gray-400">
                       Anticipación mínima: {therapist.specialties.find(s => s.name === selectedSpecialty)?.minBookingLeadHours}h
                     </p>
                   )}
                 </div>
               )}
+
+              {/* Bloquear calendario si hay múltiples especialidades y no se eligió ninguna */}
+              {therapist.specialties && therapist.specialties.length > 1 && !selectedSpecialty ? (
+                <div className="py-10 text-center text-sm text-gray-400">
+                  <svg className="w-10 h-10 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Elegí un tipo de sesión para ver la disponibilidad.
+                </div>
+              ) : (<>
 
               {/* Navegación de mes */}
               <div className="flex items-center justify-between mb-4">
@@ -650,6 +655,7 @@ const TherapistDetail = () => {
                   </p>
                 )}
               </div>
+              </>)}
               </>)}
 
             </div>

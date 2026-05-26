@@ -271,35 +271,37 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
             ))}
           </div>
         )}
-        <div className="flex gap-2">
+        <div className="space-y-2">
           <input
             type="text"
             value={newSpecName}
             onChange={(e) => setNewSpecName(e.target.value)}
-            placeholder="Ej: Carta natal, Lecturas"
-            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder="Ej: Carta natal, Lecturas de tarot"
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
-          <select
-            value={newSpecLeadHours}
-            onChange={(e) => setNewSpecLeadHours(Number(e.target.value))}
-            className="px-2 py-2 text-sm border border-gray-200 rounded-lg bg-white"
-          >
-            {LEAD_TIME_OPTIONS.map(({ value, label }) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={() => {
-              if (!newSpecName.trim()) return;
-              setSpecialties([...specialties, { name: newSpecName.trim(), minBookingLeadHours: newSpecLeadHours }]);
-              setNewSpecName('');
-              setNewSpecLeadHours(1);
-            }}
-            className="px-3 py-2 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-200 transition-colors"
-          >
-            Agregar
-          </button>
+          <div className="flex gap-2">
+            <select
+              value={newSpecLeadHours}
+              onChange={(e) => setNewSpecLeadHours(Number(e.target.value))}
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+            >
+              {LEAD_TIME_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => {
+                if (!newSpecName.trim()) return;
+                setSpecialties([...specialties, { name: newSpecName.trim(), minBookingLeadHours: newSpecLeadHours }]);
+                setNewSpecName('');
+                setNewSpecLeadHours(1);
+              }}
+              className="px-4 py-2 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-200 transition-colors flex-shrink-0"
+            >
+              + Agregar
+            </button>
+          </div>
         </div>
       </div>
 
