@@ -521,24 +521,34 @@ const TherapistDetail = () => {
             )}
 
             {/* Calendario + reserva */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-5">Reservar turno</h2>
+            <div className="bg-navy-card border border-gold-faint p-8">
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-6">
+                Reservar turno
+              </p>
 
               {isOwnProfile && (
-                <div className="mb-5 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700 font-medium">
-                  Este es tu perfil. No podés reservar un turno con vos mismo.
+                <div className="border-l-2 border-gold pl-5 pr-4 py-4 bg-gold-ghost" role="alert">
+                  <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-2">
+                    Tu perfil
+                  </p>
+                  <p className="font-serif font-light text-base text-white leading-relaxed">
+                    No podés reservar un turno con vos mismo.
+                  </p>
                 </div>
               )}
 
               {!isOwnProfile && (<>
               {/* Selector de especialidad (solo si el terapeuta tiene múltiples especialidades) */}
               {therapist.specialties && therapist.specialties.length > 1 && (
-                <div className="mb-5">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de sesión</label>
+                <div className="mb-8">
+                  <label className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3">
+                    Tipo de sesión
+                  </label>
                   <select
                     value={selectedSpecialty || ''}
                     onChange={(e) => setSelectedSpecialty(e.target.value || null)}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all"
+                    style={{ colorScheme: 'dark' }}
+                    className="w-full bg-navy-soft/40 border border-gold-faint focus:border-gold-dim focus:outline-none font-serif font-light text-base text-white py-3 px-4 transition-colors duration-300 cursor-pointer"
                   >
                     <option value="">— Elegí un tipo de sesión —</option>
                     {therapist.specialties.map((sp) => (
@@ -546,7 +556,7 @@ const TherapistDetail = () => {
                     ))}
                   </select>
                   {selectedSpecialty && (
-                    <p className="mt-1.5 text-xs text-gray-400">
+                    <p className="mt-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
                       Anticipación mínima: {therapist.specialties.find(s => s.name === selectedSpecialty)?.minBookingLeadHours}h
                     </p>
                   )}
@@ -555,44 +565,48 @@ const TherapistDetail = () => {
 
               {/* Bloquear calendario si hay múltiples especialidades y no se eligió ninguna */}
               {therapist.specialties && therapist.specialties.length > 1 && !selectedSpecialty ? (
-                <div className="py-10 text-center text-sm text-gray-400">
-                  <svg className="w-10 h-10 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <div className="py-12 text-center">
+                  <svg className="w-10 h-10 mx-auto mb-4 text-gold-dim" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  Elegí un tipo de sesión para ver la disponibilidad.
+                  <p className="font-serif italic font-light text-base text-white-faint">
+                    Elegí un tipo de sesión para ver la disponibilidad.
+                  </p>
                 </div>
               ) : (<>
 
               {/* Navegación de mes */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <button
                   onClick={prevMonth}
                   disabled={isPrevDisabled}
-                  className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Mes anterior"
+                  className="p-2 border border-gold-dim text-gold hover:bg-gold hover:text-navy disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gold transition-all duration-400 ease-expo-out"
                 >
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
 
-                <span className="text-base font-semibold text-gray-800">
+                <span className="font-serif font-light text-xl text-white capitalize">
                   {MESES[calMonth - 1]} {calYear}
                 </span>
 
                 <button
                   onClick={nextMonth}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-label="Mes siguiente"
+                  className="p-2 border border-gold-dim text-gold hover:bg-gold hover:text-navy transition-all duration-400 ease-expo-out"
                 >
-                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
 
               {/* Encabezados días semana */}
-              <div className="grid grid-cols-7 mb-1">
+              <div className="grid grid-cols-7 mb-2">
                 {DIAS_SEMANA.map((dia) => (
-                  <div key={dia} className="text-center text-xs font-semibold text-gray-400 py-1">
+                  <div key={dia} className="text-center font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim py-2">
                     {dia}
                   </div>
                 ))}
@@ -600,8 +614,8 @@ const TherapistDetail = () => {
 
               {/* Grilla del mes */}
               {loadingDays ? (
-                <div className="flex justify-center py-8">
-                  <div className="w-6 h-6 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+                <div className="flex justify-center py-12">
+                  <div className="w-6 h-6 border-2 border-gold-faint border-t-gold rounded-full animate-spin" aria-label="Cargando" />
                 </div>
               ) : (
                 <div className="grid grid-cols-7 gap-1">
@@ -614,17 +628,31 @@ const TherapistDetail = () => {
                     const isToday = dateStr === toDateStr(todayBase);
                     const isSel = selectedDate === dateStr;
 
-                    let cellClass = 'flex flex-col items-center justify-center h-10 rounded-xl text-sm font-medium transition-all ';
-                    if (isSel) {
-                      cellClass += 'bg-primary-600 text-white shadow-sm';
+                    // Mapeo de los 7 estados visuales (ver tabla de aprobación en sesión)
+                    let cellClasses = 'flex flex-col items-center justify-center h-12 font-serif font-light text-sm transition-all duration-300 ease-expo-out ';
+                    let dotColor = '';
+                    let outlineStyle = {};
+
+                    if (isSel && hasSlots && !isPast) {
+                      // Estados 4 y 7: seleccionado
+                      cellClasses += 'bg-gold text-navy';
+                      dotColor = 'bg-navy';
+                      if (isToday) {
+                        // Estado 7: hoy + seleccionado → outline gold-deep offset
+                        outlineStyle = { outline: '1px solid #A8842C', outlineOffset: '1px' };
+                      }
                     } else if (isPast) {
-                      cellClass += 'text-gray-300 cursor-not-allowed';
+                      // Estado 1: pasado
+                      cellClasses += 'text-white-faint cursor-not-allowed';
                     } else if (hasSlots) {
-                      cellClass += 'bg-primary-50 text-primary-700 hover:bg-primary-100 cursor-pointer';
-                      if (isToday) cellClass += ' ring-2 ring-primary-300';
+                      // Estados 3 y 6: con slots, no seleccionado
+                      cellClasses += 'bg-gold-ghost text-gold hover:bg-gold-faint cursor-pointer';
+                      if (isToday) cellClasses += ' ring-1 ring-gold-dim'; // Estado 6
+                      dotColor = 'bg-gold';
                     } else {
-                      cellClass += 'text-gray-400 cursor-not-allowed';
-                      if (isToday) cellClass += ' ring-2 ring-gray-200';
+                      // Estados 2 y 5: sin slots, futuro
+                      cellClasses += 'text-white-faint cursor-not-allowed';
+                      if (isToday) cellClasses += ' ring-1 ring-gold-faint'; // Estado 5
                     }
 
                     return (
@@ -632,12 +660,13 @@ const TherapistDetail = () => {
                         key={dateStr}
                         onClick={() => !isPast && hasSlots && handleDayClick(dateStr)}
                         disabled={isPast || !hasSlots}
-                        className={cellClass}
+                        className={cellClasses}
+                        style={outlineStyle}
                         title={hasSlots && !isPast ? 'Hay horarios disponibles' : ''}
                       >
                         <span>{date.getDate()}</span>
-                        {hasSlots && !isPast && (
-                          <span className={`w-1 h-1 rounded-full mt-0.5 ${isSel ? 'bg-white' : 'bg-primary-400'}`} />
+                        {dotColor && (
+                          <span className={`w-[3px] h-[3px] rounded-full mt-1 ${dotColor}`} aria-hidden="true" />
                         )}
                       </button>
                     );
@@ -646,27 +675,30 @@ const TherapistDetail = () => {
               )}
 
               {/* Leyenda */}
-              <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-primary-100 border border-primary-300 inline-block" />
+              <div className="flex items-center justify-center gap-6 mt-5">
+                <span className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                  <span className="w-2.5 h-2.5 bg-gold-ghost border border-gold-dim" aria-hidden="true" />
                   Disponible
                 </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-primary-600 inline-block" />
+                <span className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                  <span className="w-2.5 h-2.5 bg-gold" aria-hidden="true" />
                   Seleccionado
                 </span>
               </div>
 
               {/* Slots del día seleccionado */}
               {selectedDate && (
-                <div className="mt-5 pt-5 border-t border-gray-100">
-                  <p className="text-sm font-semibold text-gray-700 mb-3 capitalize">
+                <div className="mt-8 pt-8 border-t border-gold-faint">
+                  <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-3">
+                    Día seleccionado
+                  </p>
+                  <p className="font-serif italic font-light text-base text-white mb-5 capitalize">
                     {formatDateLabel(selectedDate)}
                   </p>
 
                   {loadingSlots ? (
-                    <div className="flex justify-center py-4">
-                      <div className="w-5 h-5 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+                    <div className="flex justify-center py-6">
+                      <div className="w-5 h-5 border-2 border-gold-faint border-t-gold rounded-full animate-spin" aria-label="Cargando horarios" />
                     </div>
                   ) : displayedSlots.length > 0 ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -676,13 +708,11 @@ const TherapistDetail = () => {
                           <button
                             key={slot.id}
                             onClick={() => setSelectedSlot(isSel ? null : slot)}
-                            className={`
-                              py-2.5 rounded-lg text-sm font-medium border transition-all
-                              ${isSel
-                                ? 'bg-primary-600 text-white border-primary-600 shadow-sm'
-                                : 'bg-white text-gray-700 border-gray-200 hover:border-primary-400 hover:text-primary-600'
-                              }
-                            `}
+                            className={`py-2.5 font-sans text-[11px] font-medium uppercase tracking-eyebrow border transition-all duration-400 ease-expo-out ${
+                              isSel
+                                ? 'bg-gold border-gold text-navy'
+                                : 'bg-transparent border-gold-dim text-gold hover:bg-gold hover:text-navy'
+                            }`}
                           >
                             {slot.startTime.slice(0, 5)}
                           </button>
@@ -690,7 +720,7 @@ const TherapistDetail = () => {
                       })}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-400 text-center py-3">
+                    <p className="font-serif italic font-light text-base text-white-faint text-center py-3">
                       No hay horarios disponibles este día.
                     </p>
                   )}
@@ -698,62 +728,83 @@ const TherapistDetail = () => {
               )}
 
               {!selectedDate && !loadingDays && (
-                <p className="text-sm text-gray-400 text-center mt-5">
+                <p className="font-serif italic font-light text-sm text-white-faint text-center mt-6">
                   Seleccioná un día disponible para ver los horarios.
                 </p>
               )}
 
               {/* Resumen y botón de reserva */}
-              <div className="mt-5 pt-5 border-t border-gray-100">
+              <div className="mt-8 pt-8 border-t border-gold-faint">
                 {selectedSlot && (
-                  <div className="flex items-center gap-2 mb-4 p-3 bg-primary-50 rounded-lg">
-                    <svg className="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <div className="flex items-center gap-3 mb-5 p-4 bg-gold-ghost border border-gold-faint">
+                    <svg className="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span className="text-sm font-medium text-primary-700 capitalize">
+                    <span className="font-serif font-light text-base text-white capitalize">
                       {formatDateLabel(selectedDate)} · {selectedSlot.startTime.slice(0, 5)} hs
                     </span>
                   </div>
                 )}
 
                 {bookingSuccess && (
-                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-                    <p className="font-medium mb-2">{bookingSuccess}</p>
+                  <div className="mb-5 border border-gold-faint bg-gold-ghost px-5 py-4 space-y-3" role="status">
+                    <div className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-gold shadow-gold-glow-soft" aria-hidden="true" />
+                      <p className="font-serif font-light text-base text-white leading-relaxed">
+                        {bookingSuccess}
+                      </p>
+                    </div>
                     <Link
                       to="/mis-turnos"
-                      className="inline-flex items-center gap-1 text-green-700 font-semibold underline hover:text-green-800"
+                      className="group ml-6 inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
                     >
-                      Ver mis turnos →
+                      <span>Ver mis turnos</span>
+                      <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
                     </Link>
                   </div>
                 )}
 
                 {bookingError && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                    {bookingError}
+                  <div
+                    className="mb-5 px-5 py-4 flex items-start gap-3"
+                    style={{
+                      borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+                      borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+                      background: 'rgba(160, 74, 58, 0.08)',
+                    }}
+                    role="alert"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#A04A3A' }} className="flex-shrink-0 mt-0.5" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <p className="font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
+                      {bookingError}
+                    </p>
                   </div>
                 )}
 
                 <button
                   onClick={handleBook}
                   disabled={!selectedSlot || booking}
-                  className={`
-                    w-full py-3 rounded-xl font-semibold text-white transition-all
-                    ${selectedSlot && !booking
-                      ? 'bg-gradient-to-r from-mystic-500 to-primary-600 hover:from-mystic-600 hover:to-primary-700 shadow-sm'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }
-                  `}
+                  className="w-full inline-flex items-center justify-center gap-3 bg-gold-gradient py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                 >
-                  {booking
-                    ? 'Procesando...'
-                    : (therapist.priceAmountCents > 0 ? 'Reservar y pagar' : 'Reservar turno')
-                  }
+                  <span>
+                    {booking
+                      ? 'Procesando...'
+                      : (therapist.priceAmountCents > 0 ? 'Reservar y pagar' : 'Reservar turno')
+                    }
+                  </span>
+                  {!booking && selectedSlot && <span>→</span>}
                 </button>
 
                 {!currentUser && (
-                  <p className="text-xs text-center text-gray-400 mt-2">
-                    <Link to="/login" className="text-primary-600 hover:underline">Iniciá sesión</Link> para reservar
+                  <p className="text-center font-serif italic font-light text-sm text-white-faint mt-4">
+                    <Link to="/login" className="text-gold hover:text-gold-bright transition-colors duration-300 underline underline-offset-2">
+                      Iniciá sesión
+                    </Link>
+                    {' '}para reservar
                   </p>
                 )}
               </div>
