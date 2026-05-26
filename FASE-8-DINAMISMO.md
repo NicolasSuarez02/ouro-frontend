@@ -93,6 +93,27 @@ Documento vivo. Registra todo lo que requiera animación, micro-interacción o d
 
 ---
 
+## Observaciones agregadas durante Fase 3 (Auth)
+
+### Icono `AlertCircle` duplicado inline en 5 archivos
+
+- Se introdujo el componente `<AlertCircle>` como `const` local en cada uno de los 5 archivos de auth (Login, Register, RegisterClient, ForgotPassword, ResetPassword) para los banners de error terracota. Es un SVG lucide-like (círculo + signo exclamación, stroke 1.5px, currentColor).
+- Cuando se sume `lucide-react` como dependencia (planificado para Fase 6 o cuando se trate iconografía global), reemplazar todos los `<AlertCircle>` locales por `import { AlertCircle } from 'lucide-react'` único.
+- Mismo plan aplica a `<EyeIcon>` (mostrar/ocultar contraseña) en Login.js y Register.js, y a `<ChevronDown>`, `<SearchIcon>`, `<MenuIcon>`, `<CloseIcon>` en Navbar.js.
+- En general: cada vez que aparece `// Pendiente reemplazar por lucide-react` en un comentario del código, va al pase de iconografía.
+
+### Hook `useDismissibleError` — reglas de visibilidad mínima
+
+- Hook creado en `src/hooks/useDismissibleError.js` para resolver el bug de "flash de error". Implementa: NO auto-hide por timer, mínimo 2s visible, fade-out 400ms.
+- Usado en los 5 forms de auth. Pendiente para Fase 8: evaluar si extender el patrón a otros banners de feedback del sitio (success de form de contacto, success de calificación, banners de booking en TherapistDetail).
+
+### Interceptor de 401 — endpoint allowlist
+
+- Después del fix Opción A en `src/services/api.js`, los endpoints de auth están excluidos del redirect destructivo del interceptor 401. Si el backend agrega endpoints de auth nuevos (ej. `/users/oauth-callback`, `/users/2fa-verify`), agregarlos al array `AUTH_ENDPOINTS` para que no rompan el feedback de error en el form correspondiente.
+
+---
+
 ## Versionado
 
-- **v1 — Mayo 2026:** Documento inicial con observaciones de Roque tras revisión de Home + observaciones detectadas durante Fases 0-2. Se va a expandir durante Fases 3-7.
+- **v1 — Mayo 2026:** Documento inicial con observaciones de Roque tras revisión de Home + observaciones detectadas durante Fases 0-2.
+- **v1.1 — Mayo 2026:** Agregadas observaciones de Fase 3: iconos inline pendientes de migración a lucide-react, hook useDismissibleError, allowlist del interceptor 401.
