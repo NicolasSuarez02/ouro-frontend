@@ -146,10 +146,10 @@ const Navbar = () => {
     setDropdownOpen(false);
   };
 
-  const handleTherapistClick = (therapistId) => {
+  const handleTherapistClick = (therapistSlug) => {
     setDropdownOpen(false);
     setIsMenuOpen(false);
-    navigate(`/terapeutas/${therapistId}`);
+    navigate(`/terapeutas/${therapistSlug}`);
   };
 
   return (
@@ -266,7 +266,7 @@ const Navbar = () => {
                         filteredTherapists.map((t) => (
                           <button
                             key={t.id}
-                            onClick={() => handleTherapistClick(t.id)}
+                            onClick={() => handleTherapistClick(t.slug)}
                             className="w-full text-left px-5 py-3 hover:bg-gold-ghost transition-colors duration-300 flex items-center gap-3"
                           >
                             {t.photoUrl ? (

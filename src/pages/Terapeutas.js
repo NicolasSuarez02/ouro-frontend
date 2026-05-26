@@ -241,7 +241,7 @@ const Terapeutas = () => {
               {terapeutasPagina.map((therapist) => (
                 <Link
                   key={therapist.id}
-                  to={`/terapeutas/${therapist.id}`}
+                  to={`/terapeutas/${therapist.slug}`}
                   className="group relative bg-navy-card border border-gold-faint px-8 py-10 transition-all duration-600 ease-expo-out hover:-translate-y-2 hover:border-gold-dim hover:shadow-card-hover overflow-hidden text-center block"
                 >
                   {/* Línea superior animada en hover */}

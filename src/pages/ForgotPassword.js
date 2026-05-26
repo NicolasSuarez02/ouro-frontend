@@ -1,28 +1,42 @@
 import React, { useState } from 'react';
 import { forgotPassword } from '../services/api';
 import AuthLayout from '../components/AuthLayout';
+import useDismissibleError from '../hooks/useDismissibleError';
+
+// ---------------------------------------------------------------
+// AlertCircle icon — stroke 1.5px.
+// ---------------------------------------------------------------
+const AlertCircle = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState('');
+
+  // Error con reglas: mínimo 2s visible, fade-out 400ms, sin auto-hide por timer.
+  const { error, errorFadeOut, showError, dismissError, clearError } = useDismissibleError();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     if (!email) {
-      setError('Ingresá tu email');
+      showError('Ingresá tu email');
       return;
     }
 
     setLoading(true);
     try {
       await forgotPassword(email);
+      clearError();
       setSent(true);
     } catch {
-      setError('Error al enviar el email. Intentá nuevamente.');
+      showError('Error al enviar el email. Intentá nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -113,10 +127,10 @@ const ForgotPassword = () => {
       backLabel="Volver al login"
     >
       <form onSubmit={handleSubmit} className="space-y-10">
-        {/* Banner error (terracota) */}
+        {/* Banner error (terracota) con fade-out controlado */}
         {error && (
           <div
-            className="px-5 py-4 flex items-start gap-3"
+            className={`px-5 py-4 flex items-start gap-3 transition-opacity duration-400 ease-expo-out ${errorFadeOut ? 'opacity-0' : 'opacity-100'}`}
             style={{
               borderTop: '1px solid rgba(160, 74, 58, 0.4)',
               borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
@@ -124,12 +138,8 @@ const ForgotPassword = () => {
             }}
             role="alert"
           >
-            <span
-              className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
-              style={{ background: '#A04A3A' }}
-              aria-hidden="true"
-            />
-            <p className="font-serif font-light text-base text-white leading-relaxed">
+            <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+            <p className="font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
               {error}
             </p>
           </div>
@@ -152,7 +162,7 @@ const ForgotPassword = () => {
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
-              setError('');
+              dismissError();
             }}
             placeholder="tu@email.com"
             className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"

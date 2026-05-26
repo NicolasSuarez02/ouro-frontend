@@ -147,3 +147,36 @@ code {
     scroll-behavior: auto !important;
   }
 }
+
+/* ============================================================
+   Neutralizar el autofill style de WebKit (Chrome / Edge / Safari)
+   Sin este fix, los inputs rellenados por el browser muestran un
+   fondo blanco/amarillento/lila que rompe el estilo underline-only.
+   El truco del transition de 5000s es el patrón estándar para
+   forzar que el background autofill no se aplique visualmente.
+   ============================================================ */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--white) !important;
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: var(--gold);
+}
+
+/* ============================================================
+   Ocultar íconos nativos de Edge en inputs (mostrar/ocultar
+   contraseña y limpiar) para evitar duplicado con el ícono
+   custom del rediseño.
+   ============================================================ */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}

@@ -2,6 +2,18 @@ import React, { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { resetPassword } from '../services/api';
 import AuthLayout from '../components/AuthLayout';
+import useDismissibleError from '../hooks/useDismissibleError';
+
+// ---------------------------------------------------------------
+// AlertCircle icon — stroke 1.5px.
+// ---------------------------------------------------------------
+const AlertCircle = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -10,45 +22,47 @@ const ResetPassword = () => {
 
   const [formData, setFormData] = useState({ newPassword: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Error con reglas: mínimo 2s visible, fade-out 400ms, sin auto-hide por timer.
+  const { error, errorFadeOut, showError, dismissError, clearError } = useDismissibleError();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    dismissError();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     if (!formData.newPassword || !formData.confirmPassword) {
-      setError('Completá todos los campos');
+      showError('Completá todos los campos');
       return;
     }
 
     if (formData.newPassword.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      showError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      showError('Las contraseñas no coinciden');
       return;
     }
 
     if (!token) {
-      setError('El enlace de reset no es válido. Solicitá uno nuevo.');
+      showError('El enlace de reset no es válido. Solicitá uno nuevo.');
       return;
     }
 
     setLoading(true);
     try {
       await resetPassword(token, formData.newPassword);
+      clearError();
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'El enlace expiró o no es válido. Solicitá uno nuevo.');
+      showError(err.response?.data?.message || 'El enlace expiró o no es válido. Solicitá uno nuevo.');
     } finally {
       setLoading(false);
     }
@@ -141,10 +155,10 @@ const ResetPassword = () => {
       backLabel="Volver al login"
     >
       <form onSubmit={handleSubmit} className="space-y-10">
-        {/* Banner error (terracota) — con CTA inline si el enlace expiró */}
+        {/* Banner error (terracota) — con CTA inline si el enlace expiró + fade-out controlado */}
         {error && (
           <div
-            className="px-5 py-4 space-y-2"
+            className={`px-5 py-4 space-y-2 transition-opacity duration-400 ease-expo-out ${errorFadeOut ? 'opacity-0' : 'opacity-100'}`}
             style={{
               borderTop: '1px solid rgba(160, 74, 58, 0.4)',
               borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
@@ -153,17 +167,13 @@ const ResetPassword = () => {
             role="alert"
           >
             <div className="flex items-start gap-3">
-              <span
-                className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
-                style={{ background: '#A04A3A' }}
-                aria-hidden="true"
-              />
-              <p className="font-serif font-light text-base text-white leading-relaxed">
+              <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+              <p className="font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
                 {error}
               </p>
             </div>
             {expired && (
-              <div className="pl-6">
+              <div className="pl-7">
                 <Link
                   to="/forgot-password"
                   className="font-sans text-[11px] uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"

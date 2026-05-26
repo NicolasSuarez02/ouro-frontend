@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import {
-  getTherapistById,
+  getTherapistBySlug,
   getAvailableDays,
   getAvailableSlots,
   bookAppointment,
@@ -11,7 +11,8 @@ import {
   crearCalificacion,
 } from '../services/api';
 
-// Componente de estrellas reutilizable
+// Componente de estrellas reutilizable — paleta OURO (gold filled / gold-faint empty)
+// Coherente con MiniEstrellas de Terapeutas.js
 const Estrellas = ({ score, max = 5, size = 'md', interactive = false, onSelect }) => {
   const sizes = { sm: 'w-3.5 h-3.5', md: 'w-5 h-5', lg: 'w-7 h-7' };
   return (
@@ -21,12 +22,13 @@ const Estrellas = ({ score, max = 5, size = 'md', interactive = false, onSelect 
         return (
           <svg
             key={i}
-            className={`${sizes[size]} ${filled ? 'text-amber-400' : 'text-gray-200'} ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
+            className={`${sizes[size]} ${filled ? 'text-gold' : 'text-gold-faint'} ${interactive ? 'cursor-pointer hover:scale-110 transition-transform duration-300' : ''}`}
             fill={filled ? 'currentColor' : 'none'}
             stroke="currentColor"
             strokeWidth="1.5"
             viewBox="0 0 24 24"
             onClick={() => interactive && onSelect && onSelect(i + 1)}
+            aria-hidden="true"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
           </svg>
@@ -50,7 +52,7 @@ const toDateStr = (date) => {
 };
 
 const TherapistDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
 
   const [therapist, setTherapist] = useState(null);
@@ -70,6 +72,7 @@ const TherapistDetail = () => {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null); // { id, startTime, endTime }
 
+  const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [booking, setBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState('');
   const [bookingError, setBookingError] = useState('');
@@ -99,11 +102,11 @@ const TherapistDetail = () => {
 
   // Cargar perfil del terapeuta
   useEffect(() => {
-    getTherapistById(id)
+    getTherapistBySlug(slug)
       .then(setTherapist)
       .catch(() => setError('No se pudo cargar el perfil del terapeuta.'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [slug]);
 
   // Cargar estado de calificación cuando hay usuario y terapeuta cargados
   useEffect(() => {
@@ -114,20 +117,20 @@ const TherapistDetail = () => {
     }
   }, [therapist, currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Cargar días disponibles cuando cambia mes o terapeuta
+  // Cargar días disponibles cuando cambia mes, terapeuta o especialidad seleccionada
   useEffect(() => {
-    if (!id) return;
+    if (!therapist) return;
     setLoadingDays(true);
     setSelectedDate(null);
     setSelectedSlot(null);
     setAvailableSlots([]);
     setBookingSuccess('');
     setBookingError('');
-    getAvailableDays(id, calYear, calMonth)
+    getAvailableDays(therapist.id, calYear, calMonth, selectedSpecialty)
       .then(setAvailableDays)
       .catch(() => setAvailableDays([]))
       .finally(() => setLoadingDays(false));
-  }, [id, calYear, calMonth]);
+  }, [therapist, calYear, calMonth, selectedSpecialty]);
 
   const handleDayClick = async (dateStr) => {
     if (selectedDate === dateStr) {
@@ -142,7 +145,7 @@ const TherapistDetail = () => {
     setBookingSuccess('');
     setLoadingSlots(true);
     try {
-      const slots = await getAvailableSlots(id, dateStr);
+      const slots = await getAvailableSlots(therapist.id, dateStr, selectedSpecialty);
       setAvailableSlots(slots);
     } catch {
       setAvailableSlots([]);
@@ -153,14 +156,14 @@ const TherapistDetail = () => {
 
   const handleBook = async () => {
     if (!currentUser) {
-      navigate('/login', { state: { from: `/terapeutas/${id}` } });
+      navigate('/login', { state: { from: `/terapeutas/${slug}` } });
       return;
     }
     if (!selectedSlot) return;
     setBooking(true);
     setBookingError('');
     try {
-      const result = await bookAppointment({ timeSlotId: selectedSlot.id });
+      const result = await bookAppointment({ timeSlotId: selectedSlot.id, specialtyName: selectedSpecialty });
 
       // Si hay URL de pago, redirigir a Mercado Pago
       if (result.paymentUrl) {
@@ -172,8 +175,8 @@ const TherapistDetail = () => {
       setBookingSuccess('¡Turno reservado con éxito!');
       setSelectedSlot(null);
       const [newDays, newSlots] = await Promise.all([
-        getAvailableDays(id, calYear, calMonth),
-        getAvailableSlots(id, selectedDate),
+        getAvailableDays(therapist.id, calYear, calMonth, selectedSpecialty),
+        getAvailableSlots(therapist.id, selectedDate, selectedSpecialty),
       ]);
       setAvailableDays(newDays);
       setAvailableSlots(newSlots);
@@ -197,7 +200,7 @@ const TherapistDetail = () => {
       setRatingExito('¡Gracias por tu calificación!');
       setRatingEstado({ puedeCalificar: false, calificacionExistente: { score: ratingSeleccionado, comment: ratingComentario } });
       // Refrescar el promedio del terapeuta
-      getTherapistById(id).then(setTherapist).catch(() => {});
+      getTherapistBySlug(slug).then(setTherapist).catch(() => {});
     } catch (err) {
       setRatingError(err.response?.data?.message || 'No se pudo enviar la calificación.');
     } finally {
@@ -234,8 +237,15 @@ const TherapistDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div
+            className="w-8 h-8 border-2 border-gold-faint border-t-gold rounded-full animate-spin"
+            aria-label="Cargando"
+          />
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -244,10 +254,26 @@ const TherapistDetail = () => {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 text-gray-500">
-          <p>{error || 'Terapeuta no encontrado.'}</p>
-          <Link to="/terapeutas" className="text-sm text-mystic-600 hover:text-mystic-700 font-medium underline">
-            Volver a terapeutas
+        <div className="flex-1 flex flex-col items-center justify-center gap-8 px-6">
+          <div
+            className="inline-block px-6 py-4"
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <p className="font-serif font-light text-base text-white">
+              {error || 'Terapeuta no encontrado.'}
+            </p>
+          </div>
+          <Link
+            to="/terapeutas"
+            className="group inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
+          >
+            <span className="transition-transform duration-400 ease-expo-out group-hover:-translate-x-2">←</span>
+            <span>Volver a terapeutas</span>
           </Link>
         </div>
         <Footer />
@@ -264,68 +290,76 @@ const TherapistDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 w-full">
+      <main className="flex-1 max-w-container mx-auto px-6 lg:px-10 pt-32 lg:pt-40 pb-24 w-full">
 
         {/* Breadcrumb */}
         <Link
           to="/terapeutas"
-          className="inline-flex items-center gap-1 text-sm text-mystic-600 hover:text-mystic-700 mb-8"
+          className="group inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300 mb-12"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver a terapeutas
+          <span className="transition-transform duration-400 ease-expo-out group-hover:-translate-x-2">←</span>
+          <span>Volver a terapeutas</span>
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* ── Columna izquierda: perfil ── */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center lg:sticky lg:top-24">
+            <div className="bg-navy-card border border-gold-faint p-8 text-center lg:sticky lg:top-28">
+              {/* Avatar */}
               {therapist.photoUrl ? (
                 <img
                   src={therapist.photoUrl}
                   alt={therapist.userFullName}
-                  className="w-28 h-28 rounded-full object-cover mx-auto ring-4 ring-primary-50 shadow-md mb-4"
+                  className="w-28 h-28 rounded-full object-cover mx-auto border border-gold-faint mb-6"
                 />
               ) : (
-                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-mystic-400 to-primary-500 flex items-center justify-center mx-auto ring-4 ring-primary-50 shadow-md mb-4">
-                  <span className="text-white font-bold text-4xl">
+                <div className="w-28 h-28 rounded-full bg-gold-gradient flex items-center justify-center mx-auto mb-6">
+                  <span className="font-serif font-normal text-5xl text-navy">
                     {therapist.userFullName?.charAt(0).toUpperCase()}
                   </span>
                 </div>
               )}
 
-              <h1 className="text-xl font-bold text-gray-900 mb-2">{therapist.userFullName}</h1>
+              {/* Nombre */}
+              <h1 className="font-serif font-light text-2xl text-white mb-3 leading-tight">
+                {therapist.userFullName}
+              </h1>
 
+              {/* Especialidad como eyebrow */}
               {therapist.specialty && (
-                <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-mystic-100 text-mystic-700">
+                <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim">
                   {therapist.specialty}
-                </span>
+                </p>
               )}
 
               {/* Calificación promedio */}
               {therapist.ratingCount > 0 && (
-                <div className="mt-4">
-                  <div className="flex items-center justify-center gap-2">
-                    <Estrellas score={Math.round(therapist.averageRating)} size="md" />
-                    <span className="text-sm font-semibold text-gray-700">{therapist.averageRating?.toFixed(1)}</span>
-                    <span className="text-xs text-gray-400">({therapist.ratingCount})</span>
-                  </div>
+                <div className="mt-5 flex items-center justify-center gap-2">
+                  <Estrellas score={Math.round(therapist.averageRating)} size="sm" />
+                  <span className="font-serif font-normal text-base text-white ml-1">
+                    {therapist.averageRating?.toFixed(1)}
+                  </span>
+                  <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                    ({therapist.ratingCount})
+                  </span>
                 </div>
               )}
 
+              {/* Precio */}
               {therapist.priceAmountCents != null && (
-                <div className="border-t border-gray-100 mt-5 pt-5">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Precio por sesión</p>
-                  <p className="text-2xl font-bold text-primary-600">
+                <div className="border-t border-gold-faint mt-6 pt-6">
+                  <p className="font-serif font-normal text-2xl text-white">
                     {(therapist.priceAmountCents / 100).toLocaleString('es-AR', {
                       style: 'currency',
                       currency: therapist.priceCurrency || 'ARS',
                     })}
+                  </p>
+                  <p className="font-sans text-[10px] uppercase tracking-suffix text-white-faint mt-1">
+                    Por sesión
                   </p>
                 </div>
               )}
@@ -337,81 +371,150 @@ const TherapistDetail = () => {
 
             {/* Bio */}
             {therapist.bio && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Sobre mí</h2>
-                <p className="text-gray-600 leading-relaxed whitespace-pre-line">{therapist.bio}</p>
+              <div className="bg-navy-card border border-gold-faint p-8">
+                <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-4">
+                  Sobre mí
+                </p>
+                <p className="font-serif font-light text-base text-white-dim leading-relaxed whitespace-pre-line">
+                  {therapist.bio}
+                </p>
               </div>
             )}
 
             {/* Sección de calificación */}
             {currentUser && !isOwnProfile && ratingEstado && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Calificación</h2>
+              <div className="bg-navy-card border border-gold-faint p-8">
+                <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-6">
+                  Calificación
+                </p>
 
                 {ratingEstado.calificacionExistente ? (
+                  // ───────── Caso A: ya calificó ─────────
                   <div>
-                    <p className="text-sm text-gray-500 mb-2">Tu calificación:</p>
+                    <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-3">
+                      Tu calificación
+                    </p>
                     <div className="flex items-center gap-2">
                       <Estrellas score={ratingEstado.calificacionExistente.score} size="md" />
-                      <span className="text-sm font-medium text-gray-700">{ratingEstado.calificacionExistente.score}/5</span>
+                      <span className="font-serif font-normal text-base text-white ml-1">
+                        {ratingEstado.calificacionExistente.score}
+                      </span>
+                      <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                        / 5
+                      </span>
                     </div>
                     {ratingEstado.calificacionExistente.comment && (
-                      <p className="mt-2 text-sm text-gray-500 italic">"{ratingEstado.calificacionExistente.comment}"</p>
+                      <p className="mt-4 font-serif italic font-light text-base text-white-dim leading-relaxed">
+                        &ldquo;{ratingEstado.calificacionExistente.comment}&rdquo;
+                      </p>
                     )}
-                    {ratingExito && <p className="mt-2 text-sm text-green-600 font-medium">{ratingExito}</p>}
+                    {ratingExito && (
+                      <div className="mt-5 border border-gold-faint bg-gold-ghost px-5 py-3 flex items-start gap-3" role="status">
+                        <span
+                          className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-gold shadow-gold-glow-soft"
+                          aria-hidden="true"
+                        />
+                        <p className="font-serif font-light text-base text-white leading-relaxed">
+                          {ratingExito}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ) : ratingEstado.puedeCalificar ? (
-                  <div>
-                    <p className="text-sm text-gray-500 mb-3">¿Cómo fue tu experiencia con {therapist.userFullName?.split(' ')[0]}?</p>
+                  // ───────── Caso B: puede calificar ─────────
+                  <div className="space-y-6">
+                    <p className="font-serif font-light text-base text-white-dim leading-relaxed">
+                      ¿Cómo fue tu{' '}
+                      <em className="italic text-white">experiencia</em> con{' '}
+                      <span className="text-white">{therapist.userFullName?.split(' ')[0]}</span>?
+                    </p>
 
                     {/* Selector de estrellas interactivo */}
-                    <div className="flex items-center gap-1 mb-4"
-                         onMouseLeave={() => setRatingHover(0)}>
-                      {[1, 2, 3, 4, 5].map((star) => {
-                        const activo = star <= (ratingHover || ratingSeleccionado);
-                        return (
-                          <svg
-                            key={star}
-                            className={`w-8 h-8 cursor-pointer transition-all hover:scale-110 ${activo ? 'text-amber-400' : 'text-gray-200'}`}
-                            fill={activo ? 'currentColor' : 'none'}
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            viewBox="0 0 24 24"
-                            onMouseEnter={() => setRatingHover(star)}
-                            onClick={() => setRatingSeleccionado(star)}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                          </svg>
-                        );
-                      })}
+                    <div className="flex items-center flex-wrap gap-2">
+                      <div
+                        className="flex items-center gap-1"
+                        onMouseLeave={() => setRatingHover(0)}
+                      >
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const activo = star <= (ratingHover || ratingSeleccionado);
+                          return (
+                            <svg
+                              key={star}
+                              className={`w-8 h-8 cursor-pointer transition-transform duration-300 hover:scale-110 ${activo ? 'text-gold' : 'text-gold-faint'}`}
+                              fill={activo ? 'currentColor' : 'none'}
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              viewBox="0 0 24 24"
+                              onMouseEnter={() => setRatingHover(star)}
+                              onClick={() => setRatingSeleccionado(star)}
+                              aria-label={`Calificar con ${star} estrella${star !== 1 ? 's' : ''}`}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                            </svg>
+                          );
+                        })}
+                      </div>
                       {ratingSeleccionado > 0 && (
-                        <span className="ml-2 text-sm text-gray-500">
+                        <span className="ml-2 font-sans text-[10px] uppercase tracking-eyebrow-wide text-white-dim">
                           {['', 'Muy malo', 'Malo', 'Regular', 'Bueno', 'Excelente'][ratingSeleccionado]}
                         </span>
                       )}
                     </div>
 
-                    <textarea
-                      value={ratingComentario}
-                      onChange={(e) => setRatingComentario(e.target.value)}
-                      placeholder="Comentario opcional..."
-                      rows={2}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                    />
+                    {/* Textarea underline-only */}
+                    <div>
+                      <label
+                        htmlFor="ratingComentario"
+                        className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+                      >
+                        Comentario
+                      </label>
+                      <textarea
+                        id="ratingComentario"
+                        value={ratingComentario}
+                        onChange={(e) => setRatingComentario(e.target.value)}
+                        placeholder="Opcional"
+                        rows={2}
+                        className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-base text-white placeholder:text-white-faint placeholder:italic py-3 resize-none transition-colors duration-300"
+                      />
+                    </div>
 
-                    {ratingError && <p className="mt-2 text-sm text-red-600">{ratingError}</p>}
+                    {/* Error */}
+                    {ratingError && (
+                      <div
+                        className="px-5 py-3 flex items-start gap-3"
+                        style={{
+                          borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+                          borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+                          background: 'rgba(160, 74, 58, 0.08)',
+                        }}
+                        role="alert"
+                      >
+                        <span
+                          className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
+                          style={{ background: '#A04A3A' }}
+                          aria-hidden="true"
+                        />
+                        <p className="font-serif font-light text-base text-white leading-relaxed">
+                          {ratingError}
+                        </p>
+                      </div>
+                    )}
 
+                    {/* Submit */}
                     <button
                       onClick={handleEnviarRating}
                       disabled={!ratingSeleccionado || enviandoRating}
-                      className={`mt-3 w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all ${ratingSeleccionado && !enviandoRating ? 'bg-gradient-to-r from-mystic-500 to-primary-600 hover:from-mystic-600 hover:to-primary-700' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                      className="w-full inline-flex items-center justify-center gap-3 bg-gold-gradient py-3.5 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                     >
-                      {enviandoRating ? 'Enviando...' : 'Enviar calificación'}
+                      <span>{enviandoRating ? 'Enviando...' : 'Enviar calificación'}</span>
+                      {!enviandoRating && ratingSeleccionado > 0 && <span>→</span>}
                     </button>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400">
-                    Podrás calificar a este terapeuta una vez que tengas un turno completado con él/ella.
+                  // ───────── Caso C: no puede calificar ─────────
+                  <p className="font-serif italic font-light text-base text-white-dim leading-relaxed">
+                    Vas a poder calificar después de tu primer turno completado.
                   </p>
                 )}
               </div>
@@ -428,6 +531,38 @@ const TherapistDetail = () => {
               )}
 
               {!isOwnProfile && (<>
+              {/* Selector de especialidad (solo si el terapeuta tiene múltiples especialidades) */}
+              {therapist.specialties && therapist.specialties.length > 1 && (
+                <div className="mb-5">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de sesión</label>
+                  <select
+                    value={selectedSpecialty || ''}
+                    onChange={(e) => setSelectedSpecialty(e.target.value || null)}
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all"
+                  >
+                    <option value="">— Elegí un tipo de sesión —</option>
+                    {therapist.specialties.map((sp) => (
+                      <option key={sp.name} value={sp.name}>{sp.name}</option>
+                    ))}
+                  </select>
+                  {selectedSpecialty && (
+                    <p className="mt-1.5 text-xs text-gray-400">
+                      Anticipación mínima: {therapist.specialties.find(s => s.name === selectedSpecialty)?.minBookingLeadHours}h
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Bloquear calendario si hay múltiples especialidades y no se eligió ninguna */}
+              {therapist.specialties && therapist.specialties.length > 1 && !selectedSpecialty ? (
+                <div className="py-10 text-center text-sm text-gray-400">
+                  <svg className="w-10 h-10 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Elegí un tipo de sesión para ver la disponibilidad.
+                </div>
+              ) : (<>
+
               {/* Navegación de mes */}
               <div className="flex items-center justify-between mb-4">
                 <button
@@ -622,6 +757,7 @@ const TherapistDetail = () => {
                   </p>
                 )}
               </div>
+              </>)}
               </>)}
 
             </div>

@@ -383,7 +383,7 @@ const Home = () => {
                 {therapists.map((t) => (
                   <Link
                     key={t.id}
-                    to={`/terapeutas/${t.id}`}
+                    to={`/terapeutas/${t.slug}`}
                     className="group relative bg-navy-card border border-gold-faint px-8 py-10 transition-all duration-600 ease-expo-out hover:-translate-y-2 hover:border-gold-dim hover:shadow-card-hover overflow-hidden text-center"
                   >
                     {/* Línea superior animada */}

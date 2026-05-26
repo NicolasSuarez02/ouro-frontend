@@ -101,6 +101,11 @@ export const getTherapistById = async (id) => {
   return response.data;
 };
 
+export const getTherapistBySlug = async (slug) => {
+  const response = await api.get(`/therapists/slug/${slug}`);
+  return response.data;
+};
+
 export const getTherapistByUserId = async (userId) => {
   const response = await api.get(`/therapists/user/${userId}`);
   return response.data;
@@ -172,13 +177,17 @@ export const saveTherapistAvailability = async (therapistId, data) => {
 
 // ==================== APPOINTMENT ENDPOINTS ====================
 
-export const getAvailableDays = async (therapistId, year, month) => {
-  const response = await api.get(`/appointments/available-days?therapistId=${therapistId}&year=${year}&month=${month}`);
+export const getAvailableDays = async (therapistId, year, month, specialty = null) => {
+  const base = `/appointments/available-days?therapistId=${therapistId}&year=${year}&month=${month}`;
+  const url = specialty ? `${base}&specialty=${encodeURIComponent(specialty)}` : base;
+  const response = await api.get(url);
   return response.data;
 };
 
-export const getAvailableSlots = async (therapistId, date) => {
-  const response = await api.get(`/appointments/available-slots?therapistId=${therapistId}&date=${date}`);
+export const getAvailableSlots = async (therapistId, date, specialty = null) => {
+  const base = `/appointments/available-slots?therapistId=${therapistId}&date=${date}`;
+  const url = specialty ? `${base}&specialty=${encodeURIComponent(specialty)}` : base;
+  const response = await api.get(url);
   return response.data;
 };
 

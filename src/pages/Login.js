@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { loginUser } from '../services/api';
 import AuthLayout from '../components/AuthLayout';
+import useDismissibleError from '../hooks/useDismissibleError';
 
 // ---------------------------------------------------------------
-// Eye icon (mostrar/ocultar contraseña) — stroke 1.5px, color current.
+// Iconos inline — stroke 1.5px.
 // Pendiente reemplazar por lucide-react al sumar la dependencia.
 // ---------------------------------------------------------------
 const EyeIcon = ({ open }) => open ? (
@@ -15,6 +16,14 @@ const EyeIcon = ({ open }) => open ? (
 ) : (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
     <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+  </svg>
+);
+
+const AlertCircle = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
   </svg>
 );
 
@@ -36,22 +45,23 @@ const Login = () => {
   }, [navigate]);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [requiresVerification, setRequiresVerification] = useState(false);
+
+  // Error con reglas: mínimo 2s visible, fade-out 400ms, sin auto-hide por timer.
+  const { error, errorFadeOut, showError, dismissError, clearError } = useDismissibleError();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    dismissError();
     setRequiresVerification(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setRequiresVerification(false);
 
     if (!formData.email || !formData.password) {
-      setError('Completá todos los campos');
+      showError('Completá todos los campos');
       return;
     }
 
@@ -59,6 +69,7 @@ const Login = () => {
     try {
       const response = await loginUser(formData);
       if (response.success) {
+        clearError();
         localStorage.setItem('ouro_token', response.token);
         localStorage.setItem('ouro_user', JSON.stringify(response.user));
         navigate(from, { replace: true });
@@ -66,9 +77,10 @@ const Login = () => {
     } catch (err) {
       const data = err.response?.data;
       if (data?.requiresEmailVerification) {
+        clearError();
         setRequiresVerification(true);
       } else {
-        setError(data?.message || 'Error al iniciar sesión. Revisá tus datos.');
+        showError(data?.message || 'Error al iniciar sesión. Revisá tus datos.');
       }
     } finally {
       setLoading(false);
@@ -89,10 +101,10 @@ const Login = () => {
       subtitle="Bienvenida de vuelta."
     >
       <form onSubmit={handleSubmit} className="space-y-10">
-        {/* Banner: error genérico (terracota) */}
+        {/* Banner: error genérico (terracota) con fade-out controlado */}
         {error && (
           <div
-            className="px-5 py-4 flex items-start gap-3"
+            className={`px-5 py-4 flex items-start gap-3 transition-opacity duration-400 ease-expo-out ${errorFadeOut ? 'opacity-0' : 'opacity-100'}`}
             style={{
               borderTop: '1px solid rgba(160, 74, 58, 0.4)',
               borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
@@ -100,12 +112,8 @@ const Login = () => {
             }}
             role="alert"
           >
-            <span
-              className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
-              style={{ background: '#A04A3A' }}
-              aria-hidden="true"
-            />
-            <p className="font-serif font-light text-base text-white leading-relaxed">
+            <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+            <p className="font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
               {error}
             </p>
           </div>

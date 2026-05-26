@@ -2,10 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import AuthLayout from '../components/AuthLayout';
+import useDismissibleError from '../hooks/useDismissibleError';
 
 // ---------------------------------------------------------------
-// Eye icon — stroke 1.5px, color current.
+// Iconos inline — stroke 1.5px.
 // ---------------------------------------------------------------
+const AlertCircle = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
 const EyeIcon = ({ open }) => open ? (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -42,30 +51,31 @@ const Register = () => {
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Error con reglas: mínimo 2s visible, fade-out 400ms, sin auto-hide por timer.
+  const { error, errorFadeOut, showError, dismissError, clearError } = useDismissibleError();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    dismissError();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password) {
-      setError('Todos los campos obligatorios deben completarse');
+      showError('Todos los campos obligatorios deben completarse');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      showError('Las contraseñas no coinciden');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      showError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
@@ -87,13 +97,14 @@ const Register = () => {
           timeOfBirth: formData.timeOfBirth ? `${formData.timeOfBirth}:00` : null,
         }));
 
+        clearError();
         setSuccess(true);
         setTimeout(() => {
           navigate('/verification-sent', { state: { email: formData.email } });
         }, 2000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al registrarse. Intentá nuevamente.');
+      showError(err.response?.data?.message || 'Error al registrarse. Intentá nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -165,10 +176,10 @@ const Register = () => {
       backLabel="Volver al inicio"
     >
       <form onSubmit={handleSubmit} className="space-y-12">
-        {/* Banner error (terracota) */}
+        {/* Banner error (terracota) con fade-out controlado */}
         {error && (
           <div
-            className="px-5 py-4 flex items-start gap-3"
+            className={`px-5 py-4 flex items-start gap-3 transition-opacity duration-400 ease-expo-out ${errorFadeOut ? 'opacity-0' : 'opacity-100'}`}
             style={{
               borderTop: '1px solid rgba(160, 74, 58, 0.4)',
               borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
@@ -176,12 +187,8 @@ const Register = () => {
             }}
             role="alert"
           >
-            <span
-              className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
-              style={{ background: '#A04A3A' }}
-              aria-hidden="true"
-            />
-            <p className="font-serif font-light text-base text-white leading-relaxed">
+            <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+            <p className="font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
               {error}
             </p>
           </div>
