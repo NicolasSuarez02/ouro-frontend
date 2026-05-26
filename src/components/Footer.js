@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ReactComponent as Isotipo } from '../assets/logo/ouro-isotipo.svg';
 
 const Footer = () => {
@@ -41,6 +42,23 @@ const Footer = () => {
             contactoouro@gmail.com
             <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
           </a>
+
+          {/* Links legales */}
+          <div className="flex items-center gap-4">
+            <Link
+              to="/terminos"
+              className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
+            >
+              Términos
+            </Link>
+            <span className="w-1 h-1 rounded-full bg-gold-dim" aria-hidden="true" />
+            <Link
+              to="/privacidad"
+              className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
+            >
+              Privacidad
+            </Link>
+          </div>
         </div>
 
         {/* Divisor inferior con línea-gradiente */}

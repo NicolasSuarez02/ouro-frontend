@@ -428,10 +428,10 @@ const Home = () => {
               <div className="text-center">
                 <Link
                   to="/terapeutas"
-                  className="inline-flex items-center gap-3 bg-gold-gradient px-9 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
+                  className="group inline-flex items-center gap-3 bg-gold-gradient px-9 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
                 >
                   <span>Ver todos los terapeutas</span>
-                  <span>→</span>
+                  <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
                 </Link>
               </div>
             </>
@@ -484,9 +484,10 @@ const Home = () => {
 
           {/* 5 pasos */}
           <div className="relative mb-24 lg:mb-32">
-            {/* Línea conectora (desktop) */}
+            {/* Línea conectora (desktop) — centrada verticalmente sobre los círculos
+                de 80px. Eyebrow "Paso 01" (~31px) + mitad del círculo (40px) = ~72px */}
             <div
-              className="hidden lg:block absolute top-10 left-[10%] right-[10%] h-px"
+              className="hidden lg:block absolute top-[72px] left-[10%] right-[10%] h-px"
               style={{
                 background:
                   'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), rgba(198, 167, 94, 0.4), transparent)',
@@ -636,7 +637,7 @@ const Home = () => {
           {/* Botón outline dorado */}
           <Link
             to="/login"
-            className="inline-flex items-center gap-3 px-10 py-4 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+            className="group inline-flex items-center gap-3 px-10 py-4 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
           >
             <span>Iniciar</span>
             <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>

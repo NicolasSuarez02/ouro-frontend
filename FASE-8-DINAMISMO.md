@@ -6,11 +6,10 @@ Documento vivo. Registra todo lo que requiera animación, micro-interacción o d
 
 ## Observaciones registradas por Roque (post Fase 2)
 
-### Home / Cómo empezar — Línea conectora desalineada y estática
+### Home / Cómo empezar — Línea conectora
 
-- La línea conectora horizontal dorada entre los círculos de los 5 pasos no está centrada verticalmente respecto a los círculos: pasa por encima en vez de cruzarlos por el medio.
-- Además es estática. Debería tener animación de "dibujado" de izquierda a derecha al entrar en viewport: `scaleX 0 → 1` con `cubic-bezier(0.16, 1, 0.3, 1)`, duración 1.5s.
-- Implementación: ajustar `top: 40px` (centro vertical exacto del círculo 80px) y agregar Intersection Observer + clase `.visible` con `transform-origin: left`.
+- **Posicionamiento: RESUELTO (mayo 2026).** Se cambió `top-10` por `top-[72px]` para centrar verticalmente respecto a los círculos. Cálculo documentado en el código: eyebrow "Paso 01" (~31px) + mitad del círculo de 80px (40px) = ~72px hasta el centro vertical. Si en testing visual aparece 1-2px de offset por metrics de Inter, ajustar a `70px` o `74px`.
+- **Pendiente animación de dibujado** de izquierda a derecha al entrar en viewport: `scaleX 0 → 1` con `cubic-bezier(0.16, 1, 0.3, 1)`, duración 1.5s, `transform-origin: left`. Requiere Intersection Observer (ver TODO global más abajo).
 
 ### Home / Fundadoras — Sin gesto interno en hover
 
@@ -47,12 +46,13 @@ Documento vivo. Registra todo lo que requiera animación, micro-interacción o d
 
 - Igual situación: el modal aparece de golpe. Agregar fade del backdrop + scale-up sutil del card (`scale: 0.96 → 1` + `opacity: 0 → 1` durante 0.4s).
 
-### Botones con flecha — Algunas flechas no se animan por falta de `group` envolvente
+### Botones con flecha — RESUELTO (mayo 2026)
 
-- Lugares detectados donde puse `<span className="... group-hover:translate-x-2">→</span>` pero el contenedor no tiene la clase `group`, así que la flecha queda estática:
-  - `Home.js` — CTA "Ver todos los terapeutas" (sección Terapeutas, bloque 2.C).
-  - `Home.js` — Botón "Iniciar" del CTA grande (bloque 2.E).
-- Fix simple: agregar `group` al className del Link/button contenedor. Costo casi cero, lo dejo en este TODO para hacerlo junto con el pase general de Fase 8.
+Revisión exhaustiva tras cerrar 7-LEGALES:
+
+- **Falsos positivos:** las flechas de cards founders (Lucila/Elina/Celina) y de las 4 cards de garantías de "Cómo empezar" **ya funcionaban** — sus `<article>` envolventes tienen `group`. Sacar del listado.
+- **Bug real único:** botón "Iniciar" del CTA grande de Home (sección "Volver es integrar"). **Fixed:** se agregó `group` al className del Link.
+- **Bonus:** CTA "Ver todos los terapeutas" (sección Terapeutas del Home) que originalmente tenía flecha estática también se animó (group + transition). No era bug, era ausencia.
 
 ### Hero — Reduced motion no afecta los anillos
 
@@ -113,7 +113,38 @@ Documento vivo. Registra todo lo que requiera animación, micro-interacción o d
 
 ---
 
+## Observaciones agregadas durante Fases 4-7
+
+### Modales sin animación de entrada (3 lugares ahora)
+
+Además del modal de logout del Navbar y el modal de Recursos, sumamos:
+- **Modal de eliminar de Recursos.js** — aparece abruptamente al click. Agregar fade del backdrop + scale-up del card.
+- **Confirmación inline de cancelación en ClientAppointments AppointmentCard** — el card cambia de contenido sin transición. Agregar fade entre estados o slide vertical sutil.
+
+### AppointmentCard sin línea superior animada en hover
+
+Las cards del sistema OURO típicamente tienen la línea superior dorada que se dibuja en hover (scaleX 0→1, 800ms). En `ClientAppointments.AppointmentCard` no la agregué — quedó solo con border. Considerar agregar para coherencia transversal con el resto del sistema. Decisión: depende de si las cards de turnos deben sentirse "interactivas como un Link" o "informativas estáticas". Probablemente la línea queda bien.
+
+### Banners booking en TherapistDetail sin transición de entrada
+
+Los banners `bookingSuccess` y `bookingError` aparecen/desaparecen abruptamente. Cuando se implemente el patrón global de Intersection Observer + transiciones, considerar aplicar fade-in también a estos banners cuando aparecen post-reserva.
+
+### Patch de iconos inline migración
+
+Acumulado de iconos `AlertCircle`, `EyeIcon`, `VideoIcon`, `DocumentIcon`, `TrashIcon`, `PlusIcon`, `CloseIcon`, `SearchIcon`, `ChevronDown`, `MenuIcon` definidos inline en distintos archivos. Cuando se sume `lucide-react` como dependencia, hacer pasada de reemplazo masivo. Identificable buscando `// Pendiente reemplazar por lucide-react` en comentarios.
+
+### PaymentStatusLayout — circle decorativo estático
+
+El círculo decorativo con punto interno en `PaymentStatusLayout` es estático. Considerar para variant="pending" un punto que pulsa lentamente (4-5s, similar al side-rail) para comunicar el estado de "en proceso" sin caer en spinners genéricos.
+
+### Páginas estáticas (legales) sin entrada animada
+
+`TermsPage` y `PrivacyPage` cargan sin transición. Cuando se haga el pase global del Intersection Observer, considerar que las `<LegalSection>` entren con fade-up secuencial.
+
+---
+
 ## Versionado
 
 - **v1 — Mayo 2026:** Documento inicial con observaciones de Roque tras revisión de Home + observaciones detectadas durante Fases 0-2.
 - **v1.1 — Mayo 2026:** Agregadas observaciones de Fase 3: iconos inline pendientes de migración a lucide-react, hook useDismissibleError, allowlist del interceptor 401.
+- **v1.2 — Mayo 2026:** Resueltos dos ítems del TODO original (flechas con `group-hover` y posicionamiento de línea conectora). Agregadas observaciones de Fases 4-7: modales sin entrada, AppointmentCard sin línea animada, banners booking sin transición, acumulado de iconos inline, PaymentStatusLayout decorativo estático, páginas legales sin entrada animada.
