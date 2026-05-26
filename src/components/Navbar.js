@@ -1,11 +1,72 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ReactComponent as Isotipo } from '../assets/logo/ouro-isotipo.svg';
 import { getAllTherapists } from '../services/api';
 
+// ---------------------------------------------------------------
+// Iconos inline (stroke 1.5px, color current).
+// Pendiente: reemplazar por lucide-react cuando se sume la dependencia.
+// ---------------------------------------------------------------
+const ChevronDown = ({ className = '' }) => (
+  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+const SearchIcon = ({ className = '' }) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="7" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+const MenuIcon = ({ className = '' }) => (
+  <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="17" x2="20" y2="17" />
+  </svg>
+);
+
+const CloseIcon = ({ className = '' }) => (
+  <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="6" y1="6" x2="18" y2="18" />
+    <line x1="6" y1="18" x2="18" y2="6" />
+  </svg>
+);
+
+// ---------------------------------------------------------------
+// NavLink: link con underline dorado animado en hover.
+// ---------------------------------------------------------------
+const NavLink = ({ children, onClick }) => (
+  <button
+    onClick={onClick}
+    className="group relative font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-2"
+  >
+    {children}
+    <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
+  </button>
+);
+
+const NavLinkAsLink = ({ to, onClick, children }) => (
+  <Link
+    to={to}
+    onClick={onClick}
+    className="group relative font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-2"
+  >
+    {children}
+    <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
+  </Link>
+);
+
+// ---------------------------------------------------------------
+// Navbar
+// ---------------------------------------------------------------
 const Navbar = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   // Dropdown terapeutas
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -23,6 +84,14 @@ const Navbar = () => {
   }
   const isAdmin = currentUser?.role === 'ADMIN';
   const firstName = currentUser?.fullName?.split(' ')[0] || null;
+
+  // Efecto scroll → cambia fondo de la nav
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -85,272 +154,295 @@ const Navbar = () => {
 
   return (
     <>
-    {confirmLogout && (
-      <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-6 max-w-xs w-full">
-          <h3 className="font-semibold text-gray-900 text-center mb-1">¿Cerrar sesión?</h3>
-          <p className="text-sm text-gray-400 text-center mb-5">Tu sesión actual se cerrará.</p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setConfirmLogout(false)}
-              className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
-            >
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
-    <nav className="bg-white shadow-md fixed w-full top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-mystic-500 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-xl">O</span>
-            </div>
-            <span className="text-2xl font-bold text-gray-800">URO</span>
-          </Link>
-
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
-            <button
-              onClick={() => scrollToSection('inicio')}
-              className="text-gray-700 hover:text-mystic-600 transition-colors font-medium"
-            >
-              Inicio
-            </button>
-
-            <button
-              onClick={() => scrollToSection('quienes-somos')}
-              className="text-gray-700 hover:text-mystic-600 transition-colors font-medium"
-            >
-              Quiénes somos
-            </button>
-
-            {/* Terapeutas con dropdown */}
-            <div className="relative" ref={dropdownRef}>
+      {/* =======================================================
+          MODAL — Confirmación de logout
+          ======================================================= */}
+      {confirmLogout && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
+            <h3 className="font-serif text-2xl font-light text-white text-center mb-2">
+              ¿Cerrar sesión?
+            </h3>
+            <p className="font-serif text-base text-white-dim text-center mb-8 leading-relaxed">
+              Tu sesión actual se cerrará.
+            </p>
+            <div className="flex gap-3">
               <button
-                onClick={() => setDropdownOpen((v) => !v)}
-                className="flex items-center gap-1 text-gray-700 hover:text-mystic-600 transition-colors font-medium"
+                onClick={() => setConfirmLogout(false)}
+                className="flex-1 py-3 border border-gold-faint hover:border-gold-dim font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-white transition-all duration-300"
               >
-                Terapeutas
-                <svg
-                  className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
+                Cancelar
               </button>
-
-              {dropdownOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
-                  {/* Buscador */}
-                  <div className="p-3 border-b border-gray-100">
-                    <div className="relative">
-                      <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                      <input
-                        type="text"
-                        placeholder="Buscar terapeuta o especialidad..."
-                        value={therapistSearch}
-                        onChange={(e) => setTherapistSearch(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300"
-                        autoFocus
-                      />
-                    </div>
-                  </div>
-
-                  {/* Lista */}
-                  <div className="max-h-64 overflow-y-auto">
-                    {therapistLoading ? (
-                      <div className="flex justify-center py-6">
-                        <div className="w-5 h-5 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-                      </div>
-                    ) : filteredTherapists.length === 0 ? (
-                      <p className="text-sm text-gray-400 text-center py-6">
-                        {therapistSearch ? 'Sin resultados' : 'No hay terapeutas disponibles'}
-                      </p>
-                    ) : (
-                      filteredTherapists.map((t) => (
-                        <button
-                          key={t.id}
-                          onClick={() => handleTherapistClick(t.id)}
-                          className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors flex items-center gap-3 border-b border-gray-50 last:border-0"
-                        >
-                          {t.photoUrl ? (
-                            <img src={t.photoUrl} alt={t.userFullName} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-mystic-400 to-primary-500 flex items-center justify-center flex-shrink-0">
-                              <span className="text-white text-xs font-bold">{t.userFullName?.charAt(0)}</span>
-                            </div>
-                          )}
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-gray-800 truncate">{t.userFullName}</p>
-                            {t.specialty && (
-                              <p className="text-xs text-gray-500 truncate">{t.specialty}</p>
-                            )}
-                          </div>
-                        </button>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Ver todos */}
-                  <div className="p-3 border-t border-gray-100">
-                    <Link
-                      to="/terapeutas"
-                      onClick={() => setDropdownOpen(false)}
-                      className="block w-full text-center text-sm font-medium text-primary-600 hover:text-primary-700 py-1 transition-colors"
-                    >
-                      Ver todos los terapeutas →
-                    </Link>
-                  </div>
-                </div>
-              )}
+              <button
+                onClick={handleLogout}
+                className="flex-1 py-3 bg-gold-gradient hover:-translate-y-0.5 hover:shadow-gold-glow font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-300 ease-expo-out"
+              >
+                Cerrar sesión
+              </button>
             </div>
-
-            {currentUser && (
-              <>
-                <Link
-                  to="/biblioteca"
-                  className="text-gray-700 hover:text-mystic-600 transition-colors font-medium"
-                >
-                  Biblioteca
-                </Link>
-                <Link
-                  to="/formaciones"
-                  className="text-gray-700 hover:text-mystic-600 transition-colors font-medium"
-                >
-                  Formaciones
-                </Link>
-              </>
-            )}
-
-            <button
-              onClick={() => scrollToSection('como-empezar')}
-              className="text-gray-700 hover:text-mystic-600 transition-colors font-medium"
-            >
-              Cómo empezar
-            </button>
-
-            <button
-              onClick={() => scrollToSection('contacto')}
-              className="text-gray-700 hover:text-mystic-600 transition-colors font-medium"
-            >
-              Contacto
-            </button>
-
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="text-gray-700 hover:text-mystic-600 transition-colors font-medium"
-              >
-                Panel Admin
-              </Link>
-            )}
-
-            {currentUser ? (
-              <div className="flex items-center space-x-3">
-                <Link
-                  to="/dashboard"
-                  className="text-gray-700 hover:text-mystic-600 transition-colors font-medium"
-                >
-                  {firstName}
-                </Link>
-                <button
-                  onClick={() => setConfirmLogout(true)}
-                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full transition-all font-medium text-sm"
-                >
-                  Salir
-                </button>
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className="bg-gradient-to-r from-mystic-500 to-primary-600 text-white px-6 py-2 rounded-full hover:from-mystic-600 hover:to-primary-700 transition-all transform hover:scale-105 font-medium shadow-md"
-              >
-                Iniciar sesión
-              </Link>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-primary-500 focus:outline-none"
-            >
-              <svg className="h-6 w-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                {isMenuOpen ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white border-t">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            <button onClick={() => scrollToSection('inicio')} className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-mystic-50 hover:text-mystic-600 rounded-md font-medium">
-              Inicio
-            </button>
-            <button onClick={() => scrollToSection('quienes-somos')} className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-mystic-50 hover:text-mystic-600 rounded-md font-medium">
-              Quiénes somos
-            </button>
-            <Link to="/terapeutas" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-mystic-50 hover:text-mystic-600 rounded-md font-medium">
-              Terapeutas
-            </Link>
-            {currentUser && (
-              <>
-                <Link to="/biblioteca" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-mystic-50 hover:text-mystic-600 rounded-md font-medium">
-                  Biblioteca de Alejandría
-                </Link>
-                <Link to="/formaciones" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-mystic-50 hover:text-mystic-600 rounded-md font-medium">
-                  Formaciones
-                </Link>
-              </>
-            )}
-            <button onClick={() => scrollToSection('como-empezar')} className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-mystic-50 hover:text-mystic-600 rounded-md font-medium">
-              Cómo empezar
-            </button>
-            <button onClick={() => scrollToSection('contacto')} className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-mystic-50 hover:text-mystic-600 rounded-md font-medium">
-              Contacto
-            </button>
-            {isAdmin && (
-              <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-mystic-50 hover:text-mystic-600 rounded-md font-medium">
-                Panel Admin
-              </Link>
-            )}
-            {currentUser ? (
-              <>
-                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-3 py-2 text-gray-700 hover:bg-mystic-50 hover:text-mystic-600 rounded-md font-medium">
-                  {firstName}
-                </Link>
-                <button onClick={() => setConfirmLogout(true)} className="block w-full text-left px-3 py-2 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-md font-medium">
-                  Salir
-                </button>
-              </>
-            ) : (
-              <Link to="/login" onClick={() => setIsMenuOpen(false)} className="block w-full text-center px-3 py-2 bg-gradient-to-r from-mystic-500 to-primary-600 text-white rounded-md hover:from-mystic-600 hover:to-primary-700 font-medium">
-                Iniciar sesión
-              </Link>
-            )}
           </div>
         </div>
       )}
-    </nav>
+
+      {/* =======================================================
+          NAV principal
+          ======================================================= */}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-400 ease-expo-out ${
+          scrolled
+            ? 'bg-navy/[0.88] backdrop-blur-xl border-b border-gold-faint'
+            : 'bg-transparent border-b border-transparent'
+        }`}
+      >
+        <div className="max-w-container mx-auto px-6 lg:px-10">
+          <div className="flex justify-between items-center h-20">
+
+            {/* ---------- Logo ---------- */}
+            <Link
+              to="/"
+              className="group flex items-center gap-3 text-gold"
+              aria-label="OURO — Inicio"
+            >
+              <Isotipo
+                className="h-11 w-11 md:h-11 md:w-11 text-gold transition-transform duration-600 ease-expo-out group-hover:rotate-[15deg]"
+                aria-hidden="true"
+              />
+              <span
+                className="hidden sm:inline font-serif text-xl font-normal tracking-brand text-white"
+                style={{ paddingRight: '0.45em' }}
+              >
+                OURO
+              </span>
+            </Link>
+
+            {/* ---------- Menú desktop ---------- */}
+            <div className="hidden lg:flex items-center gap-8">
+              <NavLink onClick={() => scrollToSection('inicio')}>Inicio</NavLink>
+              <NavLink onClick={() => scrollToSection('quienes-somos')}>Quiénes somos</NavLink>
+
+              {/* Dropdown terapeutas */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen((v) => !v)}
+                  className="group relative flex items-center gap-1.5 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-2"
+                >
+                  Terapeutas
+                  <ChevronDown
+                    className={`transition-transform duration-400 ease-expo-out ${
+                      dropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                  <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 w-80 bg-navy/[0.96] backdrop-blur-xl border border-gold-faint shadow-card-hover overflow-hidden">
+                    {/* Buscador (caja completa — excepción del design system) */}
+                    <div className="p-4 border-b border-gold-faint">
+                      <div className="relative">
+                        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gold-dim" />
+                        <input
+                          type="text"
+                          placeholder="Buscar terapeuta o especialidad..."
+                          value={therapistSearch}
+                          onChange={(e) => setTherapistSearch(e.target.value)}
+                          className="w-full pl-10 pr-3 py-2.5 bg-navy-soft/40 border border-gold-faint focus:border-gold-dim font-serif text-sm text-white placeholder:text-white-faint placeholder:italic outline-none transition-colors duration-300"
+                          autoFocus
+                        />
+                      </div>
+                    </div>
+
+                    {/* Lista */}
+                    <div className="max-h-72 overflow-y-auto py-2">
+                      {therapistLoading ? (
+                        <div className="flex justify-center py-8">
+                          <div className="w-5 h-5 border-2 border-gold-faint border-t-gold rounded-full animate-spin" />
+                        </div>
+                      ) : filteredTherapists.length === 0 ? (
+                        <p className="font-serif text-sm text-white-faint italic text-center py-8">
+                          {therapistSearch ? 'Sin resultados' : 'No hay terapeutas disponibles'}
+                        </p>
+                      ) : (
+                        filteredTherapists.map((t) => (
+                          <button
+                            key={t.id}
+                            onClick={() => handleTherapistClick(t.id)}
+                            className="w-full text-left px-5 py-3 hover:bg-gold-ghost transition-colors duration-300 flex items-center gap-3"
+                          >
+                            {t.photoUrl ? (
+                              <img
+                                src={t.photoUrl}
+                                alt={t.userFullName}
+                                className="w-9 h-9 rounded-full object-cover flex-shrink-0 border border-gold-faint"
+                              />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-gold-gradient flex items-center justify-center flex-shrink-0">
+                                <span className="font-serif text-base font-normal text-navy">
+                                  {t.userFullName?.charAt(0)}
+                                </span>
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-serif text-base text-white truncate leading-tight">
+                                {t.userFullName}
+                              </p>
+                              {t.specialty && (
+                                <p className="font-sans text-[10px] uppercase tracking-dropdown text-white-faint truncate mt-1">
+                                  {t.specialty}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+
+                    {/* Ver todos */}
+                    <div className="border-t border-gold-faint px-5 py-3">
+                      <Link
+                        to="/terapeutas"
+                        onClick={() => setDropdownOpen(false)}
+                        className="group flex items-center justify-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
+                      >
+                        <span>Ver todos los terapeutas</span>
+                        <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {currentUser && (
+                <>
+                  <NavLinkAsLink to="/biblioteca">Biblioteca</NavLinkAsLink>
+                  <NavLinkAsLink to="/formaciones">Formaciones</NavLinkAsLink>
+                </>
+              )}
+
+              <NavLink onClick={() => scrollToSection('como-empezar')}>Cómo empezar</NavLink>
+              <NavLink onClick={() => scrollToSection('contacto')}>Contacto</NavLink>
+
+              {isAdmin && (
+                <NavLinkAsLink to="/admin">Panel admin</NavLinkAsLink>
+              )}
+
+              {/* CTA outline */}
+              {currentUser ? (
+                <div className="flex items-center gap-4 pl-4 border-l border-gold-faint">
+                  <Link
+                    to="/dashboard"
+                    className="font-serif text-base text-white-dim hover:text-gold transition-colors duration-300"
+                  >
+                    {firstName}
+                  </Link>
+                  <button
+                    onClick={() => setConfirmLogout(true)}
+                    className="px-5 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-300 ease-expo-out"
+                  >
+                    Salir
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="px-5 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-300 ease-expo-out"
+                >
+                  Iniciar sesión
+                </Link>
+              )}
+            </div>
+
+            {/* ---------- Botón mobile menu ---------- */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="lg:hidden text-gold hover:text-gold-bright transition-colors duration-300"
+              aria-label="Abrir menú"
+            >
+              {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* =======================================================
+          DRAWER mobile
+          ======================================================= */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-navy-deep/80 backdrop-blur-sm"
+            onClick={() => setIsMenuOpen(false)}
+          />
+
+          {/* Drawer */}
+          <aside className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-navy-deep border-l border-gold-faint shadow-card-hover overflow-y-auto">
+            <div className="px-8 pt-24 pb-10 space-y-1">
+              <MobileItem onClick={() => scrollToSection('inicio')}>Inicio</MobileItem>
+              <MobileItem onClick={() => scrollToSection('quienes-somos')}>Quiénes somos</MobileItem>
+              <MobileItem onClick={() => { setIsMenuOpen(false); navigate('/terapeutas'); }}>Terapeutas</MobileItem>
+
+              {currentUser && (
+                <>
+                  <MobileItem onClick={() => { setIsMenuOpen(false); navigate('/biblioteca'); }}>Biblioteca</MobileItem>
+                  <MobileItem onClick={() => { setIsMenuOpen(false); navigate('/formaciones'); }}>Formaciones</MobileItem>
+                </>
+              )}
+
+              <MobileItem onClick={() => scrollToSection('como-empezar')}>Cómo empezar</MobileItem>
+              <MobileItem onClick={() => scrollToSection('contacto')}>Contacto</MobileItem>
+
+              {isAdmin && (
+                <MobileItem onClick={() => { setIsMenuOpen(false); navigate('/admin'); }}>Panel admin</MobileItem>
+              )}
+
+              {/* Divisor dorado tipo línea-gradiente */}
+              <div className="my-6 h-px bg-gradient-to-r from-transparent via-gold-dim to-transparent" />
+
+              {currentUser ? (
+                <>
+                  <MobileItem onClick={() => { setIsMenuOpen(false); navigate('/dashboard'); }}>
+                    {firstName || 'Mi cuenta'}
+                  </MobileItem>
+                  <button
+                    onClick={() => { setIsMenuOpen(false); setConfirmLogout(true); }}
+                    className="w-full mt-4 py-3 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-300"
+                  >
+                    Cerrar sesión
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="block w-full mt-4 py-3 bg-gold-gradient text-center font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-300"
+                >
+                  Iniciar sesión
+                </Link>
+              )}
+            </div>
+
+            {/* Marca vertical en el lateral inferior del drawer */}
+            <div className="absolute bottom-6 left-8 font-serif text-[10px] tracking-brand uppercase text-white-faint">
+              OURO
+            </div>
+          </aside>
+        </div>
+      )}
     </>
   );
 };
+
+// ---------------------------------------------------------------
+// MobileItem — item del drawer mobile
+// ---------------------------------------------------------------
+const MobileItem = ({ onClick, children }) => (
+  <button
+    onClick={onClick}
+    className="block w-full text-left py-3 font-serif text-xl font-light text-white-dim hover:text-gold active:text-gold transition-colors duration-300"
+  >
+    {children}
+  </button>
+);
 
 export default Navbar;

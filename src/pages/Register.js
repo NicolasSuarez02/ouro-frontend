@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/api';
+import AuthLayout from '../components/AuthLayout';
 
+// ---------------------------------------------------------------
+// Eye icon — stroke 1.5px, color current.
+// ---------------------------------------------------------------
 const EyeIcon = ({ open }) => open ? (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
   </svg>
 ) : (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
   </svg>
 );
 
+// ---------------------------------------------------------------
+// Register
+// ---------------------------------------------------------------
 const Register = () => {
   const navigate = useNavigate();
 
@@ -86,228 +93,370 @@ const Register = () => {
         }, 2000);
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al registrarse. Intenta nuevamente.');
+      setError(err.response?.data?.message || 'Error al registrarse. Intentá nuevamente.');
     } finally {
       setLoading(false);
     }
   };
 
+  // ---------------------------------------------------------------
+  // Estado: éxito
+  // ---------------------------------------------------------------
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
+      <AuthLayout
+        eyebrow="Registrada"
+        title={
+          <>
+            Cuenta{' '}
+            <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+              creada
+            </em>
+          </>
+        }
+        subtitle="Te enviamos un email de verificación."
+        showBackLink={false}
+      >
+        <div className="space-y-8 text-center">
+          {/* Punto dorado con glow centrado como marca de éxito */}
+          <div className="flex justify-center">
+            <span
+              className="block w-3 h-3 rounded-full bg-gold shadow-gold-glow-soft"
+              aria-hidden="true"
+            />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">¡Registro exitoso!</h2>
-          <p className="text-gray-600 mb-4">
-            Te enviamos un email de verificación a <strong>{formData.email}</strong>
+
+          {/* Email destacado */}
+          <div>
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-3">
+              Enviado a
+            </p>
+            <p className="font-serif font-light text-xl text-white break-all">
+              {formData.email}
+            </p>
+          </div>
+
+          {/* Redirect */}
+          <p className="font-serif italic font-light text-base text-white-dim">
+            Redirigiendo...
           </p>
-          <p className="text-sm text-gray-500">Redirigiendo...</p>
         </div>
-      </div>
+      </AuthLayout>
     );
   }
 
+  // ---------------------------------------------------------------
+  // Estado: formulario
+  // ---------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-mystic-500 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">O</span>
-            </div>
-            <span className="text-3xl font-bold text-gray-800">URO</span>
-          </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Crea tu cuenta</h2>
-          <p className="mt-2 text-gray-600">Comenzá tu camino hacia el autoconocimiento</p>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            {/* Nombre y Apellido */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  placeholder="Juan"
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Apellido <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  placeholder="Pérez"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                placeholder="tu@email.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Teléfono <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                placeholder="+54 11 1234-5678"
-              />
-            </div>
-
-            {/* Fecha y hora de nacimiento */}
-            <div className="p-4 bg-mystic-50 border border-mystic-100 rounded-xl">
-              <p className="text-xs text-mystic-700 mb-3">
-                En Ouro trabajamos con terapias holísticas que incluyen astrología. Tu fecha y hora de nacimiento permiten a los terapeutas personalizar la sesión.
-              </p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-                    Fecha de nacimiento
-                  </label>
-                  <input
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="timeOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-                    Hora de nacimiento
-                  </label>
-                  <input
-                    id="timeOfBirth"
-                    name="timeOfBirth"
-                    type="time"
-                    value={formData.timeOfBirth}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Contraseña <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  placeholder="Mínimo 6 caracteres"
-                />
-                <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
-                  <EyeIcon open={showPassword} />
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirmar contraseña <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirm ? 'text' : 'password'}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  placeholder="Repetí tu contraseña"
-                />
-                <button type="button" onClick={() => setShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" tabIndex={-1}>
-                  <EyeIcon open={showConfirm} />
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-mystic-500 to-primary-600 text-white py-3 rounded-lg hover:from-mystic-600 hover:to-primary-700 transition-all font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-            >
-              {loading ? 'Registrando...' : 'Crear cuenta'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              ¿Ya tenés cuenta?{' '}
-              <Link to="/login" className="text-mystic-600 hover:text-mystic-700 font-semibold">
-                Iniciar sesión
-              </Link>
+    <AuthLayout
+      width="lg"
+      eyebrow="Registro"
+      title={
+        <>
+          Crear{' '}
+          <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+            cuenta
+          </em>
+        </>
+      }
+      subtitle="Comenzá tu camino hacia el autoconocimiento."
+      backTo="/"
+      backLabel="Volver al inicio"
+    >
+      <form onSubmit={handleSubmit} className="space-y-12">
+        {/* Banner error (terracota) */}
+        {error && (
+          <div
+            className="px-5 py-4 flex items-start gap-3"
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <span
+              className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
+              style={{ background: '#A04A3A' }}
+              aria-hidden="true"
+            />
+            <p className="font-serif font-light text-base text-white leading-relaxed">
+              {error}
             </p>
           </div>
-        </div>
+        )}
 
-        <p className="mt-8 text-center text-sm text-gray-500">
-          Al registrarte, aceptás nuestros{' '}
-          <Link to="/terminos" className="text-primary-500 hover:text-primary-600">
-            Términos de Servicio
-          </Link>{' '}
-          y{' '}
-          <Link to="/privacidad" className="text-primary-500 hover:text-primary-600">
-            Política de Privacidad
+        {/* ───────── Sección 1: Datos personales ───────── */}
+        <section className="space-y-8">
+          <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+            Datos personales
+          </p>
+
+          {/* Nombre + Apellido */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div>
+              <label
+                htmlFor="firstName"
+                className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+              >
+                Nombre
+              </label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="text"
+                required
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="Tu nombre"
+                className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="lastName"
+                className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+              >
+                Apellido
+              </label>
+              <input
+                id="lastName"
+                name="lastName"
+                type="text"
+                required
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="Tu apellido"
+                className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+              />
+            </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="tu@email.com"
+              className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+            />
+          </div>
+
+          {/* Teléfono */}
+          <div>
+            <label
+              htmlFor="phone"
+              className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+            >
+              Teléfono
+            </label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              required
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="+54 11 1234-5678"
+              className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+            />
+          </div>
+        </section>
+
+        {/* Divisor con línea-gradiente */}
+        <div
+          className="h-px"
+          style={{
+            background:
+              'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* ───────── Sección 2: Datos de nacimiento ───────── */}
+        <section className="space-y-6">
+          <div>
+            <div className="flex items-baseline gap-3 mb-2">
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+                Datos de nacimiento
+              </p>
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                Opcional
+              </p>
+            </div>
+            <p className="font-serif font-light text-sm text-white-dim leading-relaxed">
+              Trabajamos con terapias holísticas que incluyen astrología. Tu fecha y hora de nacimiento permiten personalizar cada sesión.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div>
+              <label
+                htmlFor="dateOfBirth"
+                className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+              >
+                Fecha
+              </label>
+              <input
+                id="dateOfBirth"
+                name="dateOfBirth"
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                style={{ colorScheme: 'dark' }}
+                className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white py-3 transition-colors duration-300"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="timeOfBirth"
+                className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+              >
+                Hora
+              </label>
+              <input
+                id="timeOfBirth"
+                name="timeOfBirth"
+                type="time"
+                value={formData.timeOfBirth}
+                onChange={handleChange}
+                style={{ colorScheme: 'dark' }}
+                className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white py-3 transition-colors duration-300"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Divisor */}
+        <div
+          className="h-px"
+          style={{
+            background:
+              'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* ───────── Sección 3: Contraseña ───────── */}
+        <section className="space-y-8">
+          <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+            Contraseña
+          </p>
+
+          {/* Password */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+            >
+              Contraseña
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Mínimo 6 caracteres"
+                className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 pr-10 transition-colors duration-300"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                className="absolute right-0 bottom-3 text-gold-dim hover:text-gold transition-colors duration-300"
+              >
+                <EyeIcon open={showPassword} />
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+            >
+              Confirmar contraseña
+            </label>
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirm ? 'text' : 'password'}
+                required
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Repetí tu contraseña"
+                className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 pr-10 transition-colors duration-300"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((v) => !v)}
+                tabIndex={-1}
+                aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                className="absolute right-0 bottom-3 text-gold-dim hover:text-gold transition-colors duration-300"
+              >
+                <EyeIcon open={showConfirm} />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Submit */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full inline-flex items-center justify-center gap-3 bg-gold-gradient py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          >
+            <span>{loading ? 'Registrando...' : 'Crear cuenta'}</span>
+            {!loading && <span>→</span>}
+          </button>
+        </div>
+      </form>
+
+      {/* Footer del card: link a login */}
+      <div className="mt-10 pt-8 border-t border-gold-faint text-center">
+        <p className="font-serif font-light text-base text-white-dim">
+          ¿Ya tenés cuenta?{' '}
+          <Link
+            to="/login"
+            className="font-sans text-[11px] uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300 ml-1"
+          >
+            Iniciar sesión →
           </Link>
         </p>
       </div>
-    </div>
+
+      {/* Texto legal (fuera del card pero adentro del AuthLayout) */}
+      <p className="mt-8 text-center font-serif font-light text-sm text-white-faint leading-relaxed">
+        Al registrarte aceptás nuestros{' '}
+        <Link to="/terminos" className="text-gold-dim hover:text-gold transition-colors duration-300 underline underline-offset-2">
+          Términos
+        </Link>{' '}
+        y nuestra{' '}
+        <Link to="/privacidad" className="text-gold-dim hover:text-gold transition-colors duration-300 underline underline-offset-2">
+          Política de privacidad
+        </Link>
+        .
+      </p>
+    </AuthLayout>
   );
 };
 

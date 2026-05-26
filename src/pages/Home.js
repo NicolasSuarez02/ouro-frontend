@@ -110,44 +110,96 @@ const Home = () => {
     <div className="min-h-screen">
       <Navbar />
 
-      {/* ── 1. INICIO ── */}
-      <section id="inicio" className="pt-24 pb-16 bg-gradient-to-br from-primary-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              {/* Título dual-color — contenido a ajustar con el equipo */}
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Renacé en <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-mystic-500 to-primary-600">
-                  cada ciclo
+      {/* ── 1. INICIO (Hero) ── */}
+      <section id="inicio" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
+        <div className="max-w-container mx-auto px-6 lg:px-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+
+            {/* Columna texto */}
+            <div className="relative z-10">
+              {/* Eyebrow con líneas laterales */}
+              <div className="flex items-center gap-4 mb-10">
+                <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+                <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
+                  El ciclo consciente
                 </span>
+                <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+              </div>
+
+              {/* Título display */}
+              {/* Copy original conservado. El DS v2 sugiere tono contemplativo: ver propuesta al cerrar bloque. */}
+              <h1
+                className="font-serif font-light text-white mb-10 leading-[0.95]"
+                style={{ fontSize: 'clamp(56px, 8.5vw, 128px)', letterSpacing: '-0.02em' }}
+              >
+                Renacé en
+                <br />
+                <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+                  cada ciclo
+                </em>
               </h1>
-              {/* Reseña — a ajustar con el propósito del equipo */}
-              <p className="text-xl text-gray-600">
+
+              {/* Lead text */}
+              <p
+                className="font-serif font-light text-white-dim leading-relaxed max-w-xl"
+                style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}
+              >
                 Un espacio de encuentro entre quienes buscan y quienes acompañan.
-                Ouro nació del símbolo del ouroboros, presente en todas las culturas
-                como símbolo de transformación, renovación y autoconocimiento.
+                Ouro nació del símbolo del ouroboros, presente en culturas que nunca
+                se conocieron entre sí, como memoria de transformación, retorno y
+                autoconocimiento.
               </p>
             </div>
 
-            {/* Placeholder video */}
+            {/* Columna placeholder de video con anillos decorativos */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-mystic-400 via-primary-500 to-mystic-600 rounded-3xl p-1 shadow-2xl">
-                <div className="bg-gray-900 rounded-3xl aspect-video flex items-center justify-center">
-                  <div className="text-center px-8">
-                    <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                    <p className="text-white text-opacity-80 text-sm font-medium">
-                      Video inspiracional — próximamente
-                    </p>
-                    <p className="text-white text-opacity-50 text-xs mt-1">
-                      El ouroboros a través de las civilizaciones
-                    </p>
+              {/* Anillos concéntricos decorativos (versión simplificada del astral del DS) */}
+              <div
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] aspect-square rounded-full border border-gold-faint animate-spin"
+                style={{ animationDuration: '480s' }}
+                aria-hidden="true"
+              />
+              <div
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] aspect-square rounded-full border border-gold-ghost animate-spin"
+                style={{ animationDuration: '720s', animationDirection: 'reverse' }}
+                aria-hidden="true"
+              />
+
+              {/* Placeholder de video */}
+              <div className="relative bg-navy-card border border-gold-faint aspect-video flex items-center justify-center overflow-hidden">
+                {/* Marca de esquina superior izquierda — pequeño detalle ornamental */}
+                <span
+                  className="absolute top-4 left-4 font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim"
+                  aria-hidden="true"
+                >
+                  Próximamente
+                </span>
+
+                <div className="text-center px-8">
+                  {/* Botón play */}
+                  <div className="w-20 h-20 rounded-full border border-gold-dim flex items-center justify-center mx-auto mb-6 transition-all duration-600 ease-expo-out hover:border-gold hover:shadow-gold-glow-soft">
+                    <svg className="w-7 h-7 text-gold ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
                   </div>
+
+                  <p className="font-sans text-[11px] uppercase tracking-eyebrow text-white-dim mb-3">
+                    Video inspiracional
+                  </p>
+                  <p className="font-serif italic text-base text-white-faint">
+                    El ouroboros a través de las civilizaciones
+                  </p>
                 </div>
+
+                {/* Línea-gradiente inferior */}
+                <span
+                  className="absolute bottom-0 left-0 right-0 h-px"
+                  style={{
+                    background:
+                      'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
+                  }}
+                  aria-hidden="true"
+                />
               </div>
             </div>
           </div>
@@ -155,121 +207,231 @@ const Home = () => {
       </section>
 
       {/* ── 2. QUIÉNES SOMOS ── */}
-      <section id="quienes-somos" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Equipo Fundador
+      <section id="quienes-somos" className="relative py-24 lg:py-32">
+        <div className="max-w-container mx-auto px-6 lg:px-10">
+          {/* Header de sección */}
+          <div className="text-center mb-20 lg:mb-24">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+              <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
+                El equipo
+              </span>
+              <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+            </div>
+            <h2
+              className="font-serif font-light text-white mb-6"
+              style={{ fontSize: 'clamp(40px, 5vw, 72px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+            >
+              Equipo <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">fundador</em>
             </h2>
-            {/* Subtítulo — a ajustar por el equipo */}
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Cada una con su camino, todas comprometidas con tu proceso
+            {/* Subtítulo — copy original conservado */}
+            <p className="font-serif font-light text-white-dim max-w-xl mx-auto leading-relaxed" style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}>
+              Cada una con su camino, todas comprometidas con tu proceso.
             </p>
           </div>
 
+          {/* Grilla de fundadoras */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Fundadora 1 */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow">
-              <div className="h-64 bg-gradient-to-br from-mystic-400 via-mystic-500 to-primary-600 relative overflow-hidden flex items-center justify-center">
-                <div className="w-24 h-24 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                  <span className="text-white font-bold text-4xl">L</span>
-                </div>
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Lucila</h3>
-                <p className="text-gray-600 mb-4">
-                  Co-fundadora de Ouro. Terapeuta comprometida con acompañar procesos de transformación y autoconocimiento.
-                </p>
-                <Link to="/terapeutas" className="text-mystic-600 hover:text-mystic-700 font-medium">
-                  Ver terapeutas →
-                </Link>
-              </div>
-            </div>
 
-            {/* Fundadora 2 */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow">
-              <div className="h-64 bg-gradient-to-br from-primary-500 via-mystic-500 to-mystic-600 relative overflow-hidden flex items-center justify-center">
-                <div className="w-24 h-24 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                  <span className="text-white font-bold text-4xl">E</span>
-                </div>
+            {/* Fundadora 1 — Lucila */}
+            <article className="group relative bg-gradient-to-b from-navy-soft to-navy border border-gold-faint px-8 pt-9 pb-10 transition-all duration-600 ease-expo-out hover:-translate-y-3 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
+              {/* Línea superior animada */}
+              <span
+                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+                aria-hidden="true"
+              />
+              {/* Inicial gigante */}
+              <div className="text-center mb-6">
+                <span
+                  className="font-serif italic font-light bg-gold-gradient bg-clip-text text-transparent inline-block leading-none"
+                  style={{ fontSize: 'clamp(120px, 14vw, 180px)' }}
+                  aria-hidden="true"
+                >
+                  L
+                </span>
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Elina</h3>
-                <p className="text-gray-600 mb-4">
-                  Co-fundadora de Ouro. Especialista en bienestar integral, dedicada a crear espacios seguros y de crecimiento personal.
-                </p>
-                <Link to="/terapeutas" className="text-mystic-600 hover:text-mystic-700 font-medium">
-                  Ver terapeutas →
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim text-center mb-3">
+                Co-fundadora
+              </p>
+              <h3 className="font-serif font-light text-3xl text-white text-center mb-4">
+                Lucila
+              </h3>
+              <p className="font-serif font-light text-base text-white-dim leading-relaxed text-center mb-8">
+                Acompaña procesos de transformación y autoconocimiento.
+              </p>
+              <div className="text-center">
+                <Link
+                  to="/terapeutas"
+                  className="inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
+                >
+                  <span>Ver terapeutas</span>
+                  <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
                 </Link>
               </div>
-            </div>
+            </article>
 
-            {/* Fundadora 3 */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow">
-              <div className="h-64 bg-gradient-to-br from-mystic-600 via-primary-500 to-primary-400 relative overflow-hidden flex items-center justify-center">
-                <div className="w-24 h-24 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                  <span className="text-white font-bold text-4xl">C</span>
-                </div>
+            {/* Fundadora 2 — Elina */}
+            <article className="group relative bg-gradient-to-b from-navy-soft to-navy border border-gold-faint px-8 pt-9 pb-10 transition-all duration-600 ease-expo-out hover:-translate-y-3 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
+              <span
+                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+                aria-hidden="true"
+              />
+              <div className="text-center mb-6">
+                <span
+                  className="font-serif italic font-light bg-gold-gradient bg-clip-text text-transparent inline-block leading-none"
+                  style={{ fontSize: 'clamp(120px, 14vw, 180px)' }}
+                  aria-hidden="true"
+                >
+                  E
+                </span>
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-1">Celina</h3>
-                <p className="text-gray-600 mb-4">
-                  Co-fundadora de Ouro. Apasionada por el desarrollo humano y el acompañamiento terapéutico en cada etapa de la vida.
-                </p>
-                <Link to="/terapeutas" className="text-mystic-600 hover:text-mystic-700 font-medium">
-                  Ver terapeutas →
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim text-center mb-3">
+                Co-fundadora
+              </p>
+              <h3 className="font-serif font-light text-3xl text-white text-center mb-4">
+                Elina
+              </h3>
+              <p className="font-serif font-light text-base text-white-dim leading-relaxed text-center mb-8">
+                Especialista en bienestar integral. Dedicada a sostener espacios de crecimiento personal.
+              </p>
+              <div className="text-center">
+                <Link
+                  to="/terapeutas"
+                  className="inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
+                >
+                  <span>Ver terapeutas</span>
+                  <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
                 </Link>
               </div>
-            </div>
+            </article>
+
+            {/* Fundadora 3 — Celina */}
+            <article className="group relative bg-gradient-to-b from-navy-soft to-navy border border-gold-faint px-8 pt-9 pb-10 transition-all duration-600 ease-expo-out hover:-translate-y-3 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
+              <span
+                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+                aria-hidden="true"
+              />
+              <div className="text-center mb-6">
+                <span
+                  className="font-serif italic font-light bg-gold-gradient bg-clip-text text-transparent inline-block leading-none"
+                  style={{ fontSize: 'clamp(120px, 14vw, 180px)' }}
+                  aria-hidden="true"
+                >
+                  C
+                </span>
+              </div>
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim text-center mb-3">
+                Co-fundadora
+              </p>
+              <h3 className="font-serif font-light text-3xl text-white text-center mb-4">
+                Celina
+              </h3>
+              <p className="font-serif font-light text-base text-white-dim leading-relaxed text-center mb-8">
+                Apasionada por el desarrollo humano y el acompañamiento terapéutico en cada tránsito vital.
+              </p>
+              <div className="text-center">
+                <Link
+                  to="/terapeutas"
+                  className="inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
+                >
+                  <span>Ver terapeutas</span>
+                  <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
+                </Link>
+              </div>
+            </article>
           </div>
         </div>
       </section>
 
       {/* ── 3. TERAPEUTAS ── */}
-      <section id="terapeutas" className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Nuestros Terapeutas
+      <section id="terapeutas" className="relative py-24 lg:py-32">
+        {/* Separador superior con línea-gradiente */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px"
+          style={{
+            background:
+              'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
+          }}
+          aria-hidden="true"
+        />
+
+        <div className="max-w-container mx-auto px-6 lg:px-10">
+          {/* Header de sección */}
+          <div className="text-center mb-20 lg:mb-24">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+              <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
+                Quienes acompañan
+              </span>
+              <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+            </div>
+            <h2
+              className="font-serif font-light text-white mb-6"
+              style={{ fontSize: 'clamp(40px, 5vw, 72px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+            >
+              Nuestros <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">terapeutas</em>
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Especialistas seleccionados, comprometidos con tu bienestar y crecimiento personal
+            <p className="font-serif font-light text-white-dim max-w-xl mx-auto leading-relaxed" style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}>
+              Especialistas seleccionados, comprometidos con tu camino.
             </p>
           </div>
 
           {therapists.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+              {/* Grilla de cards compactas */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
                 {therapists.map((t) => (
                   <Link
                     key={t.id}
                     to={`/terapeutas/${t.id}`}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow flex items-center gap-4"
+                    className="group relative bg-navy-card border border-gold-faint px-8 py-10 transition-all duration-600 ease-expo-out hover:-translate-y-2 hover:border-gold-dim hover:shadow-card-hover overflow-hidden text-center"
                   >
-                    {t.photoUrl ? (
-                      <img src={t.photoUrl} alt={t.userFullName} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
-                    ) : (
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-mystic-400 to-primary-500 flex items-center justify-center flex-shrink-0">
-                        <span className="text-white font-bold text-xl">{t.userFullName?.charAt(0)}</span>
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">{t.userFullName}</p>
-                      {t.specialty && (
-                        <span className="inline-block mt-1 text-xs font-medium bg-mystic-100 text-mystic-700 px-2 py-0.5 rounded-full truncate max-w-full">
-                          {t.specialty}
-                        </span>
+                    {/* Línea superior animada */}
+                    <span
+                      className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+                      aria-hidden="true"
+                    />
+
+                    {/* Avatar */}
+                    <div className="flex justify-center mb-6">
+                      {t.photoUrl ? (
+                        <img
+                          src={t.photoUrl}
+                          alt={t.userFullName}
+                          className="w-20 h-20 rounded-full object-cover border border-gold-faint"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-gold-gradient flex items-center justify-center">
+                          <span className="font-serif font-normal text-3xl text-navy">
+                            {t.userFullName?.charAt(0)}
+                          </span>
+                        </div>
                       )}
                     </div>
+
+                    {/* Nombre */}
+                    <h3 className="font-serif font-light text-2xl text-white mb-3 leading-tight">
+                      {t.userFullName}
+                    </h3>
+
+                    {/* Especialidad como eyebrow */}
+                    {t.specialty && (
+                      <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim truncate">
+                        {t.specialty}
+                      </p>
+                    )}
                   </Link>
                 ))}
               </div>
+
+              {/* CTA */}
               <div className="text-center">
                 <Link
                   to="/terapeutas"
-                  className="inline-block bg-gradient-to-r from-mystic-500 to-primary-600 text-white px-8 py-3 rounded-full hover:from-mystic-600 hover:to-primary-700 transition-all font-semibold shadow-md"
+                  className="inline-flex items-center gap-3 bg-gold-gradient px-9 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
                 >
-                  Ver todos los terapeutas
+                  <span>Ver todos los terapeutas</span>
+                  <span>→</span>
                 </Link>
               </div>
             </>
@@ -277,9 +439,10 @@ const Home = () => {
             <div className="text-center">
               <Link
                 to="/terapeutas"
-                className="inline-block bg-gradient-to-r from-mystic-500 to-primary-600 text-white px-8 py-3 rounded-full hover:from-mystic-600 hover:to-primary-700 transition-all font-semibold shadow-md"
+                className="inline-flex items-center gap-3 bg-gold-gradient px-9 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
               >
-                Explorar terapeutas
+                <span>Explorar terapeutas</span>
+                <span>→</span>
               </Link>
             </div>
           )}
@@ -287,178 +450,339 @@ const Home = () => {
       </section>
 
       {/* ── 4. CÓMO EMPEZAR ── */}
-      <section id="como-empezar" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Cómo empezar
+      <section id="como-empezar" className="relative py-24 lg:py-32">
+        {/* Separador superior con línea-gradiente */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px"
+          style={{
+            background:
+              'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
+          }}
+          aria-hidden="true"
+        />
+
+        <div className="max-w-container mx-auto px-6 lg:px-10">
+          {/* Header de sección */}
+          <div className="text-center mb-20 lg:mb-24">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+              <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
+                El camino
+              </span>
+              <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+            </div>
+            <h2
+              className="font-serif font-light text-white mb-6"
+              style={{ fontSize: 'clamp(40px, 5vw, 72px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+            >
+              Cómo <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">empezar</em>
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Cinco simples pasos para comenzar tu proceso
+            <p className="font-serif font-light text-white-dim max-w-xl mx-auto leading-relaxed" style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}>
+              Cinco pasos para iniciar tu tránsito.
             </p>
           </div>
 
           {/* 5 pasos */}
-          <div className="relative mb-16">
+          <div className="relative mb-24 lg:mb-32">
             {/* Línea conectora (desktop) */}
-            <div className="hidden lg:block absolute top-10 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-mystic-200 via-primary-300 to-mystic-200" />
+            <div
+              className="hidden lg:block absolute top-10 left-[10%] right-[10%] h-px"
+              style={{
+                background:
+                  'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), rgba(198, 167, 94, 0.4), transparent)',
+              }}
+              aria-hidden="true"
+            />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 relative">
               {PASOS.map((paso) => (
-                <div key={paso.num} className="text-center">
-                  <div className="relative inline-block mb-6">
-                    <div className="w-20 h-20 bg-gradient-to-br from-mystic-100 to-primary-100 rounded-full flex items-center justify-center mx-auto ring-4 ring-white shadow-sm">
-                      <div className="text-mystic-600">
-                        {paso.icon}
-                      </div>
+                <div key={paso.num} className="text-center relative">
+                  {/* Número como eyebrow */}
+                  <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim mb-4">
+                    Paso {String(paso.num).padStart(2, '0')}
+                  </p>
+
+                  {/* Círculo con icono */}
+                  <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full border border-gold-dim bg-navy-deep">
+                    <div className="text-gold">
+                      {paso.icon}
                     </div>
-                    <span className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-mystic-500 to-primary-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow">
-                      {paso.num}
-                    </span>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{paso.titulo}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{paso.desc}</p>
+
+                  <h3 className="font-serif font-light text-xl text-white mb-3">
+                    {paso.titulo}
+                  </h3>
+                  <p className="font-serif font-light text-sm text-white-dim leading-relaxed">
+                    {paso.desc}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* 4 características */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-gray-50 p-6 rounded-2xl hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          {/* 4 garantías */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <article className="group relative bg-navy-card border border-gold-faint p-8 transition-all duration-600 ease-expo-out hover:-translate-y-1 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
+              <span
+                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+                aria-hidden="true"
+              />
+              <div className="w-12 h-12 flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">100% Confidencial</h3>
-              <p className="text-gray-600 text-sm">Tus sesiones son privadas y seguras, protegidas con cifrado de extremo a extremo.</p>
-            </div>
+              <h3 className="font-serif font-light text-xl text-white mb-3">Confidencialidad</h3>
+              <p className="font-serif font-light text-sm text-white-dim leading-relaxed">
+                Tus sesiones son privadas. Cifradas de extremo a extremo.
+              </p>
+            </article>
 
-            <div className="bg-gray-50 p-6 rounded-2xl hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-gradient-to-br from-mystic-100 to-primary-100 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-mystic-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            <article className="group relative bg-navy-card border border-gold-faint p-8 transition-all duration-600 ease-expo-out hover:-translate-y-1 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
+              <span
+                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+                aria-hidden="true"
+              />
+              <div className="w-12 h-12 flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Terapeutas de Confianza</h3>
-              <p className="text-gray-600 text-sm">Seleccionados cuidadosamente y acompañados por nuestro equipo en cada etapa.</p>
-            </div>
+              <h3 className="font-serif font-light text-xl text-white mb-3">Terapeutas de confianza</h3>
+              <p className="font-serif font-light text-sm text-white-dim leading-relaxed">
+                Seleccionados cuidadosamente, acompañados por nuestro equipo en cada tránsito.
+              </p>
+            </article>
 
-            <div className="bg-gray-50 p-6 rounded-2xl hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-gradient-to-br from-mystic-100 to-primary-100 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-mystic-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <article className="group relative bg-navy-card border border-gold-faint p-8 transition-all duration-600 ease-expo-out hover:-translate-y-1 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
+              <span
+                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+                aria-hidden="true"
+              />
+              <div className="w-12 h-12 flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Horarios Disponibles</h3>
-              <p className="text-gray-600 text-sm">Cada especialista gestiona su agenda. Elegí el horario que mejor te convenga.</p>
-            </div>
+              <h3 className="font-serif font-light text-xl text-white mb-3">Horarios disponibles</h3>
+              <p className="font-serif font-light text-sm text-white-dim leading-relaxed">
+                Cada especialista gestiona su agenda. Elegí el horario que mejor te convenga.
+              </p>
+            </article>
 
-            <div className="bg-gray-50 p-6 rounded-2xl hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            <article className="group relative bg-navy-card border border-gold-faint p-8 transition-all duration-600 ease-expo-out hover:-translate-y-1 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
+              <span
+                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+                aria-hidden="true"
+              />
+              <div className="w-12 h-12 flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Desde Casa</h3>
-              <p className="text-gray-600 text-sm">Conectate desde cualquier lugar con nuestra plataforma de videollamadas.</p>
-            </div>
+              <h3 className="font-serif font-light text-xl text-white mb-3">Desde donde estés</h3>
+              <p className="font-serif font-light text-sm text-white-dim leading-relaxed">
+                Conectate desde cualquier lugar. Videollamada simple y estable.
+              </p>
+            </article>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-gradient-to-r from-mystic-600 via-primary-600 to-mystic-700">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">
-            ¿Lista para descubrir tu camino?
+      {/* ── CTA grande (entre Cómo empezar y Contacto) ── */}
+      {/* Alternativas de copy de título conservadas como referencia:
+            B) "Cada retorno abre un ciclo."
+            C) "Integrar lo vivido. Volver al ciclo." */}
+      <section className="relative py-32 lg:py-40 bg-navy-deep overflow-hidden">
+        {/* Anillos decorativos sutiles, centrados */}
+        <div
+          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full border border-gold-faint animate-spin"
+          style={{ animationDuration: '480s' }}
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[680px] rounded-full border border-gold-ghost animate-spin"
+          style={{ animationDuration: '720s', animationDirection: 'reverse' }}
+          aria-hidden="true"
+        />
+
+        <div className="relative max-w-3xl mx-auto px-6 lg:px-10 text-center">
+          {/* Eyebrow */}
+          <div className="flex items-center justify-center gap-4 mb-10">
+            <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+            <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
+              El retorno
+            </span>
+            <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+          </div>
+
+          {/* Título */}
+          <h2
+            className="font-serif font-light text-white mb-8"
+            style={{ fontSize: 'clamp(40px, 6vw, 88px)', lineHeight: 1.05, letterSpacing: '-0.01em' }}
+          >
+            <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">Volver</em>{' '}
+            es integrar.
           </h2>
-          <p className="text-xl text-mystic-100 mb-8">
-            Acompañamos a quienes eligen conocerse a sí mismos
+
+          {/* Lead */}
+          <p
+            className="font-serif font-light text-white-dim leading-relaxed mb-12 max-w-xl mx-auto"
+            style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}
+          >
+            Para quienes eligen volver sobre lo vivido.
           </p>
+
+          {/* Botón outline dorado */}
           <Link
             to="/login"
-            className="inline-block bg-white text-mystic-600 px-8 py-4 rounded-full hover:bg-mystic-50 transition-colors font-semibold text-lg shadow-lg transform hover:scale-105"
+            className="inline-flex items-center gap-3 px-10 py-4 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
           >
-            Iniciar sesión
+            <span>Iniciar</span>
+            <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
           </Link>
         </div>
       </section>
 
       {/* ── 5. CONTACTO ── */}
-      <section id="contacto" className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              ¿Tenés preguntas sobre la plataforma?
+      <section id="contacto" className="relative py-24 lg:py-32">
+        {/* Separador superior con línea-gradiente */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px"
+          style={{
+            background:
+              'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
+          }}
+          aria-hidden="true"
+        />
+
+        <div className="max-w-2xl mx-auto px-6 lg:px-10">
+          {/* Header de sección */}
+          <div className="text-center mb-16 lg:mb-20">
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+              <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
+                Escribinos
+              </span>
+              <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+            </div>
+            <h2
+              className="font-serif font-light text-white mb-6"
+              style={{ fontSize: 'clamp(40px, 5vw, 72px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+            >
+              ¿Tenés <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">preguntas</em>?
             </h2>
-            <p className="text-xl text-gray-600">
-              Escribinos aquí:
+            <p className="font-serif font-light text-white-dim max-w-md mx-auto leading-relaxed" style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}>
+              Contanos sobre la plataforma o tu búsqueda.
             </p>
           </div>
 
-          <div className="bg-gray-50 rounded-2xl p-8">
-            <form onSubmit={handleContactSubmit} className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={contactForm.name}
-                    onChange={handleContactChange}
-                    required
-                    placeholder="Tu nombre"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={contactForm.email}
-                    onChange={handleContactChange}
-                    required
-                    placeholder="tu@email.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  />
-                </div>
-              </div>
+          {/* Formulario */}
+          <form onSubmit={handleContactSubmit} className="space-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Nombre */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
-                <textarea
-                  name="message"
-                  value={contactForm.message}
+                <label
+                  htmlFor="contact-name"
+                  className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+                >
+                  Nombre
+                </label>
+                <input
+                  id="contact-name"
+                  type="text"
+                  name="name"
+                  value={contactForm.name}
                   onChange={handleContactChange}
                   required
-                  rows={5}
-                  placeholder="Describí tu consulta sobre la plataforma..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
+                  placeholder="Tu nombre"
+                  className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
                 />
               </div>
+              {/* Email */}
+              <div>
+                <label
+                  htmlFor="contact-email"
+                  className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+                >
+                  Email
+                </label>
+                <input
+                  id="contact-email"
+                  type="email"
+                  name="email"
+                  value={contactForm.email}
+                  onChange={handleContactChange}
+                  required
+                  placeholder="tu@email.com"
+                  className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+                />
+              </div>
+            </div>
 
-              {contactStatus === 'success' && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-                  ¡Mensaje enviado! Te respondemos a la brevedad.
-                </div>
-              )}
-              {contactStatus === 'error' && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                  Hubo un error al enviar el mensaje. Completá todos los campos o escribinos directamente al correo.
-                </div>
-              )}
+            {/* Mensaje */}
+            <div>
+              <label
+                htmlFor="contact-message"
+                className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+              >
+                Mensaje
+              </label>
+              <textarea
+                id="contact-message"
+                name="message"
+                value={contactForm.message}
+                onChange={handleContactChange}
+                required
+                rows={5}
+                placeholder="Contanos en qué podemos ayudarte..."
+                className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 resize-none transition-colors duration-300"
+              />
+            </div>
 
+            {/* Estado: éxito (dorado, no verde) */}
+            {contactStatus === 'success' && (
+              <div className="border border-gold-faint bg-gold-ghost px-5 py-4 flex items-start gap-3">
+                <span className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-gold shadow-gold-glow-soft" aria-hidden="true" />
+                <p className="font-serif font-light text-base text-white leading-relaxed">
+                  Mensaje enviado. Te respondemos a la brevedad.
+                </p>
+              </div>
+            )}
+
+            {/* Estado: error (terracota apagado) */}
+            {contactStatus === 'error' && (
+              <div
+                className="px-5 py-4 flex items-start gap-3"
+                style={{
+                  borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+                  borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+                  background: 'rgba(160, 74, 58, 0.08)',
+                }}
+              >
+                <span
+                  className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
+                  style={{ background: '#A04A3A' }}
+                  aria-hidden="true"
+                />
+                <p className="font-serif font-light text-base text-white leading-relaxed">
+                  No pudimos enviar el mensaje. Revisá los campos o escribinos directamente al correo.
+                </p>
+              </div>
+            )}
+
+            {/* Submit */}
+            <div className="pt-4 text-center">
               <button
                 type="submit"
                 disabled={contactLoading}
-                className="w-full bg-gradient-to-r from-mystic-500 to-primary-600 text-white py-3 rounded-lg hover:from-mystic-600 hover:to-primary-700 transition-all font-semibold text-lg disabled:opacity-50 shadow-md"
+                className="inline-flex items-center gap-3 bg-gold-gradient px-10 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
-                {contactLoading ? 'Enviando...' : 'Enviar mensaje'}
+                <span>{contactLoading ? 'Enviando...' : 'Enviar mensaje'}</span>
+                {!contactLoading && <span>→</span>}
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </section>
 

@@ -1,30 +1,62 @@
 import React from 'react';
+import { ReactComponent as Isotipo } from '../assets/logo/ouro-isotipo.svg';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex flex-col items-center gap-4">
-          {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-mystic-500 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-xl">O</span>
-            </div>
-            <span className="text-2xl font-bold">URO</span>
+    <footer className="bg-navy-deep border-t border-gold-faint relative">
+      {/* Línea-gradiente decorativa superior */}
+      <div
+        className="absolute top-0 left-0 right-0 h-px"
+        style={{
+          background:
+            'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="max-w-container mx-auto px-6 lg:px-10 py-16">
+        <div className="flex flex-col items-center gap-8">
+
+          {/* Logo + texto institucional */}
+          <div className="flex items-center gap-3 text-gold">
+            <Isotipo className="h-10 w-10 text-gold" aria-hidden="true" />
+            <span
+              className="font-serif text-xl font-normal tracking-brand text-white"
+              style={{ paddingRight: '0.45em' }}
+            >
+              OURO
+            </span>
           </div>
 
-          {/* Email secundario */}
+          {/* Cita filosófica breve */}
+          <p className="font-serif text-base italic text-white-dim text-center max-w-md leading-relaxed">
+            El ciclo consciente que integra.
+          </p>
+
+          {/* Contacto */}
           <a
             href="mailto:contactoouro@gmail.com"
-            className="text-gray-500 hover:text-gray-400 text-sm transition-colors"
+            className="group relative font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-2"
           >
             contactoouro@gmail.com
+            <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
           </a>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-6 text-center text-gray-600 text-sm">
-          &copy; {new Date().getFullYear()} Ouro. Todos los derechos reservados.
-        </div>
+        {/* Divisor inferior con línea-gradiente */}
+        <div
+          className="mt-12 mb-6 h-px"
+          style={{
+            background:
+              'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.2), transparent)',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Copyright */}
+        <p className="text-center font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+          &copy; {new Date().getFullYear()} OURO &mdash; Todos los derechos reservados
+        </p>
       </div>
     </footer>
   );

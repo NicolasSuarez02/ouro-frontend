@@ -1,18 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { loginUser } from '../services/api';
+import AuthLayout from '../components/AuthLayout';
 
+// ---------------------------------------------------------------
+// Eye icon (mostrar/ocultar contraseña) — stroke 1.5px, color current.
+// Pendiente reemplazar por lucide-react al sumar la dependencia.
+// ---------------------------------------------------------------
 const EyeIcon = ({ open }) => open ? (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
   </svg>
 ) : (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
   </svg>
 );
 
+// ---------------------------------------------------------------
+// Login
+// ---------------------------------------------------------------
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -68,119 +76,153 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-mystic-500 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">O</span>
-            </div>
-            <span className="text-3xl font-bold text-gray-800">URO</span>
-          </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Iniciar sesión</h2>
-          <p className="mt-2 text-gray-600">Bienvenida de vuelta</p>
+    <AuthLayout
+      eyebrow="Acceder"
+      title={
+        <>
+          Iniciar{' '}
+          <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+            sesión
+          </em>
+        </>
+      }
+      subtitle="Bienvenida de vuelta."
+    >
+      <form onSubmit={handleSubmit} className="space-y-10">
+        {/* Banner: error genérico (terracota) */}
+        {error && (
+          <div
+            className="px-5 py-4 flex items-start gap-3"
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <span
+              className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
+              style={{ background: '#A04A3A' }}
+              aria-hidden="true"
+            />
+            <p className="font-serif font-light text-base text-white leading-relaxed">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Banner: warning de verificación (dorado discreto, con CTA inline) */}
+        {requiresVerification && (
+          <div
+            className="border-l-2 border-gold pl-5 pr-4 py-4 bg-gold-ghost"
+            role="alert"
+          >
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-2">
+              Email sin verificar
+            </p>
+            <p className="font-serif font-light text-base text-white leading-relaxed">
+              Revisá tu bandeja de entrada o{' '}
+              <button
+                type="button"
+                onClick={() =>
+                  navigate('/verification-sent', { state: { email: formData.email } })
+                }
+                className="text-gold hover:text-gold-bright underline underline-offset-2 transition-colors duration-300"
+              >
+                reenviá el email de verificación
+              </button>
+              .
+            </p>
+          </div>
+        )}
+
+        {/* Email */}
+        <div>
+          <label
+            htmlFor="email"
+            className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+          >
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="tu@email.com"
+            className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+          />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            {requiresVerification && (
-              <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
-                <p className="font-semibold mb-1">Tu email no está verificado</p>
-                <p>
-                  Revisá tu bandeja de entrada o{' '}
-                  <button
-                    type="button"
-                    onClick={() => navigate('/verification-sent', { state: { email: formData.email } })}
-                    className="underline font-semibold hover:text-amber-900"
-                  >
-                    reenviá el email de verificación
-                  </button>
-                  .
-                </p>
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                placeholder="tu@email.com"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Contraseña
-                </label>
-                <Link to="/forgot-password" className="text-sm text-mystic-600 hover:text-mystic-700 font-medium">
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  autoComplete="current-password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                  placeholder="Tu contraseña"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  tabIndex={-1}
-                >
-                  <EyeIcon open={showPassword} />
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-mystic-500 to-primary-600 text-white py-3 rounded-lg hover:from-mystic-600 hover:to-primary-700 transition-all font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+        {/* Password + Olvidaste contraseña */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <label
+              htmlFor="password"
+              className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold"
             >
-              {loading ? 'Ingresando...' : 'Iniciar sesión'}
+              Contraseña
+            </label>
+            <Link
+              to="/forgot-password"
+              className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
+            >
+              Olvidaste tu contraseña
+            </Link>
+          </div>
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              autoComplete="current-password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Tu contraseña"
+              className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 pr-10 transition-colors duration-300"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              tabIndex={-1}
+              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              className="absolute right-0 bottom-3 text-gold-dim hover:text-gold transition-colors duration-300"
+            >
+              <EyeIcon open={showPassword} />
             </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              ¿No tenés cuenta?{' '}
-              <Link to="/register" className="text-mystic-600 hover:text-mystic-700 font-semibold">
-                Registrate
-              </Link>
-            </p>
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <Link to="/" className="text-sm text-gray-500 hover:text-gray-700">
-            ← Volver al inicio
-          </Link>
+        {/* Submit */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full inline-flex items-center justify-center gap-3 bg-gold-gradient py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          >
+            <span>{loading ? 'Ingresando...' : 'Iniciar'}</span>
+            {!loading && <span>→</span>}
+          </button>
         </div>
+      </form>
+
+      {/* Footer del card: link a registro */}
+      <div className="mt-10 pt-8 border-t border-gold-faint text-center">
+        <p className="font-serif font-light text-base text-white-dim">
+          ¿No tenés cuenta?{' '}
+          <Link
+            to="/register"
+            className="font-sans text-[11px] uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300 ml-1"
+          >
+            Registrarse →
+          </Link>
+        </p>
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createClient } from '../services/api';
+import AuthLayout from '../components/AuthLayout';
 
 const RegisterClient = () => {
   const location = useLocation();
@@ -34,9 +35,7 @@ const RegisterClient = () => {
     setLoading(true);
 
     try {
-      // Formatear fecha y hora para el backend (requiere HH:mm:ss)
       const timeWithSeconds = formData.timeOfBirth ? `${formData.timeOfBirth}:00` : '00:00:00';
-
       const dateTimeOfBirth = formData.dateOfBirth
         ? `${formData.dateOfBirth} ${timeWithSeconds}`
         : null;
@@ -48,11 +47,9 @@ const RegisterClient = () => {
       };
 
       await createClient(clientData);
-      
-      // Redirigir al dashboard o página de éxito
       navigate('/success', { state: { user } });
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al completar el registro. Intenta nuevamente.');
+      setError(err.response?.data?.message || 'Error al completar el registro. Intentá nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -62,68 +59,103 @@ const RegisterClient = () => {
     navigate('/success', { state: { user } });
   };
 
+  // ---------------------------------------------------------------
+  // Estado: sin usuario en location.state
+  // ---------------------------------------------------------------
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Sesión no válida</h2>
-          <p className="text-gray-600 mb-6">
-            No se pudo obtener tu información de usuario.
-          </p>
+      <AuthLayout
+        eyebrow="No fue posible"
+        title={
+          <>
+            Sesión{' '}
+            <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+              no válida
+            </em>
+          </>
+        }
+        subtitle="No pudimos obtener tu información de usuario."
+        backTo="/"
+        backLabel="Volver al inicio"
+      >
+        <div className="text-center">
           <Link
             to="/register"
-            className="inline-block bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors font-medium"
+            className="inline-flex items-center gap-3 bg-gold-gradient px-10 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
           >
-            Volver a registrarse
+            <span>Volver a registrarse</span>
+            <span>→</span>
           </Link>
         </div>
-      </div>
+      </AuthLayout>
     );
   }
 
+  // ---------------------------------------------------------------
+  // Estado: formulario
+  // ---------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4 py-12">
-      <div className="max-w-2xl w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">O</span>
+    <AuthLayout
+      width="lg"
+      eyebrow="Casi listo"
+      title={
+        <>
+          Bienvenida,{' '}
+          <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+            {user.fullName?.split(' ')[0] || 'a OURO'}
+          </em>
+        </>
+      }
+      subtitle="Completá tu perfil para personalizar tu experiencia."
+      showBackLink={false}
+    >
+      <form onSubmit={handleSubmit} className="space-y-10">
+        {/* Banner error (terracota) */}
+        {error && (
+          <div
+            className="px-5 py-4 flex items-start gap-3"
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <span
+              className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
+              style={{ background: '#A04A3A' }}
+              aria-hidden="true"
+            />
+            <p className="font-serif font-light text-base text-white leading-relaxed">
+              {error}
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            ¡Bienvenido, {user.fullName}!
-          </h1>
-          <p className="text-gray-600">
-            Completa tu perfil para personalizar tu experiencia
-          </p>
-        </div>
+        )}
 
-        {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
-              Datos de nacimiento <span className="text-sm font-normal text-gray-400">(opcional)</span>
-            </h2>
-            <div className="p-4 bg-mystic-50 border border-mystic-100 rounded-xl text-sm text-mystic-800">
-              En Ouro trabajamos con terapias holísticas que incluyen astrología y carta natal. Tu fecha y hora de nacimiento permiten a los terapeutas personalizar mejor la sesión. Podés completarlo ahora o más tarde desde tu perfil.
+        {/* Sección: Datos de nacimiento */}
+        <div className="space-y-6">
+          <div>
+            <div className="flex items-baseline gap-3 mb-2">
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+                Datos de nacimiento
+              </p>
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                Opcional
+              </p>
             </div>
+            <p className="font-serif font-light text-base text-white-dim leading-relaxed">
+              Trabajamos con terapias holísticas que incluyen astrología y carta natal. Tu fecha y hora de nacimiento permiten personalizar cada sesión. Podés completarlo ahora o más tarde desde tu perfil.
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
-            {/* Fecha de nacimiento */}
+          {/* Inputs date + time */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             <div>
-              <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-                Fecha de nacimiento
+              <label
+                htmlFor="dateOfBirth"
+                className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+              >
+                Fecha
               </label>
               <input
                 id="dateOfBirth"
@@ -131,17 +163,16 @@ const RegisterClient = () => {
                 type="date"
                 value={formData.dateOfBirth}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                style={{ colorScheme: 'dark' }}
+                className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white py-3 transition-colors duration-300"
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Nos ayuda a personalizar tu experiencia
-              </p>
             </div>
-
-            {/* Hora de nacimiento */}
             <div>
-              <label htmlFor="timeOfBirth" className="block text-sm font-medium text-gray-700 mb-2">
-                Hora de nacimiento
+              <label
+                htmlFor="timeOfBirth"
+                className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+              >
+                Hora
               </label>
               <input
                 id="timeOfBirth"
@@ -149,57 +180,86 @@ const RegisterClient = () => {
                 type="time"
                 value={formData.timeOfBirth}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                style={{ colorScheme: 'dark' }}
+                className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white py-3 transition-colors duration-300"
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Para cálculos astrológicos opcionales
-              </p>
             </div>
-
-            {/* Información del usuario */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-medium text-gray-900 mb-3">Tu información</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Email:</span>
-                  <span className="font-medium text-gray-900">{user.email}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Teléfono:</span>
-                  <span className="font-medium text-gray-900">{user.phone}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Estado:</span>
-                  <span className="text-green-600 font-medium">✓ Verificado</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-primary-500 text-white py-3 rounded-lg hover:bg-primary-600 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Guardando...' : 'Completar registro'}
-              </button>
-              <button
-                type="button"
-                onClick={handleSkip}
-                className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 transition-colors font-semibold"
-              >
-                Omitir por ahora
-              </button>
-            </div>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-gray-500">
-            Puedes agregar o editar esta información más tarde desde tu perfil
-          </p>
+          </div>
         </div>
-      </div>
-    </div>
+
+        {/* Divisor con línea-gradiente */}
+        <div
+          className="h-px"
+          style={{
+            background:
+              'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Sección: Tu información */}
+        <div className="space-y-5">
+          <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+            Tu información
+          </p>
+          <dl className="space-y-4">
+            <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+              <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                Email
+              </dt>
+              <dd className="font-serif font-light text-base text-white text-right break-all">
+                {user.email}
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+              <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                Teléfono
+              </dt>
+              <dd className="font-serif font-light text-base text-white text-right">
+                {user.phone}
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-4">
+              <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                Estado
+              </dt>
+              <dd className="flex items-center gap-2">
+                <span
+                  className="w-1.5 h-1.5 rounded-full bg-gold shadow-gold-glow-soft"
+                  aria-hidden="true"
+                />
+                <span className="font-sans text-[11px] uppercase tracking-eyebrow text-gold">
+                  Verificada
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        {/* Botones */}
+        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 inline-flex items-center justify-center gap-3 bg-gold-gradient py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          >
+            <span>{loading ? 'Guardando...' : 'Completar'}</span>
+            {!loading && <span>→</span>}
+          </button>
+          <button
+            type="button"
+            onClick={handleSkip}
+            className="flex-1 inline-flex items-center justify-center gap-3 px-8 py-4 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+          >
+            <span>Omitir por ahora</span>
+          </button>
+        </div>
+
+        <p className="text-center font-serif italic font-light text-sm text-white-faint">
+          Podés agregar o editar esta información más tarde desde tu perfil.
+        </p>
+      </form>
+    </AuthLayout>
   );
 };
 
