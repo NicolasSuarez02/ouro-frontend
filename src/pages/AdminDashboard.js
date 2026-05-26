@@ -7,7 +7,7 @@ import {
   getPendingResources,
   approveResource,
   rejectResource,
-  getAllUsersPaginados,
+  getAllUsersPaginated,
   adminDeleteUser,
 } from '../services/api';
 
@@ -34,10 +34,10 @@ const AdminDashboard = () => {
   const [actionFeedback, setActionFeedback] = useState({});
   const [admin, setAdmin] = useState(null);
 
-  // Estado tab usuarios
-  const [usuarios, setUsuarios] = useState([]);
-  const [usuariosLoading, setUsuariosLoading] = useState(false);
-  const [usuariosError, setUsuariosError] = useState('');
+  // Estado tab users
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -64,22 +64,22 @@ const AdminDashboard = () => {
 
   const cargarUsuarios = useCallback(async () => {
     if (!admin) return;
-    setUsuariosLoading(true);
-    setUsuariosError('');
+    setUsersLoading(true);
+    setUsersError('');
     try {
-      const data = await getAllUsersPaginados({ search, role: roleFilter, page, size: 20 });
-      setUsuarios(data.content || []);
+      const data = await getAllUsersPaginated({ search, role: roleFilter, page, size: 20 });
+      setUsers(data.content || []);
       setTotalPages(data.totalPages || 0);
       setTotalElements(data.totalElements || 0);
     } catch (err) {
-      setUsuariosError(err.response?.data?.message || 'Error al cargar usuarios');
+      setUsersError(err.response?.data?.message || 'Error al cargar users');
     } finally {
-      setUsuariosLoading(false);
+      setUsersLoading(false);
     }
   }, [admin, search, roleFilter, page]);
 
   useEffect(() => {
-    if (tab === 'usuarios') {
+    if (tab === 'users') {
       cargarUsuarios();
     }
   }, [tab, cargarUsuarios]);
@@ -203,7 +203,7 @@ const AdminDashboard = () => {
           {[
             { key: 'terapeutas', label: 'Terapeutas', badge: therapists.length },
             { key: 'recursos', label: 'Recursos', badge: recursos.length },
-            { key: 'usuarios', label: 'Usuarios', badge: 0 },
+            { key: 'users', label: 'Usuarios', badge: 0 },
           ].map(({ key, label, badge }) => (
             <button
               key={key}
@@ -318,7 +318,7 @@ const AdminDashboard = () => {
         )}
 
         {/* ── TAB USUARIOS ── */}
-        {tab === 'usuarios' && (
+        {tab === 'users' && (
           <div>
             {/* Filtros */}
             <div className="flex flex-col sm:flex-row gap-3 mb-5">
@@ -350,22 +350,22 @@ const AdminDashboard = () => {
               </select>
             </div>
 
-            {usuariosError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{usuariosError}</div>
+            {usersError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{usersError}</div>
             )}
 
-            {usuariosLoading ? (
-              <div className="text-center py-12 text-gray-500">Cargando usuarios...</div>
+            {usersLoading ? (
+              <div className="text-center py-12 text-gray-500">Cargando users...</div>
             ) : (
               <>
                 <p className="text-xs text-gray-400 mb-3">{totalElements} usuario{totalElements !== 1 ? 's' : ''} encontrado{totalElements !== 1 ? 's' : ''}</p>
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                  {usuarios.length === 0 ? (
-                    <div className="text-center py-10 text-gray-400 text-sm">No hay usuarios que coincidan con los filtros.</div>
+                  {users.length === 0 ? (
+                    <div className="text-center py-10 text-gray-400 text-sm">No hay users que coincidan con los filtros.</div>
                   ) : (
                     <div className="divide-y divide-gray-50">
-                      {usuarios.map((user) => (
+                      {users.map((user) => (
                         <div key={user.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-mystic-400 to-primary-500 flex items-center justify-center flex-shrink-0">

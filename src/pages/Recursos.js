@@ -41,13 +41,13 @@ const Pagination = ({ page, totalPages, onChange }) => {
 
 const Recursos = ({ category, titulo }) => {
   const navigate = useNavigate();
-  const [recursos, setRecursos] = useState([]);
+  const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [descargando, setDescargando] = useState({});
-  const [eliminando, setEliminando] = useState({});
+  const [downloading, setDownloading] = useState({});
+  const [deleting, setDeleting] = useState({});
   const [actionError, setActionError] = useState('');
-  const [confirmEliminar, setConfirmEliminar] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [user, setUser] = useState(null);
   const [page, setPage] = useState(1);
 
@@ -72,23 +72,23 @@ const Recursos = ({ category, titulo }) => {
       setLoading(true);
       setError(null);
       const data = await getResources(category);
-      setRecursos(data);
+      setResources(data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al cargar los recursos');
+      setError(err.response?.data?.message || 'Error al cargar los resources');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDescargar = async (recurso) => {
+  const handleDownload = async (resource) => {
     setActionError('');
-    setDescargando((prev) => ({ ...prev, [recurso.id]: true }));
+    setDownloading((prev) => ({ ...prev, [resource.id]: true }));
     try {
-      const response = await downloadResource(recurso.id);
+      const response = await downloadResource(resource.id);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', recurso.originalFileName);
+      link.setAttribute('download', resource.originalFileName);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -96,33 +96,33 @@ const Recursos = ({ category, titulo }) => {
     } catch (err) {
       setActionError(err.response?.data?.message || 'Error al descargar el archivo');
     } finally {
-      setDescargando((prev) => ({ ...prev, [recurso.id]: false }));
+      setDownloading((prev) => ({ ...prev, [resource.id]: false }));
     }
   };
 
-  const handleEliminar = async (recurso) => {
-    setConfirmEliminar(null);
+  const handleDelete = async (resource) => {
+    setConfirmDelete(null);
     setActionError('');
-    setEliminando((prev) => ({ ...prev, [recurso.id]: true }));
+    setDeleting((prev) => ({ ...prev, [resource.id]: true }));
     try {
-      await deleteResource(recurso.id);
-      setRecursos((prev) => prev.filter((r) => r.id !== recurso.id));
+      await deleteResource(resource.id);
+      setResources((prev) => prev.filter((r) => r.id !== resource.id));
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Error al eliminar el recurso');
+      setActionError(err.response?.data?.message || 'Error al eliminar el resource');
     } finally {
-      setEliminando((prev) => ({ ...prev, [recurso.id]: false }));
+      setDeleting((prev) => ({ ...prev, [resource.id]: false }));
     }
   };
 
-  const puedeEliminar = (recurso) => {
+  const canDelete = (resource) => {
     if (!user) return false;
-    return user.role === 'ADMIN' || recurso.uploadedByUserId === user.id;
+    return user.role === 'ADMIN' || resource.uploadedByUserId === user.id;
   };
 
   const esTerapeuta = user?.role === 'THERAPIST' || user?.role === 'ADMIN';
 
-  const totalPages = Math.ceil(recursos.length / PAGE_SIZE);
-  const recursosPagina = recursos.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.ceil(resources.length / PAGE_SIZE);
+  const resourcesPage = resources.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -134,7 +134,7 @@ const Recursos = ({ category, titulo }) => {
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{titulo}</h1>
           <p className="text-white/80 text-lg">
             {category === 'BIBLIOTECA'
-              ? 'Artículos, guías y recursos para tu camino'
+              ? 'Artículos, guías y resources para tu camino'
               : 'Materiales y programas de formación'}
           </p>
         </div>
@@ -144,7 +144,7 @@ const Recursos = ({ category, titulo }) => {
       <div className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Modal confirmación eliminar */}
-        {confirmEliminar && (
+        {confirmDelete && (
           <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
               <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -152,19 +152,19 @@ const Recursos = ({ category, titulo }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 text-center mb-2">¿Eliminar recurso?</h3>
+              <h3 className="font-semibold text-gray-900 text-center mb-2">¿Eliminar resource?</h3>
               <p className="text-sm text-gray-500 text-center mb-5">
-                "{confirmEliminar.title}" será eliminado permanentemente.
+                "{confirmDelete.title}" será eliminado permanentemente.
               </p>
               <div className="flex gap-3">
                 <button
-                  onClick={() => setConfirmEliminar(null)}
+                  onClick={() => setConfirmDelete(null)}
                   className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
-                  onClick={() => handleEliminar(confirmEliminar)}
+                  onClick={() => handleDelete(confirmDelete)}
                   className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
                 >
                   Eliminar
@@ -177,11 +177,11 @@ const Recursos = ({ category, titulo }) => {
         {/* Acciones */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-sm text-gray-400">
-            {!loading && recursos.length > 0 && `${recursos.length} recurso${recursos.length !== 1 ? 's' : ''}`}
+            {!loading && resources.length > 0 && `${resources.length} resource${resources.length !== 1 ? 's' : ''}`}
           </p>
           {esTerapeuta && (
             <button
-              onClick={() => navigate('/subir-recurso')}
+              onClick={() => navigate('/subir-resource')}
               className="bg-gradient-to-r from-mystic-500 to-primary-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:from-mystic-600 hover:to-primary-700 transition-all shadow-md flex items-center gap-1.5"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,22 +217,22 @@ const Recursos = ({ category, titulo }) => {
           </div>
         )}
 
-        {!loading && !error && recursos.length === 0 && (
+        {!loading && !error && resources.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p>No hay recursos disponibles todavía</p>
+            <p>No hay resources disponibles todavía</p>
           </div>
         )}
 
-        {/* Grid de recursos */}
-        {!loading && !error && recursosPagina.length > 0 && (
+        {/* Grid de resources */}
+        {!loading && !error && resourcesPage.length > 0 && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recursosPagina.map((recurso) => (
+              {resourcesPage.map((resource) => (
                 <div
-                  key={recurso.id}
+                  key={resource.id}
                   className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col gap-3"
                 >
                   {/* Icono + título */}
@@ -243,36 +243,36 @@ const Recursos = ({ category, titulo }) => {
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <h3 className="font-semibold text-gray-900 leading-snug">{recurso.title}</h3>
-                      <p className="text-xs text-gray-400 mt-0.5">{recurso.uploadedByName}</p>
+                      <h3 className="font-semibold text-gray-900 leading-snug">{resource.title}</h3>
+                      <p className="text-xs text-gray-400 mt-0.5">{resource.uploadedByName}</p>
                     </div>
                   </div>
 
                   {/* Descripción */}
-                  {recurso.description && (
-                    <p className="text-sm text-gray-500 line-clamp-2">{recurso.description}</p>
+                  {resource.description && (
+                    <p className="text-sm text-gray-500 line-clamp-2">{resource.description}</p>
                   )}
 
                   {/* Meta */}
                   <div className="flex items-center gap-2 text-xs text-gray-400">
-                    <span className="truncate">{recurso.originalFileName}</span>
+                    <span className="truncate">{resource.originalFileName}</span>
                     <span className="flex-shrink-0">·</span>
-                    <span className="flex-shrink-0">{formatFileSize(recurso.fileSize)}</span>
+                    <span className="flex-shrink-0">{formatFileSize(resource.fileSize)}</span>
                   </div>
 
                   {/* Acciones */}
                   <div className="flex items-center gap-2 mt-auto pt-2 border-t border-gray-50">
                     <button
-                      onClick={() => handleDescargar(recurso)}
-                      disabled={descargando[recurso.id]}
+                      onClick={() => handleDownload(resource)}
+                      disabled={downloading[resource.id]}
                       className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
                     >
-                      {descargando[recurso.id] ? 'Descargando...' : 'Descargar'}
+                      {downloading[resource.id] ? 'Descargando...' : 'Descargar'}
                     </button>
-                    {puedeEliminar(recurso) && (
+                    {canDelete(resource) && (
                       <button
-                        onClick={() => setConfirmEliminar(recurso)}
-                        disabled={eliminando[recurso.id]}
+                        onClick={() => setConfirmDelete(resource)}
+                        disabled={deleting[resource.id]}
                         className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                         title="Eliminar"
                       >

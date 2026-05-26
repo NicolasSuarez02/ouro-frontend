@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { getAllTherapists } from '../services/api';
 
-const MiniEstrellas = ({ score, count }) => {
+const MiniStars = ({ score, count }) => {
   if (!count) return null;
   return (
     <div className="flex items-center justify-center gap-1 mt-1.5">
@@ -202,7 +202,7 @@ const Terapeutas = () => {
                         {therapist.specialty}
                       </span>
                     )}
-                    <MiniEstrellas score={therapist.averageRating} count={therapist.ratingCount} />
+                    <MiniStars score={therapist.averageRating} count={therapist.ratingCount} />
                     {therapist.priceAmountCents != null && (
                       <p className="text-sm font-semibold text-primary-600 mt-1">
                         {(therapist.priceAmountCents / 100).toLocaleString('es-AR', {

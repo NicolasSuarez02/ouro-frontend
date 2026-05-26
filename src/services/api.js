@@ -79,6 +79,11 @@ export const updateUser = async (id, userData) => {
   return response.data;
 };
 
+export const updateClientMe = async (clientData) => {
+  const response = await api.put('/clients/me', clientData);
+  return response.data;
+};
+
 // ==================== THERAPIST ENDPOINTS ====================
 
 export const createTherapist = async (therapistData) => {
@@ -206,6 +211,11 @@ export const completeAppointment = async (id) => {
   return response.data;
 };
 
+export const getPaymentLink = async (id) => {
+  const response = await api.get(`/appointments/${id}/payment-link`);
+  return response.data;
+};
+
 export const getAppointmentById = async (id) => {
   const response = await api.get(`/appointments/${id}`);
   return response.data;
@@ -287,24 +297,24 @@ export const deleteTimeSlot = async (slotId) => {
 
 // ==================== RATING ENDPOINTS ====================
 
-export const crearCalificacion = async (data) => {
+export const createRating = async (data) => {
   const response = await api.post('/ratings', data);
   return response.data;
 };
 
-export const getRatingEstado = async (therapistId) => {
+export const getRatingStatus = async (therapistId) => {
   const response = await api.get(`/ratings/therapist/${therapistId}/estado`);
   return response.data;
 };
 
-export const getCalificacionesTerapeuta = async (therapistId) => {
+export const getRatingsByTherapist = async (therapistId) => {
   const response = await api.get(`/ratings/therapist/${therapistId}`);
   return response.data;
 };
 
 // ==================== ADMIN USER ENDPOINTS ====================
 
-export const getAllUsersPaginados = async ({ search = '', role = '', page = 0, size = 20 }) => {
+export const getAllUsersPaginated = async ({ search = '', role = '', page = 0, size = 20 }) => {
   const response = await api.get(
     `/users/admin?search=${encodeURIComponent(search)}&role=${role}&page=${page}&size=${size}`
   );

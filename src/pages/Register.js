@@ -43,6 +43,16 @@ const Register = () => {
     setError('');
   };
 
+  const handleDateChange = (e) => {
+    let raw = e.target.value.replace(/[^\d]/g, '');
+    if (raw.length > 8) raw = raw.slice(0, 8);
+    let formatted = raw;
+    if (raw.length > 4) formatted = raw.slice(0, 2) + '/' + raw.slice(2, 4) + '/' + raw.slice(4);
+    else if (raw.length > 2) formatted = raw.slice(0, 2) + '/' + raw.slice(2);
+    setFormData({ ...formData, dateOfBirth: formatted });
+    setError('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -74,9 +84,16 @@ const Register = () => {
       });
 
       if (response.success) {
-        // Guardar datos de nacimiento para crear el perfil de cliente tras verificar email
+        // Convertir dd/mm/aaaa → yyyy-MM-dd para el backend
+        let birthDate = null;
+        if (formData.dateOfBirth) {
+          const parts = formData.dateOfBirth.split('/');
+          if (parts.length === 3 && parts[2].length === 4) {
+            birthDate = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')} 00:00:00`;
+          }
+        }
         localStorage.setItem('ouro_pending_client', JSON.stringify({
-          dateOfBirth: formData.dateOfBirth ? `${formData.dateOfBirth} 00:00:00` : null,
+          dateOfBirth: birthDate,
           timeOfBirth: formData.timeOfBirth ? `${formData.timeOfBirth}:00` : null,
         }));
 
@@ -213,9 +230,12 @@ const Register = () => {
                   <input
                     id="dateOfBirth"
                     name="dateOfBirth"
-                    type="date"
+                    type="text"
+                    inputMode="numeric"
                     value={formData.dateOfBirth}
-                    onChange={handleChange}
+                    onChange={handleDateChange}
+                    placeholder="dd/mm/aaaa"
+                    maxLength={10}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
                   />
                 </div>

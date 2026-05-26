@@ -12,10 +12,10 @@ const SubirRecurso = () => {
     description: '',
     category: 'BIBLIOTECA',
   });
-  const [archivo, setArchivo] = useState(null);
+  const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [exito, setExito] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('ouro_user');
@@ -33,7 +33,7 @@ const SubirRecurso = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!archivo) {
+    if (!file) {
       setError('Seleccioná un archivo');
       return;
     }
@@ -42,7 +42,7 @@ const SubirRecurso = () => {
     setError(null);
 
     const formData = new FormData();
-    formData.append('archivo', archivo);
+    formData.append('archivo', file);
     formData.append('title', form.title);
     formData.append('category', form.category);
     if (form.description) {
@@ -51,7 +51,7 @@ const SubirRecurso = () => {
 
     try {
       await uploadResource(formData);
-      setExito(true);
+      setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Error al subir el archivo');
     } finally {
@@ -61,7 +61,7 @@ const SubirRecurso = () => {
 
   if (!user) return null;
 
-  if (exito) {
+  if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
@@ -84,7 +84,7 @@ const SubirRecurso = () => {
                 Ver {form.category === 'BIBLIOTECA' ? 'Biblioteca' : 'Formaciones'}
               </button>
               <button
-                onClick={() => { setExito(false); setArchivo(null); setForm({ title: '', description: '', category: 'BIBLIOTECA' }); }}
+                onClick={() => { setSuccess(false); setFile(null); setForm({ title: '', description: '', category: 'BIBLIOTECA' }); }}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-full font-medium transition-all"
               >
                 Subir otro
@@ -162,21 +162,21 @@ const SubirRecurso = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Archivo</label>
             <label className={`flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl py-8 cursor-pointer transition-colors ${
-              archivo ? 'border-primary-300 bg-primary-50' : 'border-gray-300 hover:border-primary-300 hover:bg-gray-50'
+              file ? 'border-primary-300 bg-primary-50' : 'border-gray-300 hover:border-primary-300 hover:bg-gray-50'
             }`}>
               <input
                 type="file"
                 className="hidden"
-                onChange={(e) => setArchivo(e.target.files[0] || null)}
+                onChange={(e) => setFile(e.target.files[0] || null)}
               />
-              {archivo ? (
+              {file ? (
                 <div className="text-center">
                   <svg className="w-8 h-8 text-primary-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <p className="text-sm font-medium text-primary-700">{archivo.name}</p>
+                  <p className="text-sm font-medium text-primary-700">{file.name}</p>
                   <p className="text-xs text-gray-400 mt-1">
-                    {(archivo.size / (1024 * 1024)).toFixed(1)} MB
+                    {(file.size / (1024 * 1024)).toFixed(1)} MB
                   </p>
                 </div>
               ) : (

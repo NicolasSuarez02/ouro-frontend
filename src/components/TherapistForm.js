@@ -19,7 +19,7 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
     bio: initialValues.bio || '',
     specialty: initialValues.specialty || '',
     photoUrl: initialValues.photoUrl || '',
-    precioEnPesos: initialValues.precioEnPesos || '',
+    priceInCurrency: initialValues.priceInCurrency || '',
     priceCurrency: initialValues.priceCurrency || 'ARS',
     minBookingLeadHours: initialValues.minBookingLeadHours || 1,
   });
@@ -58,13 +58,13 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
     e.preventDefault();
     setLocalError('');
 
-    if (!formData.bio.trim() || !formData.specialty.trim() || !formData.precioEnPesos) {
+    if (!formData.bio.trim() || !formData.specialty.trim() || !formData.priceInCurrency) {
       setLocalError('Completá los campos obligatorios');
       return;
     }
 
-    const precio = parseFloat(formData.precioEnPesos);
-    if (isNaN(precio) || precio <= 0) {
+    const price = parseFloat(formData.priceInCurrency);
+    if (isNaN(price) || price <= 0) {
       setLocalError('El precio debe ser un número mayor a 0');
       return;
     }
@@ -89,7 +89,7 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
       bio: formData.bio,
       specialty: formData.specialty,
       photoUrl: finalPhotoUrl || null,
-      priceAmountCents: Math.round(precio * 100),
+      priceAmountCents: Math.round(price * 100),
       priceCurrency: formData.priceCurrency,
       minBookingLeadHours: formData.minBookingLeadHours,
       specialties: specialties.length > 0 ? specialties : null,
@@ -141,17 +141,17 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="precioEnPesos" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="priceInCurrency" className="block text-sm font-medium text-gray-700 mb-2">
             Precio por sesión <span className="text-red-500">*</span>
           </label>
           <input
-            id="precioEnPesos"
-            name="precioEnPesos"
+            id="priceInCurrency"
+            name="priceInCurrency"
             type="number"
             required
             min="1"
             step="1"
-            value={formData.precioEnPesos}
+            value={formData.priceInCurrency}
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
             placeholder="5000"

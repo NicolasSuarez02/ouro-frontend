@@ -23,7 +23,7 @@ const DURACIONES = [15, 30, 45, 60];
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DIAS_SEMANA = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 
-const scheduleVacio = () => Object.fromEntries(DIAS.map(({ db }) => [db, []]));
+const emptySchedule = () => Object.fromEntries(DIAS.map(({ db }) => [db, []]));
 
 const toDateStr = (date) => {
   const y = date.getFullYear();
@@ -42,7 +42,7 @@ const groupSlotsByDate = (slots) => {
   return groups;
 };
 
-const formatHora = (isoStr) => {
+const formatTime = (isoStr) => {
   const d = new Date(isoStr);
   return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
 };
@@ -92,7 +92,7 @@ const ManageAvailability = () => {
 
   const [user, setUser] = useState(null);
   const [therapist, setTherapist] = useState(null);
-  const [schedule, setSchedule] = useState(scheduleVacio());
+  const [schedule, setSchedule] = useState(emptySchedule());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -106,7 +106,7 @@ const ManageAvailability = () => {
   const [cancellingSlot, setCancellingSlot] = useState(null);
   const [slotError, setSlotError] = useState('');
   const [confirmSlot, setConfirmSlot] = useState(null);
-  const [confirmDia, setConfirmDia] = useState(null);
+  const [confirmDay, setConfirmDay] = useState(null);
 
   // Calendar
   const [calYear, setCalYear] = useState(todayBase.getFullYear());
@@ -127,7 +127,7 @@ const ManageAvailability = () => {
         return getTherapistAvailability(t.id);
       })
       .then((availability) => {
-        const newSchedule = scheduleVacio();
+        const newSchedule = emptySchedule();
         availability.forEach(({ dayOfWeek, startTime, endTime, slotDurationMinutes }) => {
           newSchedule[dayOfWeek].push({
             startTime: startTime.slice(0, 5),
@@ -259,14 +259,14 @@ const ManageAvailability = () => {
     }
   };
 
-  const handleCancelDia = async (fecha) => {
-    setConfirmDia(null);
-    const slotsDelDia = slotsByDate[fecha] || [];
+  const handleCancelDay = async (dateStr) => {
+    setConfirmDay(null);
+    const daySlotsToDelete = slotsByDate[dateStr] || [];
     setSlotError('');
-    for (const slot of slotsDelDia) {
+    for (const slot of daySlotsToDelete) {
       try { await deleteTimeSlot(slot.id); } catch { /* continuar */ }
     }
-    setSlots((prev) => prev.filter((s) => s.startAt.slice(0, 10) !== fecha));
+    setSlots((prev) => prev.filter((s) => s.startAt.slice(0, 10) !== dateStr));
     setSelectedDate(null);
   };
 
@@ -297,7 +297,7 @@ const ManageAvailability = () => {
             </div>
             <h3 className="font-semibold text-gray-900 text-center mb-1">¿Cancelar este turno?</h3>
             <p className="text-sm text-gray-500 text-center mb-5">
-              {formatHora(confirmSlot.startAt)} – {formatHora(confirmSlot.endAt)} hs
+              {formatTime(confirmSlot.startAt)} – {formatTime(confirmSlot.endAt)} hs
             </p>
             <div className="flex gap-3">
               <button
@@ -318,7 +318,7 @@ const ManageAvailability = () => {
       )}
 
       {/* ── Modal: cancelar día completo ── */}
-      {confirmDia && (
+      {confirmDay && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
             <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -327,19 +327,19 @@ const ManageAvailability = () => {
               </svg>
             </div>
             <h3 className="font-semibold text-gray-900 text-center mb-1">¿Cancelar el día completo?</h3>
-            <p className="text-sm text-gray-500 text-center capitalize mb-1">{formatDayLabel(confirmDia)}</p>
+            <p className="text-sm text-gray-500 text-center capitalize mb-1">{formatDayLabel(confirmDay)}</p>
             <p className="text-sm text-red-500 text-center font-medium mb-5">
-              {slotsByDate[confirmDia]?.length} turno{slotsByDate[confirmDia]?.length !== 1 ? 's' : ''} disponible{slotsByDate[confirmDia]?.length !== 1 ? 's' : ''}
+              {slotsByDate[confirmDay]?.length} turno{slotsByDate[confirmDay]?.length !== 1 ? 's' : ''} disponible{slotsByDate[confirmDay]?.length !== 1 ? 's' : ''}
             </p>
             <div className="flex gap-3">
               <button
-                onClick={() => setConfirmDia(null)}
+                onClick={() => setConfirmDay(null)}
                 className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
               >
                 Mantener
               </button>
               <button
-                onClick={() => handleCancelDia(confirmDia)}
+                onClick={() => handleCancelDay(confirmDay)}
                 className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
               >
                 Cancelar todos
@@ -631,7 +631,7 @@ const ManageAvailability = () => {
                       </div>
                       {selectedDaySlots.length > 0 && (
                         <button
-                          onClick={() => setConfirmDia(selectedDate)}
+                          onClick={() => setConfirmDay(selectedDate)}
                           className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700 font-medium transition-colors px-3 py-2 hover:bg-red-50 rounded-lg"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -655,7 +655,7 @@ const ManageAvailability = () => {
                               <div className="flex items-center gap-3">
                                 <div className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />
                                 <span className="text-sm font-medium text-gray-800">
-                                  {formatHora(slot.startAt)} – {formatHora(slot.endAt)} hs
+                                  {formatTime(slot.startAt)} – {formatTime(slot.endAt)} hs
                                 </span>
                               </div>
                               <button

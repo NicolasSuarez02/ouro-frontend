@@ -33,7 +33,7 @@ const EditTherapist = () => {
           bio: therapist.bio || '',
           specialty: therapist.specialty || '',
           photoUrl: therapist.photoUrl || '',
-          precioEnPesos: therapist.priceAmountCents != null
+          priceInCurrency: therapist.priceAmountCents != null
             ? (therapist.priceAmountCents / 100).toString()
             : '',
           priceCurrency: therapist.priceCurrency || 'ARS',

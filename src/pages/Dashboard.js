@@ -139,7 +139,15 @@ const Dashboard = () => {
 
         {/* Card datos del usuario */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Tus datos</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Tus datos</h2>
+            <Link
+              to="/editar-perfil"
+              className="text-sm text-mystic-600 hover:text-mystic-700 font-medium transition-colors"
+            >
+              Editar
+            </Link>
+          </div>
           <dl className="space-y-3">
             <div className="flex justify-between text-sm">
               <dt className="text-gray-500 font-medium">Nombre completo</dt>
