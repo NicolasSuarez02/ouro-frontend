@@ -13,6 +13,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Dashboard from './pages/Dashboard';
 import RegisterTherapist from './pages/RegisterTherapist';
 import EditTherapist from './pages/EditTherapist';
+import EditProfile from './pages/EditProfile';
 import Terapeutas from './pages/Terapeutas';
 import TherapistDetail from './pages/TherapistDetail';
 import ManageAvailability from './pages/ManageAvailability';
@@ -54,6 +55,7 @@ function App() {
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/register-therapist" element={<PrivateRoute><RegisterTherapist /></PrivateRoute>} />
         <Route path="/edit-therapist" element={<PrivateRoute><EditTherapist /></PrivateRoute>} />
+        <Route path="/editar-perfil" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
         <Route path="/manage-availability" element={<PrivateRoute><ManageAvailability /></PrivateRoute>} />
         <Route path="/mis-turnos" element={<PrivateRoute><ClientAppointments /></PrivateRoute>} />
         <Route path="/subir-recurso" element={<PrivateRoute><SubirRecurso /></PrivateRoute>} />
