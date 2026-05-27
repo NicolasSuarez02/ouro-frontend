@@ -1,103 +1,136 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+
+const PASOS = [
+  {
+    titulo: 'Explorar terapeutas',
+    desc: 'Encontrá el profesional para tu camino.',
+  },
+  {
+    titulo: 'Agendar tu primera sesión',
+    desc: 'Elegí el día y la hora que mejor te convenga.',
+  },
+  {
+    titulo: 'Completar tu perfil',
+    desc: 'Personalizá tu experiencia.',
+  },
+];
 
 const Success = () => {
   const location = useLocation();
   const user = location.state?.user;
+  const firstName = user?.fullName?.split(' ')[0] || null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4">
-      <div className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8">
-        <div className="text-center">
-          {/* Success animation */}
-          <div className="relative w-32 h-32 mx-auto mb-8">
-            <div className="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-75"></div>
-            <div className="relative w-32 h-32 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="w-16 h-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
 
-          {/* Title */}
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            ¡Registro completado!
-          </h1>
+      <main className="flex-1 flex items-center justify-center px-6 pt-32 lg:pt-40 pb-24">
+        <div className="max-w-2xl w-full">
 
-          {/* Message */}
-          <p className="text-xl text-gray-600 mb-8">
-            {user?.fullName}, tu cuenta está lista para usar
-          </p>
-
-          {/* Features */}
-          <div className="bg-gray-50 rounded-xl p-6 mb-8 text-left">
-            <h3 className="font-semibold text-gray-900 mb-4 text-center">
-              ¿Qué puedes hacer ahora?
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                  <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Explorar terapeutas</h4>
-                  <p className="text-sm text-gray-600">Encuentra el profesional ideal para ti</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                  <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Agendar tu primera sesión</h4>
-                  <p className="text-sm text-gray-600">Elige el día y hora que mejor te convenga</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
-                  <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">Completar tu perfil</h4>
-                  <p className="text-sm text-gray-600">Personaliza tu experiencia</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/"
-              className="bg-primary-500 text-white px-8 py-4 rounded-full hover:bg-primary-600 transition-all transform hover:scale-105 font-semibold text-lg shadow-lg inline-block"
+          {/* Marca circular de status — punto dorado con glow */}
+          <div className="flex justify-center mb-10">
+            <div
+              className="w-20 h-20 rounded-full border border-gold-dim flex items-center justify-center"
+              aria-hidden="true"
             >
-              Explorar terapeutas
+              <span className="block w-3 h-3 rounded-full bg-gold shadow-gold-glow-soft" />
+            </div>
+          </div>
+
+          {/* Eyebrow + Title + Subtitle */}
+          <div className="text-center mb-12">
+            <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold mb-5">
+              Registro completado
+            </p>
+            <h1
+              className="font-serif font-light text-white mb-4"
+              style={{ fontSize: 'clamp(40px, 5vw, 64px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+            >
+              {firstName ? (
+                <>
+                  Bienvenida,{' '}
+                  <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+                    {firstName}
+                  </em>
+                </>
+              ) : (
+                'Cuenta creada'
+              )}
+            </h1>
+            <p
+              className="font-serif font-light text-white-dim leading-relaxed"
+              style={{ fontSize: 'clamp(16px, 1.2vw, 18px)' }}
+            >
+              Tu cuenta está lista.
+            </p>
+          </div>
+
+          {/* Próximos pasos */}
+          <div className="bg-navy-card border border-gold-faint p-8 mb-10">
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-6 text-center">
+              Próximos pasos
+            </p>
+            <ol className="space-y-6">
+              {PASOS.map((paso, idx) => (
+                <li key={idx} className="flex items-start gap-5">
+                  <span
+                    className="flex-shrink-0 font-serif italic font-light leading-none bg-gold-gradient bg-clip-text text-transparent"
+                    style={{ fontSize: '42px', minWidth: '36px' }}
+                    aria-hidden="true"
+                  >
+                    {idx + 1}
+                  </span>
+                  <div className="pt-1">
+                    <h3 className="font-serif font-light text-lg text-white leading-snug">
+                      {paso.titulo}
+                    </h3>
+                    <p className="font-serif font-light text-sm text-white-dim leading-relaxed mt-1">
+                      {paso.desc}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              to="/terapeutas"
+              className="flex-1 inline-flex items-center justify-center gap-3 bg-gold-gradient py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
+            >
+              <span>Explorar terapeutas</span>
+              <span>→</span>
             </Link>
             <Link
               to="/"
-              className="bg-white text-primary-500 border-2 border-primary-500 px-8 py-4 rounded-full hover:bg-primary-50 transition-colors font-semibold text-lg inline-block"
+              className="flex-1 inline-flex items-center justify-center gap-3 px-8 py-4 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
             >
-              Ir al inicio
+              <span>Ir al inicio</span>
             </Link>
           </div>
 
           {/* Help */}
-          <div className="mt-8 pt-8 border-t border-gray-200">
-            <p className="text-gray-600 mb-2">¿Necesitas ayuda?</p>
-            <a href="#contacto" className="text-primary-500 hover:text-primary-600 font-medium">
-              Contacta con soporte
-            </a>
+          <div className="mt-12 pt-8 border-t border-gold-faint text-center">
+            <p className="font-serif font-light text-base text-white-dim mb-3">
+              ¿Necesitás ayuda?
+            </p>
+            <Link
+              to="/#contacto"
+              className="inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
+            >
+              <span>Escribinos al contacto</span>
+              <span>→</span>
+            </Link>
           </div>
+
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 };

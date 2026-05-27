@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { verifyEmail, createClient } from '../services/api';
+import AuthLayout from '../components/AuthLayout';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -21,7 +22,7 @@ const VerifyEmail = () => {
 
       try {
         const response = await verifyEmail(token);
-        
+
         if (response.success) {
           if (response.token) {
             localStorage.setItem('ouro_token', response.token);
@@ -60,103 +61,155 @@ const VerifyEmail = () => {
     verify();
   }, [token, navigate]);
 
+  // ---------------------------------------------------------------
+  // Estado: loading
+  // ---------------------------------------------------------------
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-20 h-20 border-4 border-primary-200 border-t-primary-500 rounded-full animate-spin mx-auto mb-6"></div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Verificando tu email...</h2>
-          <p className="text-gray-600">Por favor espera un momento</p>
+      <AuthLayout
+        eyebrow="Un momento"
+        title={
+          <>
+            Verificando tu{' '}
+            <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+              cuenta
+            </em>
+          </>
+        }
+        subtitle="Estamos confirmando tu email."
+        showBackLink={false}
+      >
+        <div className="flex flex-col items-center gap-6 py-4">
+          {/* Spinner dorado */}
+          <div
+            className="w-12 h-12 border-2 border-gold-faint border-t-gold rounded-full animate-spin"
+            aria-label="Cargando"
+          />
+          <p className="font-serif italic font-light text-base text-white-dim">
+            Por favor esperá un momento.
+          </p>
         </div>
-      </div>
+      </AuthLayout>
     );
   }
 
+  // ---------------------------------------------------------------
+  // Estado: éxito
+  // ---------------------------------------------------------------
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          {/* Success Icon */}
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-
-          {/* Title */}
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            ¡Email verificado!
-          </h2>
-
-          {/* Message */}
-          <p className="text-lg text-gray-600 mb-6">
-            Tu cuenta ha sido verificada exitosamente.
-          </p>
-
-          {/* User info */}
+      <AuthLayout
+        eyebrow="Verificada"
+        title={
+          <>
+            Email{' '}
+            <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+              verificado
+            </em>
+          </>
+        }
+        subtitle="Tu cuenta ha sido confirmada."
+        showBackLink={false}
+      >
+        <div className="space-y-8">
+          {/* Bienvenida con el nombre */}
           {user && (
-            <div className="bg-primary-50 rounded-lg p-4 mb-6">
-              <p className="text-sm text-gray-600 mb-1">Bienvenido,</p>
-              <p className="text-xl font-semibold text-primary-700">{user.fullName}</p>
+            <div className="text-center">
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-3">
+                Bienvenida
+              </p>
+              <p className="font-serif font-light text-2xl text-white">
+                {user.fullName}
+              </p>
             </div>
           )}
 
-          {/* Redirect message */}
-          <p className="text-sm text-gray-500 mb-6">
-            Redirigiendo al registro de cliente...
-          </p>
+          {/* Divisor con línea-gradiente */}
+          <div
+            className="h-px"
+            style={{
+              background:
+                'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
+            }}
+            aria-hidden="true"
+          />
 
-          {/* Manual link */}
-          <Link
-            to="/register-client"
-            state={{ user }}
-            className="inline-block bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors font-medium"
-          >
-            Continuar →
-          </Link>
+          {/* Mensaje de redirect + CTA manual */}
+          <div className="text-center space-y-6">
+            <p className="font-serif italic font-light text-base text-white-dim">
+              Redirigiendo al panel...
+            </p>
+            <Link
+              to="/register-client"
+              state={{ user }}
+              className="inline-flex items-center gap-3 bg-gold-gradient px-10 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
+            >
+              <span>Continuar ahora</span>
+              <span>→</span>
+            </Link>
+          </div>
         </div>
-      </div>
+      </AuthLayout>
     );
   }
 
-  // Error state
+  // ---------------------------------------------------------------
+  // Estado: error
+  // ---------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-        {/* Error Icon */}
-        <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg className="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+    <AuthLayout
+      eyebrow="No fue posible"
+      title={
+        <>
+          Verificación{' '}
+          <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+            fallida
+          </em>
+        </>
+      }
+      subtitle="No pudimos confirmar tu email."
+      backTo="/"
+      backLabel="Volver al inicio"
+    >
+      <div className="space-y-10">
+        {/* Banner error (terracota) */}
+        <div
+          className="px-5 py-4 flex items-start gap-3"
+          style={{
+            borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+            borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+            background: 'rgba(160, 74, 58, 0.08)',
+          }}
+          role="alert"
+        >
+          <span
+            className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full"
+            style={{ background: '#A04A3A' }}
+            aria-hidden="true"
+          />
+          <p className="font-serif font-light text-base text-white leading-relaxed">
+            {message}
+          </p>
         </div>
 
-        {/* Title */}
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Error de verificación
-        </h2>
-
-        {/* Error message */}
-        <p className="text-gray-600 mb-6">
-          {message}
-        </p>
-
-        {/* Actions */}
-        <div className="space-y-3">
+        {/* Dos CTAs: primario + outline */}
+        <div className="flex flex-col gap-4">
           <Link
             to="/register"
-            className="block w-full bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors font-medium"
+            className="w-full inline-flex items-center justify-center gap-3 bg-gold-gradient py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
           >
-            Registrarse nuevamente
+            <span>Registrarme nuevamente</span>
+            <span>→</span>
           </Link>
           <Link
-            to="/"
-            className="block w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            to="/login"
+            className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
           >
-            Volver al inicio
+            <span>Ir al login</span>
           </Link>
         </div>
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

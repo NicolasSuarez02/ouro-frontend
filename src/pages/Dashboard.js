@@ -1,22 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getMpConnectUrl } from '../services/api';
 
-const badgeConfig = {
-  PENDING: {
-    label: 'Pendiente de aprobación',
-    className: 'bg-amber-100 text-amber-800 border border-amber-200',
-  },
-  APPROVED: {
-    label: 'Aprobado',
-    className: 'bg-green-100 text-green-800 border border-green-200',
-  },
-  REJECTED: {
-    label: 'Rechazado',
-    className: 'bg-red-100 text-red-800 border border-red-200',
-  },
-};
+// ---------------------------------------------------------------
+// Iconos inline — stroke 1.5px.
+// Pendiente reemplazar por lucide-react al sumar la dependencia.
+// ---------------------------------------------------------------
+const AlertCircle = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+const CheckIcon = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const CalendarIcon = ({ className = '' }) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+const CloseIcon = ({ className = '' }) => (
+  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="6" y1="6" x2="18" y2="18" />
+    <line x1="6" y1="18" x2="18" y2="6" />
+  </svg>
+);
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -81,84 +101,135 @@ const Dashboard = () => {
     }
   };
 
+  // ---------------------------------------------------------------
+  // Loading
+  // ---------------------------------------------------------------
   if (pageLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div
+            className="w-8 h-8 border-2 border-gold-faint border-t-gold rounded-full animate-spin"
+            aria-label="Cargando"
+          />
+        </div>
+        <Footer />
       </div>
     );
   }
 
   const firstName = user.fullName?.split(' ')[0] || 'Usuario';
-  const badge = therapist ? badgeConfig[therapist.approvalStatus] : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-6 lg:px-10 pt-32 lg:pt-40 pb-24">
+
         {/* Encabezado */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Hola, {firstName}
+        <div className="mb-12">
+          <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold mb-4">
+            Mi espacio
+          </p>
+          <h1
+            className="font-serif font-light text-white mb-3"
+            style={{ fontSize: 'clamp(36px, 4vw, 56px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+          >
+            Hola,{' '}
+            <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+              {firstName}
+            </em>
           </h1>
-          <p className="mt-1 text-gray-500">Tu espacio personal en Ouro</p>
+          <p className="font-serif font-light text-white-dim leading-relaxed" style={{ fontSize: 'clamp(16px, 1.2vw, 18px)' }}>
+            Tu <em className="italic">ciclo</em> en curso.
+          </p>
         </div>
 
-        {/* Banner resultado MP OAuth */}
+        {/* Banner MP success */}
         {mpStatus === 'success' && (
-          <div className="mb-6 flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
-            <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <p className="text-sm font-medium text-green-800">
-              ¡Tu cuenta de Mercado Pago fue conectada exitosamente! Ya podés recibir pagos.
+          <div className="mb-8 border border-gold-faint bg-gold-ghost px-5 py-4 flex items-start gap-3" role="status">
+            <span
+              className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-gold shadow-gold-glow-soft"
+              aria-hidden="true"
+            />
+            <p className="flex-1 font-serif font-light text-base text-white leading-relaxed">
+              Mercado Pago conectado. Ya podés recibir pagos.
             </p>
-            <button onClick={() => setMpStatus(null)} className="ml-auto text-green-500 hover:text-green-700">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        )}
-        {mpStatus === 'error' && (
-          <div className="mb-6 flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-            <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-            </svg>
-            <p className="text-sm font-medium text-red-800">
-              No se pudo conectar con Mercado Pago. Intentá de nuevo.
-            </p>
-            <button onClick={() => setMpStatus(null)} className="ml-auto text-red-500 hover:text-red-700">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <button
+              onClick={() => setMpStatus(null)}
+              aria-label="Cerrar"
+              className="text-white-faint hover:text-gold transition-colors duration-300 flex-shrink-0"
+            >
+              <CloseIcon />
             </button>
           </div>
         )}
 
-        {/* Card datos del usuario */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Tus datos</h2>
-          <dl className="space-y-3">
-            <div className="flex justify-between text-sm">
-              <dt className="text-gray-500 font-medium">Nombre completo</dt>
-              <dd className="text-gray-800">{user.fullName}</dd>
+        {/* Banner MP error */}
+        {mpStatus === 'error' && (
+          <div
+            className="mb-8 px-5 py-4 flex items-start gap-3"
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+            <p className="flex-1 font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
+              No pudimos conectar con Mercado Pago. Intentá nuevamente.
+            </p>
+            <button
+              onClick={() => setMpStatus(null)}
+              aria-label="Cerrar"
+              className="hover:opacity-80 transition-opacity duration-300 flex-shrink-0"
+              style={{ color: '#A04A3A' }}
+            >
+              <CloseIcon />
+            </button>
+          </div>
+        )}
+
+        {/* Card: Tus datos */}
+        <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+          <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-6">
+            Tus datos
+          </p>
+          <dl className="space-y-4">
+            <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+              <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                Nombre completo
+              </dt>
+              <dd className="font-serif font-light text-base text-white text-right">
+                {user.fullName}
+              </dd>
             </div>
-            <div className="flex justify-between text-sm">
-              <dt className="text-gray-500 font-medium">Email</dt>
-              <dd className="text-gray-800">{user.email}</dd>
+            <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+              <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                Email
+              </dt>
+              <dd className="font-serif font-light text-base text-white text-right break-all">
+                {user.email}
+              </dd>
             </div>
             {user.phone && (
-              <div className="flex justify-between text-sm">
-                <dt className="text-gray-500 font-medium">Teléfono</dt>
-                <dd className="text-gray-800">{user.phone}</dd>
+              <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+                <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                  Teléfono
+                </dt>
+                <dd className="font-serif font-light text-base text-white text-right">
+                  {user.phone}
+                </dd>
               </div>
             )}
             {client?.dateOfBirth && (
-              <div className="flex justify-between text-sm">
-                <dt className="text-gray-500 font-medium">Fecha de nacimiento</dt>
-                <dd className="text-gray-800">
+              <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+                <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                  Fecha de nacimiento
+                </dt>
+                <dd className="font-serif font-light text-base text-white text-right">
                   {new Date(client.dateOfBirth).toLocaleDateString('es-AR', {
                     day: 'numeric', month: 'long', year: 'numeric',
                   })}
@@ -166,232 +237,320 @@ const Dashboard = () => {
               </div>
             )}
             {client?.timeOfBirth && (
-              <div className="flex justify-between text-sm">
-                <dt className="text-gray-500 font-medium">Hora de nacimiento</dt>
-                <dd className="text-gray-800">{client.timeOfBirth.slice(0, 5)} hs</dd>
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                  Hora de nacimiento
+                </dt>
+                <dd className="font-serif font-light text-base text-white text-right">
+                  {client.timeOfBirth.slice(0, 5)} hs
+                </dd>
               </div>
             )}
           </dl>
-        </div>
+        </section>
 
-        {/* Card según rol */}
+        {/* Card: Postulate como terapeuta (solo USER) */}
         {user.role === 'USER' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-mystic-400 to-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-900 mb-1">
-                  ¿Querés ser terapeuta en Ouro?
-                </h2>
-                <p className="text-sm text-gray-500 mb-4">
-                  Completá tu perfil profesional y comenzá a recibir consultas. Tu solicitud será revisada por nuestro equipo.
-                </p>
-                <Link
-                  to="/register-therapist"
-                  className="inline-block bg-gradient-to-r from-mystic-500 to-primary-600 text-white px-5 py-2 rounded-lg hover:from-mystic-600 hover:to-primary-700 transition-all font-medium text-sm shadow-sm"
-                >
-                  Quiero ser terapeuta
-                </Link>
-              </div>
-            </div>
-          </div>
+          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-4">
+              Sumate al equipo
+            </p>
+            <h2 className="font-serif font-light text-2xl text-white mb-3 leading-tight">
+              Postulate como terapeuta
+            </h2>
+            <p className="font-serif font-light text-base text-white-dim leading-relaxed mb-6">
+              Sumate al equipo profesional de OURO. Cada perfil es revisado.
+            </p>
+            <Link
+              to="/register-therapist"
+              className="group inline-flex items-center gap-3 px-7 py-3 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+            >
+              <span>Postular mi perfil</span>
+              <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
+            </Link>
+          </section>
         )}
 
+        {/* Card: Mis turnos (USER y THERAPIST) */}
         {(user.role === 'USER' || user.role === 'THERAPIST') && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-gray-900">Mis turnos</h2>
+          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+                Mis turnos
+              </p>
               <Link
                 to="/mis-turnos"
-                className="inline-block bg-gradient-to-r from-mystic-500 to-primary-600 text-white px-4 py-1.5 rounded-lg hover:from-mystic-600 hover:to-primary-700 transition-all font-medium text-sm shadow-sm"
+                className="group inline-flex items-center gap-2 font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
               >
-                Ver todos
+                <span>Ver todos</span>
+                <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
               </Link>
             </div>
+
             {nextAppointment ? (
-              <div className="flex items-center gap-3 p-3 bg-primary-50 rounded-xl">
-                <div className="w-9 h-9 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+              <div className="flex items-start gap-4 p-5 bg-gold-ghost border border-gold-faint">
+                <div className="w-10 h-10 flex items-center justify-center flex-shrink-0 text-gold border border-gold-dim">
+                  <CalendarIcon />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs text-gray-400 font-medium">Próximo turno</p>
-                  <p className="text-sm font-semibold text-gray-800 truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1">
+                    Próximo turno
+                  </p>
+                  <p className="font-serif font-normal text-base text-white truncate">
                     {nextAppointment.therapistFullName}
                   </p>
-                  <p className="text-xs text-primary-600 capitalize">
+                  <p className="font-serif font-light text-sm text-white-dim mt-1 capitalize">
                     {new Date(nextAppointment.startAt).toLocaleDateString('es-AR', {
                       weekday: 'long', day: 'numeric', month: 'long',
-                    })} · {new Date(nextAppointment.startAt).toLocaleTimeString('es-AR', {
+                    })}
+                    {' · '}
+                    {new Date(nextAppointment.startAt).toLocaleTimeString('es-AR', {
                       hour: '2-digit', minute: '2-digit',
-                    })} hs
+                    })}
+                    {' hs'}
                   </p>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-400">No tenés turnos próximos.{' '}
-                <Link to="/terapeutas" className="text-primary-600 hover:underline font-medium">Reservar uno</Link>
-              </p>
+              <div className="text-center py-6">
+                <p className="font-serif italic font-light text-base text-white-dim mb-4">
+                  No tenés turnos próximos.
+                </p>
+                <Link
+                  to="/terapeutas"
+                  className="inline-flex items-center gap-3 px-6 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+                >
+                  <span>Reservar un turno</span>
+                  <span>→</span>
+                </Link>
+              </div>
             )}
-          </div>
+          </section>
         )}
 
+        {/* Card: Tu perfil de terapeuta (solo THERAPIST) */}
         {user.role === 'THERAPIST' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Tu perfil de terapeuta</h2>
-              <div className="flex items-center gap-3">
+          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+                Tu perfil de terapeuta
+              </p>
+              <div className="flex items-center gap-5">
                 <Link
                   to="/manage-availability"
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                  className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
                 >
                   Gestionar horarios
                 </Link>
                 <Link
                   to="/edit-therapist"
-                  className="text-sm text-mystic-600 hover:text-mystic-700 font-medium transition-colors"
+                  className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
                 >
                   Editar perfil
                 </Link>
               </div>
             </div>
+
             {loadingTherapist && (
-              <p className="text-sm text-gray-400">Cargando perfil...</p>
+              <p className="font-serif italic font-light text-base text-white-dim">
+                Cargando perfil...
+              </p>
             )}
+
             {!loadingTherapist && therapist && (
-              <div className="space-y-4">
-                {/* Foto + nombre */}
-                <div className="flex items-center gap-4">
+              <div className="space-y-6">
+                {/* Foto + nombre + specialty */}
+                <div className="flex items-center gap-5">
                   {therapist.photoUrl ? (
                     <img
                       src={therapist.photoUrl}
                       alt={user.fullName}
-                      className="w-16 h-16 rounded-full object-cover ring-2 ring-primary-100 flex-shrink-0"
+                      className="w-16 h-16 rounded-full object-cover border border-gold-faint flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-mystic-400 to-primary-500 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-2xl">
+                    <div className="w-16 h-16 rounded-full bg-gold-gradient flex items-center justify-center flex-shrink-0">
+                      <span className="font-serif font-normal text-2xl text-navy">
                         {user.fullName?.charAt(0).toUpperCase()}
                       </span>
                     </div>
                   )}
-                  <div>
-                    <p className="font-semibold text-gray-900">{user.fullName}</p>
+                  <div className="min-w-0">
+                    <p className="font-serif font-light text-xl text-white leading-tight">
+                      {user.fullName}
+                    </p>
                     {therapist.specialty && (
-                      <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-mystic-100 text-mystic-700">
+                      <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim mt-2">
                         {therapist.specialty}
-                      </span>
+                      </p>
                     )}
                   </div>
                 </div>
 
                 {/* Precio */}
                 {therapist.priceAmountCents != null && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 font-medium">Precio por sesión</span>
-                    <span className="text-gray-800 font-semibold">
-                      {(therapist.priceAmountCents / 100).toLocaleString('es-AR', {
-                        style: 'currency',
-                        currency: therapist.priceCurrency || 'ARS',
-                      })}
-                    </span>
+                  <div className="pt-5 border-t border-gold-faint">
+                    <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mb-2">
+                      Precio por sesión
+                    </p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="font-serif font-normal text-xl text-white">
+                        {(therapist.priceAmountCents / 100).toLocaleString('es-AR', {
+                          style: 'currency',
+                          currency: therapist.priceCurrency || 'ARS',
+                        })}
+                      </p>
+                      <p className="font-sans text-[10px] uppercase tracking-suffix text-white-faint">
+                        Por sesión
+                      </p>
+                    </div>
                   </div>
                 )}
 
                 {/* Bio */}
                 {therapist.bio && (
-                  <div className="text-sm">
-                    <span className="text-gray-500 font-medium block mb-1">Bio</span>
-                    <p className="text-gray-600 leading-relaxed">{therapist.bio}</p>
+                  <div className="pt-5 border-t border-gold-faint">
+                    <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mb-2">
+                      Bio
+                    </p>
+                    <p className="font-serif font-light text-base text-white-dim leading-relaxed whitespace-pre-line">
+                      {therapist.bio}
+                    </p>
                   </div>
                 )}
 
                 {/* Mercado Pago */}
                 {therapist.approvalStatus === 'APPROVED' && (
-                  <div className={`flex items-center justify-between gap-3 p-3 rounded-xl border ${
-                    therapist.mpTokenConfigurado
-                      ? 'bg-green-50 border-green-200'
-                      : 'bg-amber-50 border-amber-200'
-                  }`}>
-                    <div className="flex items-center gap-2">
-                      <svg className={`w-5 h-5 flex-shrink-0 ${therapist.mpTokenConfigurado ? 'text-green-500' : 'text-amber-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        {therapist.mpTokenConfigurado
-                          ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                          : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                        }
-                      </svg>
-                      <div>
-                        <p className={`text-xs font-semibold ${therapist.mpTokenConfigurado ? 'text-green-800' : 'text-amber-800'}`}>
-                          {therapist.mpTokenConfigurado ? 'Mercado Pago conectado' : 'Conectá tu Mercado Pago'}
-                        </p>
-                        {!therapist.mpTokenConfigurado && (
-                          <p className="text-xs text-amber-700 mt-0.5">Necesario para recibir pagos de tus clientes.</p>
-                        )}
+                  therapist.mpTokenConfigurado ? (
+                    <div className="pt-5 border-t border-gold-faint">
+                      <div className="bg-gold-ghost border border-gold-faint p-5 flex items-start gap-3">
+                        <CheckIcon className="flex-shrink-0 mt-0.5 text-gold" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-1">
+                            Mercado Pago conectado
+                          </p>
+                          <p className="font-serif font-light text-sm text-white-dim leading-relaxed">
+                            Recibís los pagos de tus sesiones directamente en tu cuenta.
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleConnectMp}
+                          disabled={connectingMp}
+                          className="flex-shrink-0 font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300 underline underline-offset-4 disabled:opacity-50"
+                        >
+                          {connectingMp ? 'Redirigiendo...' : 'Reconectar'}
+                        </button>
                       </div>
                     </div>
-                    {!therapist.mpTokenConfigurado && (
-                      <button
-                        onClick={handleConnectMp}
-                        disabled={connectingMp}
-                        className="flex-shrink-0 bg-[#009ee3] hover:bg-[#0080c0] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-60"
-                      >
-                        {connectingMp ? 'Redirigiendo...' : 'Conectar'}
-                      </button>
-                    )}
-                    {therapist.mpTokenConfigurado && (
-                      <button
-                        onClick={handleConnectMp}
-                        disabled={connectingMp}
-                        className="flex-shrink-0 text-xs text-green-700 hover:text-green-900 font-medium underline transition-colors disabled:opacity-60"
-                      >
-                        {connectingMp ? 'Redirigiendo...' : 'Reconectar'}
-                      </button>
-                    )}
+                  ) : (
+                    <div className="pt-5 border-t border-gold-faint">
+                      <div className="border-l-2 border-gold pl-5 pr-4 py-4 bg-gold-ghost">
+                        <div className="flex items-start gap-3 mb-4">
+                          <AlertCircle className="flex-shrink-0 mt-0.5 text-gold" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-1">
+                              Conectá tu Mercado Pago
+                            </p>
+                            <p className="font-serif font-light text-sm text-white leading-relaxed">
+                              Necesario para recibir pagos de tus clientes.
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleConnectMp}
+                          disabled={connectingMp}
+                          className="inline-flex items-center gap-3 bg-gold-gradient px-6 py-2.5 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <span>{connectingMp ? 'Redirigiendo...' : 'Conectar'}</span>
+                          {!connectingMp && <span>→</span>}
+                        </button>
+                      </div>
+                    </div>
+                  )
+                )}
+
+                {/* Estado de aprobación */}
+                {therapist.approvalStatus === 'PENDING' && (
+                  <div className="pt-5 border-t border-gold-faint">
+                    <div className="border-l-2 border-gold pl-5 pr-4 py-4 bg-gold-ghost">
+                      <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-2">
+                        En aprobación
+                      </p>
+                      <p className="font-serif font-light text-base text-white leading-relaxed">
+                        Tu solicitud está siendo revisada por el equipo.
+                      </p>
+                    </div>
                   </div>
                 )}
 
-                {/* Estado */}
-                {badge && (
-                  <div className="pt-1 border-t border-gray-100">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400 font-medium">Estado:</span>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${badge.className}`}>
-                        {badge.label}
-                      </span>
+                {therapist.approvalStatus === 'APPROVED' && (
+                  <div className="pt-5 border-t border-gold-faint flex items-center gap-3">
+                    <span
+                      className="w-1.5 h-1.5 rounded-full bg-gold shadow-gold-glow-soft"
+                      aria-hidden="true"
+                    />
+                    <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+                      Perfil aprobado
+                    </p>
+                  </div>
+                )}
+
+                {therapist.approvalStatus === 'REJECTED' && (
+                  <div className="pt-5 border-t border-gold-faint">
+                    <div
+                      className="px-5 py-4"
+                      style={{
+                        borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+                        borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+                        background: 'rgba(160, 74, 58, 0.08)',
+                      }}
+                      role="alert"
+                    >
+                      <div className="flex items-start gap-3 mb-3">
+                        <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+                        <div className="flex-1">
+                          <p className="font-sans text-[10px] uppercase tracking-eyebrow mb-1" style={{ color: '#A04A3A' }}>
+                            Solicitud rechazada
+                          </p>
+                          <p className="font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
+                            Para más información escribinos a{' '}
+                            <a
+                              href="mailto:contactoouro@gmail.com"
+                              className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+                              style={{ color: '#A04A3A' }}
+                            >
+                              contactoouro@gmail.com
+                            </a>
+                            .
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    {therapist.approvalStatus === 'REJECTED' && (
-                      <p className="mt-2 text-xs text-gray-500">
-                        Tu solicitud fue rechazada. Para más información contactanos en{' '}
-                        <a href="mailto:contactoouro@gmail.com" className="text-primary-600 hover:underline">
-                          contactoouro@gmail.com
-                        </a>
-                      </p>
-                    )}
                   </div>
                 )}
               </div>
             )}
+
             {!loadingTherapist && !therapist && (
-              <p className="text-sm text-gray-400">No se pudo cargar el perfil.</p>
+              <p className="font-serif italic font-light text-base text-white-dim">
+                No pudimos cargar el perfil.
+              </p>
             )}
-          </div>
+          </section>
         )}
 
-        {/* Botón logout */}
-        <div className="text-center">
+        {/* Logout */}
+        <div className="mt-10 text-center">
           <button
             onClick={handleLogout}
-            className="text-sm text-gray-500 hover:text-red-600 transition-colors font-medium"
+            className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300 underline underline-offset-4"
           >
             Cerrar sesión
           </button>
         </div>
-      </div>
+
+      </main>
+
+      <Footer />
     </div>
   );
 };
