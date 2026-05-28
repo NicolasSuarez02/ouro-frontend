@@ -184,11 +184,6 @@ export const updateClient = async (id, clientData) => {
   return response.data;
 };
 
-export const updateClientMe = async (clientData) => {
-  const response = await api.put('/clients/me', clientData);
-  return response.data;
-};
-
 // ==================== AVAILABILITY ENDPOINTS ====================
 
 export const getTherapistAvailability = async (therapistId) => {
