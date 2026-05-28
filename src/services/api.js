@@ -277,10 +277,8 @@ export const rejectResource = async (id) => {
 };
 
 export const downloadResource = async (id) => {
-  const response = await api.get(`/resources/${id}/download`, {
-    responseType: 'blob',
-  });
-  return response;
+  const response = await api.get(`/resources/${id}/download`);
+  return response.data;
 };
 
 export const deleteResource = async (id) => {

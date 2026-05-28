@@ -135,15 +135,8 @@ const Recursos = ({ category, titulo }) => {
     setActionError('');
     setDescargando((prev) => ({ ...prev, [recurso.id]: true }));
     try {
-      const response = await downloadResource(recurso.id);
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', recurso.originalFileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      const { url } = await downloadResource(recurso.id);
+      window.open(url, '_blank', 'noopener,noreferrer');
     } catch (err) {
       setActionError(err.response?.data?.message || 'Error al descargar el archivo');
     } finally {
