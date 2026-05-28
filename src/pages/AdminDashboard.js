@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ReactComponent as Isotipo } from '../assets/logo/ouro-isotipo.svg';
 import {
   getPendingTherapists,
   approveTherapist,
@@ -11,18 +12,40 @@ import {
   adminDeleteUser,
 } from '../services/api';
 
+// ---------------------------------------------------------------
+// Iconos inline — stroke 1.5px.
+// Pendiente reemplazar por lucide-react al sumar la dependencia.
+// ---------------------------------------------------------------
+const SearchIcon = ({ className = '' }) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="11" cy="11" r="7" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+const TrashIcon = ({ className = '' }) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+    <path d="M10 11v6" />
+    <path d="M14 11v6" />
+    <path d="M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2" />
+  </svg>
+);
+
+const TERRACOTA = '#A04A3A';
+
 const ROLE_LABELS = { USER: 'Cliente', THERAPIST: 'Terapeuta', ADMIN: 'Admin' };
-const ROLE_COLORS = {
-  USER: 'bg-blue-100 text-blue-700',
-  THERAPIST: 'bg-purple-100 text-purple-700',
-  ADMIN: 'bg-red-100 text-red-700',
-};
-const APPROVAL_COLORS = {
-  APPROVED: 'bg-green-100 text-green-700',
-  PENDING: 'bg-amber-100 text-amber-700',
-  REJECTED: 'bg-red-100 text-red-700',
-};
 const APPROVAL_LABELS = { APPROVED: 'Aprobado', PENDING: 'Pendiente', REJECTED: 'Rechazado' };
+
+// Estilos de badge de rol (OURO Operativo)
+const roleBadgeClass = (role) => {
+  switch (role) {
+    case 'ADMIN':     return 'bg-gold text-navy';
+    case 'THERAPIST': return 'bg-gold-ghost border border-gold-faint text-gold';
+    default:          return 'border border-gold-faint text-white-dim';
+  }
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -44,7 +67,7 @@ const AdminDashboard = () => {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [deleteConfirm, setDeleteConfirm] = useState(null); // id del usuario a confirmar
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
@@ -84,7 +107,6 @@ const AdminDashboard = () => {
     }
   }, [tab, cargarUsuarios]);
 
-  // Reset page when filters change
   useEffect(() => { setPage(0); }, [search, roleFilter]);
 
   const handleSearchSubmit = (e) => {
@@ -173,98 +195,174 @@ const AdminDashboard = () => {
 
   if (!admin) return null;
 
+  // Render de feedback de acción (aprobar/rechazar)
+  const renderFeedback = (feedback) => {
+    if (feedback?.loading) {
+      return <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">Procesando...</span>;
+    }
+    if (feedback?.success) {
+      return <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">{feedback.success}</span>;
+    }
+    if (feedback?.error) {
+      return <span className="font-sans text-[10px] uppercase tracking-eyebrow" style={{ color: TERRACOTA }}>{feedback.error}</span>;
+    }
+    return null;
+  };
+
+  // Botones aprobar / rechazar reutilizables
+  const ApproveRejectButtons = ({ onApprove, onReject }) => (
+    <div className="flex gap-3">
+      <button
+        onClick={onApprove}
+        className="px-5 py-2 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+      >
+        Aprobar
+      </button>
+      <button
+        onClick={onReject}
+        className="px-5 py-2 font-sans text-[10px] font-medium uppercase tracking-eyebrow hover:opacity-80 transition-opacity duration-300 underline underline-offset-4"
+        style={{ color: TERRACOTA }}
+      >
+        Rechazar
+      </button>
+    </div>
+  );
+
+  const tabs = [
+    { key: 'terapeutas', label: 'Terapeutas', badge: therapists.length },
+    { key: 'recursos', label: 'Recursos', badge: recursos.length },
+    { key: 'usuarios', label: 'Usuarios', badge: 0 },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-mystic-500 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">O</span>
+    <div className="min-h-screen flex flex-col">
+
+      {/* ═══════════════════════════════════════════════
+          Header propio del panel admin
+          ═══════════════════════════════════════════════ */}
+      <header className="border-b border-gold-faint">
+        <div className="max-w-container mx-auto px-6 lg:px-10 py-5 flex justify-between items-center gap-4">
+          <div className="flex items-center gap-3 text-gold">
+            <Isotipo className="h-9 w-9 text-gold" aria-hidden="true" />
+            <div>
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim leading-none mb-1">
+                Panel
+              </p>
+              <span className="font-serif font-light text-lg text-white leading-none">
+                Administración
+              </span>
             </div>
-            <span className="text-xl font-bold text-gray-800">Panel de administración</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500 hidden sm:block">{admin.email}</span>
+          <div className="flex items-center gap-5">
+            <span className="hidden sm:block font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+              {admin.email}
+            </span>
             <button
               onClick={() => { localStorage.removeItem('ouro_user'); localStorage.removeItem('ouro_token'); navigate('/'); }}
-              className="text-sm text-gray-500 hover:text-red-600 font-medium transition-colors"
+              className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
             >
               Cerrar sesión
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Contenido */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* ═══════════════════════════════════════════════
+          Contenido
+          ═══════════════════════════════════════════════ */}
+      <main className="flex-1 max-w-container mx-auto w-full px-6 lg:px-10 py-12">
+
         {/* Tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 w-fit">
-          {[
-            { key: 'terapeutas', label: 'Terapeutas', badge: therapists.length },
-            { key: 'recursos', label: 'Recursos', badge: recursos.length },
-            { key: 'usuarios', label: 'Usuarios', badge: 0 },
-          ].map(({ key, label, badge }) => (
-            <button
-              key={key}
-              onClick={() => setTab(key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                tab === key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {label}
-              {badge > 0 && (
-                <span className="ml-1 bg-amber-100 text-amber-700 text-xs px-1.5 py-0.5 rounded-full">{badge}</span>
-              )}
-            </button>
-          ))}
+        <div className="flex flex-wrap gap-3 mb-8">
+          {tabs.map(({ key, label, badge }) => {
+            const active = tab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                className={`inline-flex items-center gap-2 px-5 py-2.5 border font-sans text-[11px] font-medium uppercase tracking-eyebrow transition-all duration-400 ease-expo-out ${
+                  active
+                    ? 'bg-gold border-gold text-navy'
+                    : 'bg-transparent border-gold-faint text-white-dim hover:border-gold-dim hover:text-gold'
+                }`}
+              >
+                <span>{label}</span>
+                {badge > 0 && (
+                  <span className={`text-[10px] px-1.5 py-0.5 ${active ? 'bg-navy/20 text-navy' : 'bg-gold-ghost text-gold'}`}>
+                    {badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* ── TAB TERAPEUTAS ── */}
         {tab === 'terapeutas' && (
           <>
-            {loading && <div className="text-center py-12 text-gray-500">Cargando...</div>}
-            {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">{error}</div>}
+            {loading && (
+              <div className="flex justify-center py-16">
+                <div className="w-8 h-8 border-2 border-gold-faint border-t-gold rounded-full animate-spin" aria-label="Cargando" />
+              </div>
+            )}
+            {error && (
+              <div
+                className="mb-6 px-5 py-4 flex items-start gap-3"
+                style={{ borderTop: `1px solid ${TERRACOTA}66`, borderBottom: `1px solid ${TERRACOTA}66`, background: `${TERRACOTA}14` }}
+                role="alert"
+              >
+                <p className="font-serif font-light text-base leading-relaxed" style={{ color: TERRACOTA }}>{error}</p>
+              </div>
+            )}
             {!loading && !error && therapists.length === 0 && (
-              <div className="text-center py-12 text-gray-400">No hay terapeutas pendientes de aprobación.</div>
+              <div className="text-center py-16">
+                <p className="font-serif italic font-light text-lg text-white-dim">
+                  No hay terapeutas pendientes de aprobación.
+                </p>
+              </div>
             )}
             <div className="space-y-4">
               {therapists.map((therapist) => {
                 const feedback = actionFeedback[therapist.id];
                 return (
-                  <div key={therapist.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div key={therapist.id} className="bg-navy-card border border-gold-faint p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-4 mb-3">
                           {therapist.photoUrl ? (
-                            <img src={therapist.photoUrl} alt={therapist.userFullName} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                            <img src={therapist.photoUrl} alt={therapist.userFullName} className="w-12 h-12 rounded-full object-cover border border-gold-faint flex-shrink-0" />
                           ) : (
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-mystic-400 to-primary-500 flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold text-lg">{therapist.userFullName?.charAt(0).toUpperCase()}</span>
+                            <div className="w-12 h-12 rounded-full bg-gold-gradient flex items-center justify-center flex-shrink-0">
+                              <span className="font-serif font-normal text-lg text-navy">{therapist.userFullName?.charAt(0).toUpperCase()}</span>
                             </div>
                           )}
-                          <div>
-                            <h2 className="font-semibold text-gray-900">{therapist.userFullName}</h2>
-                            <p className="text-sm text-gray-500">{therapist.userEmail}</p>
+                          <div className="min-w-0">
+                            <h2 className="font-serif font-light text-lg text-white leading-tight">{therapist.userFullName}</h2>
+                            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mt-1 truncate">{therapist.userEmail}</p>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600 mb-2">
-                          {therapist.specialty && <span><span className="font-medium">Especialidad:</span> {therapist.specialty}</span>}
+                        <div className="flex flex-wrap gap-x-6 gap-y-1 mb-3">
+                          {therapist.specialty && (
+                            <span className="font-serif font-light text-sm text-white-dim">
+                              <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mr-2">Especialidad</span>
+                              {therapist.specialty}
+                            </span>
+                          )}
                           {therapist.priceAmountCents != null && (
-                            <span><span className="font-medium">Precio:</span> {(therapist.priceAmountCents / 100).toLocaleString('es-AR', { style: 'currency', currency: therapist.priceCurrency || 'ARS' })}</span>
+                            <span className="font-serif font-light text-sm text-white-dim">
+                              <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mr-2">Precio</span>
+                              {(therapist.priceAmountCents / 100).toLocaleString('es-AR', { style: 'currency', currency: therapist.priceCurrency || 'ARS' })}
+                            </span>
                           )}
                         </div>
-                        {therapist.bio && <p className="text-sm text-gray-500 line-clamp-2">{therapist.bio}</p>}
+                        {therapist.bio && <p className="font-serif font-light text-sm text-white-dim leading-relaxed line-clamp-2">{therapist.bio}</p>}
                       </div>
                       <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        {feedback?.loading && <span className="text-sm text-gray-400">Procesando...</span>}
-                        {feedback?.success && <span className="text-sm text-green-600 font-medium">{feedback.success}</span>}
-                        {feedback?.error && <span className="text-sm text-red-600">{feedback.error}</span>}
-                        {!feedback && (
-                          <div className="flex gap-2">
-                            <button onClick={() => handleApprove(therapist.id)} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">Aprobar</button>
-                            <button onClick={() => handleReject(therapist.id)} className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-sm font-medium rounded-lg transition-colors">Rechazar</button>
-                          </div>
+                        {feedback ? renderFeedback(feedback) : (
+                          <ApproveRejectButtons
+                            onApprove={() => handleApprove(therapist.id)}
+                            onReject={() => handleReject(therapist.id)}
+                          />
                         )}
                       </div>
                     </div>
@@ -279,34 +377,35 @@ const AdminDashboard = () => {
         {tab === 'recursos' && (
           <>
             {!loading && recursos.length === 0 && (
-              <div className="text-center py-12 text-gray-400">No hay recursos pendientes de aprobación.</div>
+              <div className="text-center py-16">
+                <p className="font-serif italic font-light text-lg text-white-dim">
+                  No hay recursos pendientes de aprobación.
+                </p>
+              </div>
             )}
             <div className="space-y-4">
               {recursos.map((recurso) => {
                 const feedback = actionFeedback[`r${recurso.id}`];
                 return (
-                  <div key={recurso.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div key={recurso.id} className="bg-navy-card border border-gold-faint p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${recurso.category === 'BIBLIOTECA' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                            {recurso.category === 'BIBLIOTECA' ? 'Biblioteca' : 'Formaciones'}
-                          </span>
-                        </div>
-                        <h2 className="font-semibold text-gray-900">{recurso.title}</h2>
-                        <p className="text-sm text-gray-500 mt-0.5">Subido por {recurso.uploadedByName}</p>
-                        {recurso.description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{recurso.description}</p>}
-                        <p className="text-xs text-gray-400 mt-1">{recurso.originalFileName}</p>
+                        <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim mb-2">
+                          {recurso.category === 'BIBLIOTECA' ? 'Biblioteca' : 'Formaciones'}
+                        </p>
+                        <h2 className="font-serif font-light text-lg text-white leading-tight">{recurso.title}</h2>
+                        <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mt-2">
+                          Subido por {recurso.uploadedByName}
+                        </p>
+                        {recurso.description && <p className="font-serif font-light text-sm text-white-dim leading-relaxed line-clamp-2 mt-2">{recurso.description}</p>}
+                        <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mt-2 truncate">{recurso.originalFileName}</p>
                       </div>
                       <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        {feedback?.loading && <span className="text-sm text-gray-400">Procesando...</span>}
-                        {feedback?.success && <span className="text-sm text-green-600 font-medium">{feedback.success}</span>}
-                        {feedback?.error && <span className="text-sm text-red-600">{feedback.error}</span>}
-                        {!feedback && (
-                          <div className="flex gap-2">
-                            <button onClick={() => handleApproveResource(recurso.id)} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors">Aprobar</button>
-                            <button onClick={() => handleRejectResource(recurso.id)} className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-sm font-medium rounded-lg transition-colors">Rechazar</button>
-                          </div>
+                        {feedback ? renderFeedback(feedback) : (
+                          <ApproveRejectButtons
+                            onApprove={() => handleApproveResource(recurso.id)}
+                            onReject={() => handleRejectResource(recurso.id)}
+                          />
                         )}
                       </div>
                     </div>
@@ -321,27 +420,31 @@ const AdminDashboard = () => {
         {tab === 'usuarios' && (
           <div>
             {/* Filtros */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-5">
-              <form onSubmit={handleSearchSubmit} className="flex-1 flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+              <form onSubmit={handleSearchSubmit} className="flex-1 flex gap-3">
                 <div className="relative flex-1">
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+                  <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gold-dim" />
                   <input
                     type="text"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     placeholder="Buscar por nombre o email..."
-                    className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="w-full pl-11 pr-3 py-2.5 bg-navy-soft/40 border border-gold-faint focus:border-gold-dim focus:outline-none font-serif font-light text-base text-white placeholder:text-white-faint placeholder:italic transition-colors duration-300"
                   />
                 </div>
-                <button type="submit" className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors">Buscar</button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+                >
+                  Buscar
+                </button>
               </form>
 
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
+                style={{ colorScheme: 'dark' }}
+                className="px-4 py-2.5 bg-navy-soft/40 border border-gold-faint focus:border-gold-dim focus:outline-none font-serif font-light text-base text-white cursor-pointer transition-colors duration-300"
               >
                 <option value="">Todos los roles</option>
                 <option value="USER">Clientes</option>
@@ -351,58 +454,88 @@ const AdminDashboard = () => {
             </div>
 
             {usuariosError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{usuariosError}</div>
+              <div
+                className="mb-6 px-5 py-4"
+                style={{ borderTop: `1px solid ${TERRACOTA}66`, borderBottom: `1px solid ${TERRACOTA}66`, background: `${TERRACOTA}14` }}
+                role="alert"
+              >
+                <p className="font-serif font-light text-base leading-relaxed" style={{ color: TERRACOTA }}>{usuariosError}</p>
+              </div>
             )}
 
             {usuariosLoading ? (
-              <div className="text-center py-12 text-gray-500">Cargando usuarios...</div>
+              <div className="flex justify-center py-16">
+                <div className="w-8 h-8 border-2 border-gold-faint border-t-gold rounded-full animate-spin" aria-label="Cargando" />
+              </div>
             ) : (
               <>
-                <p className="text-xs text-gray-400 mb-3">{totalElements} usuario{totalElements !== 1 ? 's' : ''} encontrado{totalElements !== 1 ? 's' : ''}</p>
+                <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mb-4">
+                  {totalElements} usuario{totalElements !== 1 ? 's' : ''} encontrado{totalElements !== 1 ? 's' : ''}
+                </p>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-navy-card border border-gold-faint">
                   {usuarios.length === 0 ? (
-                    <div className="text-center py-10 text-gray-400 text-sm">No hay usuarios que coincidan con los filtros.</div>
+                    <div className="text-center py-12">
+                      <p className="font-serif italic font-light text-base text-white-dim">
+                        No hay usuarios que coincidan con los filtros.
+                      </p>
+                    </div>
                   ) : (
-                    <div className="divide-y divide-gray-50">
+                    <ul className="divide-y divide-gold-faint">
                       {usuarios.map((user) => (
-                        <div key={user.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors">
+                        <li key={user.id} className="flex items-center justify-between px-5 py-4 gap-3">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-mystic-400 to-primary-500 flex items-center justify-center flex-shrink-0">
-                              <span className="text-white font-bold text-sm">{user.fullName?.charAt(0).toUpperCase()}</span>
+                            <div className="w-9 h-9 rounded-full bg-gold-gradient flex items-center justify-center flex-shrink-0">
+                              <span className="font-serif font-normal text-sm text-navy">{user.fullName?.charAt(0).toUpperCase()}</span>
                             </div>
                             <div className="min-w-0">
-                              <p className="font-medium text-gray-900 text-sm truncate">{user.fullName}</p>
-                              <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                              <p className="font-serif font-light text-base text-white truncate leading-tight">{user.fullName}</p>
+                              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint truncate mt-1">{user.email}</p>
                               {user.therapistApprovalStatus && (
-                                <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${APPROVAL_COLORS[user.therapistApprovalStatus] || 'bg-gray-100 text-gray-600'}`}>
-                                  {APPROVAL_LABELS[user.therapistApprovalStatus] || user.therapistApprovalStatus}
-                                  {user.therapistSpecialty ? ` · ${user.therapistSpecialty}` : ''}
+                                <span className="inline-block mt-1.5">
+                                  {user.therapistApprovalStatus === 'REJECTED' ? (
+                                    <span className="font-sans text-[10px] uppercase tracking-eyebrow px-2 py-0.5" style={{ border: `1px solid ${TERRACOTA}66`, color: TERRACOTA }}>
+                                      {APPROVAL_LABELS.REJECTED}
+                                      {user.therapistSpecialty ? ` · ${user.therapistSpecialty}` : ''}
+                                    </span>
+                                  ) : (
+                                    <span className={`font-sans text-[10px] uppercase tracking-eyebrow px-2 py-0.5 ${
+                                      user.therapistApprovalStatus === 'APPROVED'
+                                        ? 'bg-gold-ghost border border-gold-faint text-gold'
+                                        : 'border border-gold-dim text-gold-dim'
+                                    }`}>
+                                      {APPROVAL_LABELS[user.therapistApprovalStatus] || user.therapistApprovalStatus}
+                                      {user.therapistSpecialty ? ` · ${user.therapistSpecialty}` : ''}
+                                    </span>
+                                  )}
                                 </span>
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_COLORS[user.role] || 'bg-gray-100 text-gray-600'}`}>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className={`font-sans text-[10px] font-medium uppercase tracking-eyebrow px-2 py-0.5 ${roleBadgeClass(user.role)}`}>
                               {ROLE_LABELS[user.role] || user.role}
                             </span>
                             {!user.emailVerified && (
-                              <span className="text-xs bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full">Sin verificar</span>
+                              <span className="font-sans text-[10px] uppercase tracking-eyebrow px-2 py-0.5 border border-gold-dim text-gold-dim hidden sm:inline-block">
+                                Sin verificar
+                              </span>
                             )}
                             {user.role !== 'ADMIN' && (
                               deleteConfirm === user.id ? (
-                                <div className="flex items-center gap-1">
-                                  <span className="text-xs text-gray-500">¿Eliminar?</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint hidden sm:inline">¿Eliminar?</span>
                                   <button
                                     onClick={() => handleDeleteUser(user.id)}
                                     disabled={deleteLoading}
-                                    className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors disabled:opacity-50"
+                                    className="px-2.5 py-1 font-sans text-[10px] font-medium uppercase tracking-eyebrow disabled:opacity-50 transition-all duration-300"
+                                    style={{ background: `${TERRACOTA}26`, border: `1px solid ${TERRACOTA}80`, color: TERRACOTA }}
                                   >
                                     {deleteLoading ? '...' : 'Sí'}
                                   </button>
                                   <button
                                     onClick={() => setDeleteConfirm(null)}
-                                    className="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium rounded-md transition-colors"
+                                    className="px-2.5 py-1 border border-gold-faint hover:border-gold-dim font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-white transition-all duration-300"
                                   >
                                     No
                                   </button>
@@ -410,42 +543,45 @@ const AdminDashboard = () => {
                               ) : (
                                 <button
                                   onClick={() => setDeleteConfirm(user.id)}
-                                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                  aria-label="Eliminar usuario"
                                   title="Eliminar usuario"
+                                  className="p-1.5 text-white-faint hover:text-[#A04A3A] transition-colors duration-300"
                                 >
-                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
+                                  <TrashIcon />
                                 </button>
                               )
                             )}
                           </div>
-                        </div>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   )}
                 </div>
 
                 {/* Paginación */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-3 mt-5">
+                  <div className="flex items-center justify-center gap-4 mt-6">
                     <button
                       onClick={() => setPage((p) => p - 1)}
                       disabled={page === 0}
-                      className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Página anterior"
+                      className="p-3 border border-gold-dim text-gold hover:bg-gold hover:text-navy disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gold transition-all duration-400 ease-expo-out"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                       </svg>
                     </button>
-                    <span className="text-sm text-gray-500 font-medium">{page + 1} de {totalPages}</span>
+                    <span className="font-sans text-[11px] uppercase tracking-eyebrow text-white-dim px-2">
+                      {page + 1} de {totalPages}
+                    </span>
                     <button
                       onClick={() => setPage((p) => p + 1)}
                       disabled={page === totalPages - 1}
-                      className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Página siguiente"
+                      className="p-3 border border-gold-dim text-gold hover:bg-gold hover:text-navy disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gold transition-all duration-400 ease-expo-out"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                       </svg>
                     </button>
                   </div>
@@ -454,7 +590,7 @@ const AdminDashboard = () => {
             )}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 };
