@@ -7,8 +7,8 @@ import {
   getAvailableDays,
   getAvailableSlots,
   bookAppointment,
-  getRatingEstado,
-  crearCalificacion,
+  getRatingStatus,
+  createRating,
 } from '../services/api';
 
 // Componente de estrellas reutilizable — paleta OURO (gold filled / gold-faint empty)
@@ -111,7 +111,7 @@ const TherapistDetail = () => {
   // Cargar estado de calificación cuando hay usuario y terapeuta cargados
   useEffect(() => {
     if (currentUser && therapist && !isOwnProfile) {
-      getRatingEstado(therapist.id)
+      getRatingStatus(therapist.id)
         .then(setRatingEstado)
         .catch(() => setRatingEstado(null));
     }
@@ -199,7 +199,7 @@ const TherapistDetail = () => {
     setEnviandoRating(true);
     setRatingError('');
     try {
-      await crearCalificacion({
+      await createRating({
         therapistId: therapist.id,
         score: ratingSeleccionado,
         comment: ratingComentario.trim() || null,
