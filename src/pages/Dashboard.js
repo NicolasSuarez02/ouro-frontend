@@ -194,9 +194,17 @@ const Dashboard = () => {
 
         {/* Card: Tus datos */}
         <section className="bg-navy-card border border-gold-faint p-8 mb-6">
-          <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-6">
-            Tus datos
-          </p>
+          <div className="flex items-center justify-between mb-6">
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+              Tus datos
+            </p>
+            <Link
+              to="/editar-perfil"
+              className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim hover:text-gold transition-colors duration-300"
+            >
+              Editar →
+            </Link>
+          </div>
           <dl className="space-y-4">
             <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
               <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">

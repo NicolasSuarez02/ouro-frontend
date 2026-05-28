@@ -12,6 +12,7 @@ const EditProfile = () => {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
+  const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
@@ -22,6 +23,7 @@ const EditProfile = () => {
     if (!stored) { navigate('/login'); return; }
     const parsed = JSON.parse(stored);
     setUser(parsed);
+    setFullName(parsed.fullName || '');
     setPhone(parsed.phone || '');
     setEmail(parsed.email || '');
 
@@ -56,14 +58,14 @@ const EditProfile = () => {
     setError('');
     setSuccess('');
 
-    if (!phone.trim() || !email.trim()) {
-      setError('El teléfono y el email son obligatorios.');
+    if (!fullName.trim() || !phone.trim() || !email.trim()) {
+      setError('El nombre, teléfono y email son obligatorios.');
       return;
     }
 
     setSaving(true);
     try {
-      const updatedUser = await updateUser(user.id, { phone: phone.trim(), email: email.trim() });
+      const updatedUser = await updateUser(user.id, { fullName: fullName.trim(), phone: phone.trim(), email: email.trim() });
 
       // Actualizar datos de nacimiento en perfil de cliente
       if (dateOfBirth || timeOfBirth) {
@@ -81,7 +83,7 @@ const EditProfile = () => {
       }
 
       // Actualizar localStorage
-      const newUserData = { ...user, phone: updatedUser.phone, email: updatedUser.email };
+      const newUserData = { ...user, fullName: updatedUser.fullName, phone: updatedUser.phone, email: updatedUser.email };
       localStorage.setItem('ouro_user', JSON.stringify(newUserData));
 
       const emailChanged = email.trim() !== user.email;
@@ -134,6 +136,19 @@ const EditProfile = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nombre completo <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -160,32 +175,34 @@ const EditProfile = () => {
                 />
               </div>
 
-              <div className="p-4 bg-mystic-50 border border-mystic-100 rounded-xl">
-                <p className="text-xs text-mystic-700 mb-3">Fecha y hora de nacimiento — usados por los terapeutas para personalizar las sesiones.</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de nacimiento</label>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={dateOfBirth}
-                      onChange={handleDateChange}
-                      placeholder="dd/mm/aaaa"
-                      maxLength={10}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Hora de nacimiento</label>
-                    <input
-                      type="time"
-                      value={timeOfBirth}
-                      onChange={(e) => setTimeOfBirth(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
-                    />
+              {user?.role !== 'THERAPIST' && (
+                <div className="p-4 bg-mystic-50 border border-mystic-100 rounded-xl">
+                  <p className="text-xs text-mystic-700 mb-3">Fecha y hora de nacimiento — usados por los terapeutas para personalizar las sesiones.</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de nacimiento</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={dateOfBirth}
+                        onChange={handleDateChange}
+                        placeholder="dd/mm/aaaa"
+                        maxLength={10}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Hora de nacimiento</label>
+                      <input
+                        type="time"
+                        value={timeOfBirth}
+                        onChange={(e) => setTimeOfBirth(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <button
                 type="submit"
