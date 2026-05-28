@@ -342,18 +342,24 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-x-6 gap-y-1 mb-3">
-                          {therapist.specialty && (
+                          {therapist.specialties?.length > 0 && (
                             <span className="font-serif font-light text-sm text-white-dim">
-                              <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mr-2">Especialidad</span>
-                              {therapist.specialty}
+                              <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mr-2">Especialidades</span>
+                              {therapist.specialties.map((s) => s.name).join(' · ')}
                             </span>
                           )}
-                          {therapist.priceAmountCents != null && (
-                            <span className="font-serif font-light text-sm text-white-dim">
-                              <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mr-2">Precio</span>
-                              {(therapist.priceAmountCents / 100).toLocaleString('es-AR', { style: 'currency', currency: therapist.priceCurrency || 'ARS' })}
-                            </span>
-                          )}
+                          {therapist.specialties?.length > 0 && (() => {
+                            const prices = therapist.specialties.map((s) => s.priceAmountCents || 0).filter((p) => p > 0);
+                            if (!prices.length) return null;
+                            const min = Math.min(...prices);
+                            const multi = prices.some((p) => p !== prices[0]);
+                            return (
+                              <span className="font-serif font-light text-sm text-white-dim">
+                                <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mr-2">{multi ? 'Desde' : 'Precio'}</span>
+                                {(min / 100).toLocaleString('es-AR', { style: 'currency', currency: therapist.priceCurrency || 'ARS', maximumFractionDigits: 0 })}
+                              </span>
+                            );
+                          })()}
                         </div>
                         {therapist.bio && <p className="font-serif font-light text-sm text-white-dim leading-relaxed line-clamp-2">{therapist.bio}</p>}
                       </div>
@@ -496,8 +502,7 @@ const AdminDashboard = () => {
                                   {user.therapistApprovalStatus === 'REJECTED' ? (
                                     <span className="font-sans text-[10px] uppercase tracking-eyebrow px-2 py-0.5" style={{ border: `1px solid ${TERRACOTA}66`, color: TERRACOTA }}>
                                       {APPROVAL_LABELS.REJECTED}
-                                      {user.therapistSpecialty ? ` · ${user.therapistSpecialty}` : ''}
-                                    </span>
+                                                                          </span>
                                   ) : (
                                     <span className={`font-sans text-[10px] uppercase tracking-eyebrow px-2 py-0.5 ${
                                       user.therapistApprovalStatus === 'APPROVED'
@@ -505,8 +510,7 @@ const AdminDashboard = () => {
                                         : 'border border-gold-dim text-gold-dim'
                                     }`}>
                                       {APPROVAL_LABELS[user.therapistApprovalStatus] || user.therapistApprovalStatus}
-                                      {user.therapistSpecialty ? ` · ${user.therapistSpecialty}` : ''}
-                                    </span>
+                                                                          </span>
                                   )}
                                 </span>
                               )}
