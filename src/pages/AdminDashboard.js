@@ -8,7 +8,7 @@ import {
   getPendingResources,
   approveResource,
   rejectResource,
-  getAllUsersPaginados,
+  getAllUsersPaginated,
   adminDeleteUser,
 } from '../services/api';
 
@@ -90,7 +90,7 @@ const AdminDashboard = () => {
     setUsuariosLoading(true);
     setUsuariosError('');
     try {
-      const data = await getAllUsersPaginados({ search, role: roleFilter, page, size: 20 });
+      const data = await getAllUsersPaginated({ search, role: roleFilter, page, size: 20 });
       setUsuarios(data.content || []);
       setTotalPages(data.totalPages || 0);
       setTotalElements(data.totalElements || 0);
