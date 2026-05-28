@@ -117,6 +117,13 @@ const TherapistDetail = () => {
     }
   }, [therapist, currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-seleccionar especialidad si hay exactamente una
+  useEffect(() => {
+    if (therapist?.specialties?.length === 1) {
+      setSelectedSpecialty(therapist.specialties[0].name);
+    }
+  }, [therapist]);
+
   // Cargar días disponibles cuando cambia mes, terapeuta o especialidad seleccionada
   useEffect(() => {
     if (!therapist) return;
@@ -329,10 +336,10 @@ const TherapistDetail = () => {
                 {therapist.userFullName}
               </h1>
 
-              {/* Especialidad como eyebrow */}
-              {therapist.specialty && (
+              {/* Especialidades como eyebrow */}
+              {therapist.specialties?.length > 0 && (
                 <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim">
-                  {therapist.specialty}
+                  {therapist.specialties.map((s) => s.name).join(' · ')}
                 </p>
               )}
 
@@ -350,19 +357,26 @@ const TherapistDetail = () => {
               )}
 
               {/* Precio */}
-              {therapist.priceAmountCents != null && (
-                <div className="border-t border-gold-faint mt-6 pt-6">
-                  <p className="font-serif font-normal text-2xl text-white">
-                    {(therapist.priceAmountCents / 100).toLocaleString('es-AR', {
-                      style: 'currency',
-                      currency: therapist.priceCurrency || 'ARS',
-                    })}
-                  </p>
-                  <p className="font-sans text-[10px] uppercase tracking-suffix text-white-faint mt-1">
-                    Por sesión
-                  </p>
-                </div>
-              )}
+              {therapist.specialties?.length > 0 && (() => {
+                const prices = therapist.specialties.map((s) => s.priceAmountCents || 0).filter((p) => p > 0);
+                if (prices.length === 0) return null;
+                const minPrice = Math.min(...prices);
+                const multiPrice = prices.length > 1 && prices.some((p) => p !== prices[0]);
+                return (
+                  <div className="border-t border-gold-faint mt-6 pt-6">
+                    <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mb-1">
+                      {multiPrice ? 'Desde' : 'Por sesión'}
+                    </p>
+                    <p className="font-serif font-normal text-2xl text-white">
+                      {(minPrice / 100).toLocaleString('es-AR', {
+                        style: 'currency',
+                        currency: therapist.priceCurrency || 'ARS',
+                        maximumFractionDigits: 0,
+                      })}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
@@ -552,14 +566,19 @@ const TherapistDetail = () => {
                   >
                     <option value="">— Elegí un tipo de sesión —</option>
                     {therapist.specialties.map((sp) => (
-                      <option key={sp.name} value={sp.name}>{sp.name}</option>
+                      <option key={sp.name} value={sp.name}>
+                        {sp.name}{sp.priceAmountCents > 0 ? ` — ${(sp.priceAmountCents / 100).toLocaleString('es-AR', { style: 'currency', currency: therapist.priceCurrency || 'ARS', maximumFractionDigits: 0 })}` : ''}
+                      </option>
                     ))}
                   </select>
-                  {selectedSpecialty && (
-                    <p className="mt-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
-                      Anticipación mínima: {therapist.specialties.find(s => s.name === selectedSpecialty)?.minBookingLeadHours}h
-                    </p>
-                  )}
+                  {selectedSpecialty && (() => {
+                    const sp = therapist.specialties.find(s => s.name === selectedSpecialty);
+                    return sp ? (
+                      <p className="mt-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                        Anticipación mínima: {sp.minBookingLeadHours}h
+                      </p>
+                    ) : null;
+                  })()}
                 </div>
               )}
 

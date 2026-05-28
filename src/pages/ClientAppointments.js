@@ -7,7 +7,6 @@ import {
   getTherapistByUserId,
   cancelAppointment,
   completeAppointment,
-  getPaymentLink,
 } from '../services/api';
 
 const PAGE_SIZE = 5;
@@ -26,14 +25,6 @@ const STATUS_CONFIG = {
       background: 'rgba(198, 167, 94, 0.06)',
       border: '1px solid rgba(198, 167, 94, 0.15)',
       color: 'var(--gold)',
-    },
-  },
-  PENDING_PAYMENT: {
-    label: 'Pendiente de pago',
-    style: {
-      background: 'transparent',
-      border: '1px solid rgba(198, 167, 94, 0.4)',
-      color: 'rgba(198, 167, 94, 0.7)',
     },
   },
   CANCELLED: {
@@ -131,7 +122,6 @@ const ClientAppointments = () => {
   const [cancellingId, setCancellingId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
   const [completingId, setCompletingId] = useState(null);
-  const [payingId, setPayingId] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [isTherapist, setIsTherapist] = useState(false);
   const [historialPage, setHistorialPage] = useState(1);
@@ -201,18 +191,6 @@ const ClientAppointments = () => {
     }
   };
 
-  const handlePay = async (appointmentId) => {
-    setPayingId(appointmentId);
-    setErrorMsg('');
-    try {
-      const { paymentUrl } = await getPaymentLink(appointmentId);
-      window.location.href = paymentUrl;
-    } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'No se pudo obtener el link de pago.');
-      setPayingId(null);
-    }
-  };
-
   // ---------------------------------------------------------------
   // Loading state
   // ---------------------------------------------------------------
@@ -241,7 +219,6 @@ const ClientAppointments = () => {
     const actingAsTherapist = isTherapist && !forceClientView;
     const canCancel = isFutureSection && appt.status !== 'CANCELLED';
     const canComplete = actingAsTherapist && isFutureSection && appt.status === 'RESERVED';
-    const canPay = !actingAsTherapist && isFutureSection && appt.status === 'PENDING_PAYMENT';
     const isConfirming = confirmId === appt.id;
 
     return (
@@ -339,17 +316,8 @@ const ClientAppointments = () => {
             </div>
 
             {/* Acciones */}
-            {(canCancel || canComplete || canPay) && (
+            {(canCancel || canComplete) && (
               <div className="flex flex-col gap-2 flex-shrink-0 items-end">
-                {canPay && (
-                  <button
-                    onClick={() => handlePay(appt.id)}
-                    disabled={payingId === appt.id}
-                    className="px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-semibold uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out disabled:opacity-50"
-                  >
-                    {payingId === appt.id ? 'Cargando...' : 'Pagar'}
-                  </button>
-                )}
                 {canComplete && (
                   <button
                     onClick={() => handleComplete(appt.id)}

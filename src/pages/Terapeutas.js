@@ -112,10 +112,12 @@ const Terapeutas = () => {
     setPage(1);
   }, [filtro]);
 
-  const terapeutasFiltrados = therapists.filter((t) =>
-    t.specialty?.toLowerCase().includes(filtro.toLowerCase()) ||
-    t.userFullName?.toLowerCase().includes(filtro.toLowerCase())
-  );
+  const terapeutasFiltrados = therapists.filter((t) => {
+    const q = filtro.toLowerCase();
+    const matchesName = t.userFullName?.toLowerCase().includes(q);
+    const matchesSpecialties = t.specialties?.some((s) => s.name?.toLowerCase().includes(q));
+    return matchesName || matchesSpecialties;
+  });
 
   const totalPages = Math.ceil(terapeutasFiltrados.length / PAGE_SIZE);
   const terapeutasPagina = terapeutasFiltrados.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -273,10 +275,10 @@ const Terapeutas = () => {
                     {therapist.userFullName}
                   </h2>
 
-                  {/* Especialidad como eyebrow */}
-                  {therapist.specialty && (
-                    <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim truncate">
-                      {therapist.specialty}
+                  {/* Especialidades como eyebrow */}
+                  {therapist.specialties?.length > 0 && (
+                    <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim">
+                      {therapist.specialties.map((s) => s.name).join(' · ')}
                     </p>
                   )}
 
@@ -284,20 +286,26 @@ const Terapeutas = () => {
                   <MiniEstrellas score={therapist.averageRating} count={therapist.ratingCount} />
 
                   {/* Precio */}
-                  {therapist.priceAmountCents != null && (
-                    <div className="mt-5 pt-5 border-t border-gold-faint">
-                      <p className="font-serif font-normal text-xl text-white">
-                        {(therapist.priceAmountCents / 100).toLocaleString('es-AR', {
-                          style: 'currency',
-                          currency: therapist.priceCurrency || 'ARS',
-                          maximumFractionDigits: 0,
-                        })}
-                      </p>
-                      <p className="font-sans text-[10px] uppercase tracking-suffix text-white-faint mt-1">
-                        Por sesión
-                      </p>
-                    </div>
-                  )}
+                  {therapist.specialties?.length > 0 && (() => {
+                    const prices = therapist.specialties.map((s) => s.priceAmountCents || 0).filter((p) => p > 0);
+                    if (prices.length === 0) return null;
+                    const minPrice = Math.min(...prices);
+                    const multiPrice = prices.some((p) => p !== prices[0]);
+                    return (
+                      <div className="mt-5 pt-5 border-t border-gold-faint">
+                        <p className="font-serif font-normal text-xl text-white">
+                          {(minPrice / 100).toLocaleString('es-AR', {
+                            style: 'currency',
+                            currency: therapist.priceCurrency || 'ARS',
+                            maximumFractionDigits: 0,
+                          })}
+                        </p>
+                        <p className="font-sans text-[10px] uppercase tracking-suffix text-white-faint mt-1">
+                          {multiPrice ? 'Desde · Por sesión' : 'Por sesión'}
+                        </p>
+                      </div>
+                    );
+                  })()}
                 </Link>
               ))}
             </div>

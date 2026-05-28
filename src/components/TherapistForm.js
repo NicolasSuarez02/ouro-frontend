@@ -43,15 +43,13 @@ const LEAD_TIME_OPTIONS = [
 const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitLabel = 'Guardar', userId }) => {
   const [formData, setFormData] = useState({
     bio: initialValues.bio || '',
-    specialty: initialValues.specialty || '',
     photoUrl: initialValues.photoUrl || '',
-    precioEnPesos: initialValues.precioEnPesos || '',
     priceCurrency: initialValues.priceCurrency || 'ARS',
-    minBookingLeadHours: initialValues.minBookingLeadHours || 1,
   });
   const [specialties, setSpecialties] = useState(initialValues.specialties || []);
   const [newSpecName, setNewSpecName] = useState('');
   const [newSpecLeadHours, setNewSpecLeadHours] = useState(1);
+  const [newSpecPrice, setNewSpecPrice] = useState('');
   const [localError, setLocalError] = useState('');
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(initialValues.photoUrl || '');
@@ -84,14 +82,13 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
     e.preventDefault();
     setLocalError('');
 
-    if (!formData.bio.trim() || !formData.specialty.trim() || !formData.precioEnPesos) {
-      setLocalError('Completá los campos obligatorios');
+    if (!formData.bio.trim()) {
+      setLocalError('La bio es obligatoria');
       return;
     }
 
-    const precio = parseFloat(formData.precioEnPesos);
-    if (isNaN(precio) || precio <= 0) {
-      setLocalError('El precio debe ser un número mayor a 0');
+    if (specialties.length === 0) {
+      setLocalError('Agregá al menos una especialidad');
       return;
     }
 
@@ -113,12 +110,9 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
 
     onSubmit({
       bio: formData.bio,
-      specialty: formData.specialty,
       photoUrl: finalPhotoUrl || null,
-      priceAmountCents: Math.round(precio * 100),
       priceCurrency: formData.priceCurrency,
-      minBookingLeadHours: formData.minBookingLeadHours,
-      specialties: specialties.length > 0 ? specialties : null,
+      specialties,
     });
   };
 
@@ -151,24 +145,6 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
         </div>
       )}
 
-      {/* Especialidad principal */}
-      <div>
-        <label htmlFor="specialty" className={labelClass}>
-          Especialidad principal
-        </label>
-        <input
-          id="specialty"
-          name="specialty"
-          type="text"
-          required
-          value={formData.specialty}
-          onChange={handleChange}
-          placeholder="Astrología, tarot, reiki, otra"
-          className={inputClass}
-          style={{ colorScheme: 'dark' }}
-        />
-      </div>
-
       {/* Bio */}
       <div>
         <label htmlFor="bio" className={labelClass}>
@@ -186,64 +162,23 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
         />
       </div>
 
-      {/* Precio + Moneda */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-        <div className="sm:col-span-2">
-          <label htmlFor="precioEnPesos" className={labelClass}>
-            Precio por sesión
-          </label>
-          <input
-            id="precioEnPesos"
-            name="precioEnPesos"
-            type="number"
-            required
-            min="1"
-            step="1"
-            value={formData.precioEnPesos}
-            onChange={handleChange}
-            placeholder="5000"
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label htmlFor="priceCurrency" className={labelClass}>
-            Moneda
-          </label>
-          <select
-            id="priceCurrency"
-            name="priceCurrency"
-            value={formData.priceCurrency}
-            onChange={handleChange}
-            style={{ colorScheme: 'dark' }}
-            className={selectClass}
-          >
-            <option value="ARS">ARS</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Anticipación mínima */}
-      <div>
-        <label htmlFor="minBookingLeadHours" className={labelClass}>
-          Anticipación mínima para reservar
+      {/* Moneda */}
+      <div className="max-w-[160px]">
+        <label htmlFor="priceCurrency" className={labelClass}>
+          Moneda
         </label>
         <select
-          id="minBookingLeadHours"
-          name="minBookingLeadHours"
-          value={formData.minBookingLeadHours}
+          id="priceCurrency"
+          name="priceCurrency"
+          value={formData.priceCurrency}
           onChange={handleChange}
           style={{ colorScheme: 'dark' }}
           className={selectClass}
         >
-          {LEAD_TIME_OPTIONS.map(({ value, label }) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
+          <option value="ARS">ARS</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
         </select>
-        <p className="font-serif italic font-light text-sm text-white-faint mt-3">
-          Los clientes solo podrán reservar con al menos esta anticipación.
-        </p>
       </div>
 
       {/* Foto de perfil */}
@@ -301,18 +236,13 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
         />
       </div>
 
-      {/* Especialidades adicionales */}
+      {/* Especialidades */}
       <div className="pt-2">
-        <div className="flex items-baseline gap-3 mb-3">
-          <label className={`${labelClass} mb-0`}>
-            Especialidades adicionales
-          </label>
-          <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
-            Opcional
-          </span>
-        </div>
+        <label className={`${labelClass} mb-1`}>
+          Especialidades
+        </label>
         <p className="font-serif italic font-light text-sm text-white-faint mb-5">
-          Si ofrecés distintos tipos de sesión con diferente anticipación, agregalas acá.
+          Cada especialidad tiene su propio precio y anticipación mínima.
         </p>
 
         {/* Lista de especialidades ya agregadas */}
@@ -325,6 +255,9 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
               >
                 <span className="flex-1 font-serif font-normal text-base text-white truncate">
                   {sp.name}
+                </span>
+                <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-dim flex-shrink-0">
+                  {(sp.priceAmountCents / 100).toLocaleString('es-AR', { style: 'currency', currency: formData.priceCurrency, maximumFractionDigits: 0 })}
                 </span>
                 <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim flex-shrink-0">
                   {sp.minBookingLeadHours}h
@@ -348,34 +281,60 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
             type="text"
             value={newSpecName}
             onChange={(e) => setNewSpecName(e.target.value)}
-            placeholder="Carta natal, lecturas de tarot, otra"
+            placeholder="Nombre de la especialidad"
             className={inputClass}
           />
-          <div className="flex flex-col sm:flex-row gap-3">
-            <select
-              value={newSpecLeadHours}
-              onChange={(e) => setNewSpecLeadHours(Number(e.target.value))}
-              style={{ colorScheme: 'dark' }}
-              className={`${selectClass} sm:flex-1`}
-            >
-              {LEAD_TIME_OPTIONS.map(({ value, label }) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => {
-                if (!newSpecName.trim()) return;
-                setSpecialties([...specialties, { name: newSpecName.trim(), minBookingLeadHours: newSpecLeadHours }]);
-                setNewSpecName('');
-                setNewSpecLeadHours(1);
-              }}
-              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out flex-shrink-0"
-            >
-              <PlusIcon />
-              <span>Agregar</span>
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-2">
+                Precio
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={newSpecPrice}
+                onChange={(e) => setNewSpecPrice(e.target.value)}
+                placeholder="5000"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-2">
+                Anticipación mínima
+              </label>
+              <select
+                value={newSpecLeadHours}
+                onChange={(e) => setNewSpecLeadHours(Number(e.target.value))}
+                style={{ colorScheme: 'dark' }}
+                className={selectClass}
+              >
+                {LEAD_TIME_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (!newSpecName.trim()) return;
+              const precio = parseFloat(newSpecPrice);
+              if (isNaN(precio) || precio < 0) return;
+              setSpecialties([...specialties, {
+                name: newSpecName.trim(),
+                minBookingLeadHours: newSpecLeadHours,
+                priceAmountCents: Math.round(precio * 100),
+              }]);
+              setNewSpecName('');
+              setNewSpecPrice('');
+              setNewSpecLeadHours(1);
+            }}
+            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+          >
+            <PlusIcon />
+            <span>Agregar especialidad</span>
+          </button>
         </div>
       </div>
 
