@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getTherapistByUserId, updateTherapist } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import TherapistForm from '../components/TherapistForm';
+import { getTherapistByUserId, updateTherapist } from '../services/api';
 
 const EditTherapist = () => {
   const navigate = useNavigate();
@@ -31,13 +33,8 @@ const EditTherapist = () => {
         setTherapistId(therapist.id);
         setInitialValues({
           bio: therapist.bio || '',
-          specialty: therapist.specialty || '',
           photoUrl: therapist.photoUrl || '',
-          priceInCurrency: therapist.priceAmountCents != null
-            ? (therapist.priceAmountCents / 100).toString()
-            : '',
           priceCurrency: therapist.priceCurrency || 'ARS',
-          minBookingLeadHours: therapist.minBookingLeadHours || 1,
           specialties: therapist.specialties || [],
         });
       })
@@ -54,40 +51,76 @@ const EditTherapist = () => {
       setSuccess(true);
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err) {
-      setApiError(err.response?.data?.message || 'Error al guardar los cambios. Intenta nuevamente.');
+      setApiError(err.response?.data?.message || 'Error al guardar los cambios. Intentá nuevamente.');
     } finally {
       setSaving(false);
     }
   };
 
+  // ---------------------------------------------------------------
+  // Loading
+  // ---------------------------------------------------------------
   if (loading || !user || !initialValues) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div
+            className="w-8 h-8 border-2 border-gold-faint border-t-gold rounded-full animate-spin"
+            aria-label="Cargando"
+          />
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-mystic-500 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">O</span>
-            </div>
-            <span className="text-3xl font-bold text-gray-800">URO</span>
-          </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Editar perfil</h2>
-          <p className="mt-2 text-gray-600">Actualizá tu información profesional</p>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+
+      <main className="flex-1 max-w-2xl mx-auto w-full px-6 lg:px-10 pt-24 lg:pt-32 pb-24">
+
+        {/* Volver al dashboard */}
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="group inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300 mb-10"
+        >
+          <span className="transition-transform duration-400 ease-expo-out group-hover:-translate-x-2">←</span>
+          <span>Dashboard</span>
+        </button>
+
+        {/* Header de sección — operativo sobrio */}
+        <div className="mb-10">
+          <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-4">
+            Mi perfil
+          </p>
+          <h1
+            className="font-serif font-light text-white mb-3"
+            style={{ fontSize: 'clamp(28px, 3vw, 40px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+          >
+            Editar perfil
+          </h1>
+          <p className="font-serif font-light text-white-dim leading-relaxed" style={{ fontSize: 'clamp(15px, 1.1vw, 17px)' }}>
+            Actualizá tu información profesional.
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          {success && (
-            <div className="mb-5 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
-              ¡Cambios guardados! Redirigiendo...
-            </div>
-          )}
+        {/* Banner success */}
+        {success && (
+          <div className="mb-8 border border-gold-faint bg-gold-ghost px-5 py-4 flex items-start gap-3" role="status">
+            <span
+              className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-gold shadow-gold-glow-soft"
+              aria-hidden="true"
+            />
+            <p className="font-serif font-light text-base text-white leading-relaxed">
+              Cambios guardados. Redirigiendo al dashboard.
+            </p>
+          </div>
+        )}
+
+        {/* Card del form */}
+        <div className="bg-navy-card border border-gold-faint p-8">
           <TherapistForm
             key={JSON.stringify(initialValues)}
             initialValues={initialValues}
@@ -97,13 +130,11 @@ const EditTherapist = () => {
             submitLabel="Guardar cambios"
             userId={user?.id}
           />
-          <div className="mt-6 text-center">
-            <Link to="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">
-              ← Volver al dashboard
-            </Link>
-          </div>
         </div>
-      </div>
+
+      </main>
+
+      <Footer />
     </div>
   );
 };

@@ -18,11 +18,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Endpoints de autenticación donde un 401 es un fail esperado del flujo
+// (no significa "sesión expirada"). NO deben triggear el redirect destructivo
+// del interceptor — si lo hicieran, el hard reload mata el state del form
+// antes de que el usuario alcance a leer el mensaje de error.
+const AUTH_ENDPOINTS = [
+  '/users/login',
+  '/users/register',
+  '/users/forgot-password',
+  '/users/reset-password',
+  '/users/verify-email',
+  '/users/resend-verification',
+];
+
 // Manejar errores globalmente; limpiar sesión si el token expiró
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url || '';
+    const isAuthEndpoint = AUTH_ENDPOINTS.some((path) => requestUrl.includes(path));
+
+    if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('ouro_token');
       localStorage.removeItem('ouro_user');
       window.location.href = '/login';
@@ -165,6 +181,11 @@ export const getClientByUserId = async (userId) => {
 
 export const updateClient = async (id, clientData) => {
   const response = await api.put(`/clients/${id}`, clientData);
+  return response.data;
+};
+
+export const updateClientMe = async (clientData) => {
+  const response = await api.put('/clients/me', clientData);
   return response.data;
 };
 

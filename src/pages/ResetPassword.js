@@ -1,6 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { resetPassword } from '../services/api';
+import AuthLayout from '../components/AuthLayout';
+import useDismissibleError from '../hooks/useDismissibleError';
+
+// ---------------------------------------------------------------
+// AlertCircle icon — stroke 1.5px.
+// ---------------------------------------------------------------
+const AlertCircle = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -9,161 +22,224 @@ const ResetPassword = () => {
 
   const [formData, setFormData] = useState({ newPassword: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+
+  // Error con reglas: mínimo 2s visible, fade-out 400ms, sin auto-hide por timer.
+  const { error, errorFadeOut, showError, dismissError, clearError } = useDismissibleError();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    dismissError();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     if (!formData.newPassword || !formData.confirmPassword) {
-      setError('Completá todos los campos');
+      showError('Completá todos los campos');
       return;
     }
 
     if (formData.newPassword.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      showError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      showError('Las contraseñas no coinciden');
       return;
     }
 
     if (!token) {
-      setError('El enlace de reset no es válido. Solicitá uno nuevo.');
+      showError('El enlace de reset no es válido. Solicitá uno nuevo.');
       return;
     }
 
     setLoading(true);
     try {
       await resetPassword(token, formData.newPassword);
+      clearError();
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'El enlace expiró o no es válido. Solicitá uno nuevo.');
+      showError(err.response?.data?.message || 'El enlace expiró o no es válido. Solicitá uno nuevo.');
     } finally {
       setLoading(false);
     }
   };
 
+  // ---------------------------------------------------------------
+  // Estado: token inválido o ausente
+  // ---------------------------------------------------------------
   if (!token) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-3">Enlace inválido</h2>
-          <p className="text-gray-600 mb-6">Este enlace no es válido. Solicitá uno nuevo desde el login.</p>
-          <Link to="/forgot-password" className="text-mystic-600 hover:text-mystic-700 font-semibold">
-            Solicitar nuevo enlace →
+      <AuthLayout
+        eyebrow="Enlace inválido"
+        title={
+          <>
+            Enlace{' '}
+            <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+              caducado
+            </em>
+          </>
+        }
+        subtitle="Este enlace ya no es válido. Solicitá uno nuevo para continuar."
+        backTo="/login"
+        backLabel="Volver al login"
+      >
+        <div className="text-center">
+          <Link
+            to="/forgot-password"
+            className="inline-flex items-center gap-3 bg-gold-gradient px-10 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
+          >
+            <span>Solicitar nuevo enlace</span>
+            <span>→</span>
           </Link>
         </div>
-      </div>
+      </AuthLayout>
     );
   }
 
+  // ---------------------------------------------------------------
+  // Estado: éxito
+  // ---------------------------------------------------------------
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
+      <AuthLayout
+        eyebrow="Hecho"
+        title={
+          <>
+            Contraseña{' '}
+            <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+              actualizada
+            </em>
+          </>
+        }
+        subtitle="Tu contraseña fue restablecida con éxito."
+        showBackLink={false}
+      >
+        <div className="text-center space-y-6">
+          {/* Punto dorado con glow centrado como marca de éxito */}
+          <div className="flex justify-center">
+            <span
+              className="block w-3 h-3 rounded-full bg-gold shadow-gold-glow-soft"
+              aria-hidden="true"
+            />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">¡Contraseña actualizada!</h2>
-          <p className="text-gray-600 mb-2">Tu contraseña fue restablecida exitosamente.</p>
-          <p className="text-sm text-gray-500">Redirigiendo al login...</p>
+          <p className="font-serif italic font-light text-base text-white-dim">
+            Redirigiendo al login...
+          </p>
         </div>
-      </div>
+      </AuthLayout>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex items-center justify-center px-4 py-12">
-      <div className="max-w-md w-full">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-mystic-500 to-primary-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">O</span>
-            </div>
-            <span className="text-3xl font-bold text-gray-800">URO</span>
-          </Link>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Nueva contraseña</h2>
-          <p className="mt-2 text-gray-600">Elegí una contraseña segura para tu cuenta.</p>
-        </div>
+  // ---------------------------------------------------------------
+  // Estado: formulario
+  // ---------------------------------------------------------------
+  const expired = error && error.toLowerCase().includes('expir');
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+  return (
+    <AuthLayout
+      eyebrow="Nueva contraseña"
+      title={
+        <>
+          Elegí tu{' '}
+          <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+            contraseña
+          </em>
+        </>
+      }
+      subtitle="Una contraseña segura para tu cuenta."
+      backTo="/login"
+      backLabel="Volver al login"
+    >
+      <form onSubmit={handleSubmit} className="space-y-10">
+        {/* Banner error (terracota) — con CTA inline si el enlace expiró + fade-out controlado */}
+        {error && (
+          <div
+            className={`px-5 py-4 space-y-2 transition-opacity duration-400 ease-expo-out ${errorFadeOut ? 'opacity-0' : 'opacity-100'}`}
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <div className="flex items-start gap-3">
+              <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+              <p className="font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
                 {error}
-                {error.includes('expiró') && (
-                  <div className="mt-2">
-                    <Link to="/forgot-password" className="underline font-semibold">
-                      Solicitar nuevo enlace →
-                    </Link>
-                  </div>
-                )}
+              </p>
+            </div>
+            {expired && (
+              <div className="pl-7">
+                <Link
+                  to="/forgot-password"
+                  className="font-sans text-[11px] uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
+                >
+                  Solicitar nuevo enlace →
+                </Link>
               </div>
             )}
+          </div>
+        )}
 
-            <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Nueva contraseña
-              </label>
-              <input
-                id="newPassword"
-                name="newPassword"
-                type="password"
-                required
-                autoComplete="new-password"
-                value={formData.newPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                placeholder="Mínimo 6 caracteres"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirmar contraseña
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                autoComplete="new-password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                placeholder="Repetí tu contraseña"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-mystic-500 to-primary-600 text-white py-3 rounded-lg hover:from-mystic-600 hover:to-primary-700 transition-all font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-            >
-              {loading ? 'Guardando...' : 'Guardar nueva contraseña'}
-            </button>
-          </form>
+        {/* Nueva contraseña */}
+        <div>
+          <label
+            htmlFor="newPassword"
+            className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+          >
+            Nueva contraseña
+          </label>
+          <input
+            id="newPassword"
+            name="newPassword"
+            type="password"
+            required
+            autoComplete="new-password"
+            value={formData.newPassword}
+            onChange={handleChange}
+            placeholder="Mínimo 6 caracteres"
+            className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+          />
         </div>
-      </div>
-    </div>
+
+        {/* Confirmar contraseña */}
+        <div>
+          <label
+            htmlFor="confirmPassword"
+            className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3"
+          >
+            Confirmar contraseña
+          </label>
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            required
+            autoComplete="new-password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="Repetí tu contraseña"
+            className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+          />
+        </div>
+
+        {/* Submit */}
+        <div className="pt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full inline-flex items-center justify-center gap-3 bg-gold-gradient py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          >
+            <span>{loading ? 'Guardando...' : 'Guardar contraseña'}</span>
+            {!loading && <span>→</span>}
+          </button>
+        </div>
+      </form>
+    </AuthLayout>
   );
 };
 

@@ -7,16 +7,42 @@ import {
   getTherapistByUserId,
   cancelAppointment,
   completeAppointment,
-  getPaymentLink,
 } from '../services/api';
 
 const PAGE_SIZE = 5;
 
+// ---------------------------------------------------------------
+// STATUS_CONFIG — mapeo de estados a estilos OURO
+// RESERVED:        gold filled (positivo confirmado)
+// PENDING_PAYMENT: gold-dim outline (esperando)
+// CANCELLED:       terracota (negativo)
+// COMPLETED:       neutral desaturado (archivado)
+// ---------------------------------------------------------------
 const STATUS_CONFIG = {
-  RESERVED: { label: 'Reservado', className: 'bg-green-100 text-green-800 border-green-200' },
-  PENDING_PAYMENT: { label: 'Pendiente de pago', className: 'bg-amber-100 text-amber-800 border-amber-200' },
-  CANCELLED: { label: 'Cancelado', className: 'bg-red-100 text-red-800 border-red-200' },
-  COMPLETED: { label: 'Completado', className: 'bg-gray-100 text-gray-600 border-gray-200' },
+  RESERVED: {
+    label: 'Reservado',
+    style: {
+      background: 'rgba(198, 167, 94, 0.06)',
+      border: '1px solid rgba(198, 167, 94, 0.15)',
+      color: 'var(--gold)',
+    },
+  },
+  CANCELLED: {
+    label: 'Cancelado',
+    style: {
+      background: 'rgba(160, 74, 58, 0.08)',
+      border: '1px solid rgba(160, 74, 58, 0.4)',
+      color: '#A04A3A',
+    },
+  },
+  COMPLETED: {
+    label: 'Completado',
+    style: {
+      background: 'transparent',
+      border: '1px solid rgba(198, 167, 94, 0.15)',
+      color: 'rgba(242, 242, 242, 0.7)',
+    },
+  },
 };
 
 const formatDatetime = (isoStr) => {
@@ -32,49 +58,76 @@ const formatDatetime = (isoStr) => {
   );
 };
 
+// ---------------------------------------------------------------
+// Iconos inline — stroke 1.5px.
+// ---------------------------------------------------------------
+const AlertCircle = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+const VideoIcon = ({ className = '' }) => (
+  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polygon points="23 7 16 12 23 17 23 7" />
+    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+  </svg>
+);
+
+// ---------------------------------------------------------------
+// Pagination — patrón OURO consolidado
+// ---------------------------------------------------------------
 const Pagination = ({ page, totalPages, onChange }) => {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-center gap-3 mt-6">
+    <div className="flex items-center justify-center gap-4 mt-8">
       <button
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
-        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        aria-label="Página anterior"
+        className="p-3 border border-gold-dim text-gold hover:bg-gold hover:text-navy disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gold transition-all duration-400 ease-expo-out"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
-      <span className="text-sm text-gray-500 font-medium px-2">{page} de {totalPages}</span>
+      <span className="font-sans text-[11px] uppercase tracking-eyebrow text-white-dim px-2">
+        {page} de {totalPages}
+      </span>
       <button
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
-        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        aria-label="Página siguiente"
+        className="p-3 border border-gold-dim text-gold hover:bg-gold hover:text-navy disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gold transition-all duration-400 ease-expo-out"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </button>
     </div>
   );
 };
 
+// ---------------------------------------------------------------
+// ClientAppointments
+// ---------------------------------------------------------------
 const ClientAppointments = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [upcoming, setUpcoming] = useState([]);
-  const [past, setPast] = useState([]);
+  const [proximos, setProximos] = useState([]);
+  const [pasados, setPasados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cancellingId, setCancellingId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
   const [completingId, setCompletingId] = useState(null);
-  const [payingId, setPayingId] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [isTherapist, setIsTherapist] = useState(false);
-  const [historyPage, setHistoryPage] = useState(1);
-  const [upcomingAsClient, setUpcomingAsClient] = useState([]);
-  const [pastAsClient, setPastAsClient] = useState([]);
-  const [clientHistoryPage, setClientHistoryPage] = useState(1);
+  const [historialPage, setHistorialPage] = useState(1);
+  const [proximosCliente, setProximosCliente] = useState([]);
+  const [pasadosCliente, setPasadosCliente] = useState([]);
+  const [historialClientePage, setHistorialClientePage] = useState(1);
 
   useEffect(() => {
     const userData = localStorage.getItem('ouro_user');
@@ -89,17 +142,17 @@ const ClientAppointments = () => {
         getTherapistByUserId(parsed.id).then((t) => getAppointmentsByTherapist(t.id)),
         getAppointmentsByUser(parsed.id),
       ])
-        .then(([therapistAgenda, clientAgenda]) => {
-          setUpcoming(therapistAgenda.proximos || []);
-          setPast(therapistAgenda.pasados || []);
-          setUpcomingAsClient(clientAgenda.proximos || []);
-          setPastAsClient(clientAgenda.pasados || []);
+        .then(([agendaTerapeuta, agendaCliente]) => {
+          setProximos(agendaTerapeuta.proximos || []);
+          setPasados(agendaTerapeuta.pasados || []);
+          setProximosCliente(agendaCliente.proximos || []);
+          setPasadosCliente(agendaCliente.pasados || []);
         })
         .catch(() => setErrorMsg('No se pudieron cargar los turnos.'))
         .finally(() => setLoading(false));
     } else {
       getAppointmentsByUser(parsed.id)
-        .then((agenda) => { setUpcoming(agenda.proximos || []); setPast(agenda.pasados || []); })
+        .then((agenda) => { setProximos(agenda.proximos || []); setPasados(agenda.pasados || []); })
         .catch(() => setErrorMsg('No se pudieron cargar tus turnos.'))
         .finally(() => setLoading(false));
     }
@@ -113,8 +166,8 @@ const ClientAppointments = () => {
       const updated = await cancelAppointment(appointmentId);
       const updateList = (list) =>
         list.map((a) => (a.id === appointmentId ? { ...a, status: updated.status } : a));
-      setUpcoming(updateList);
-      setPast(updateList);
+      setProximos(updateList);
+      setPasados(updateList);
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'No se pudo cancelar el turno.');
     } finally {
@@ -129,8 +182,8 @@ const ClientAppointments = () => {
       const updated = await completeAppointment(appointmentId);
       const updateList = (list) =>
         list.map((a) => (a.id === appointmentId ? { ...a, status: updated.status } : a));
-      setUpcoming(updateList);
-      setPast(updateList);
+      setProximos(updateList);
+      setPasados(updateList);
     } catch (err) {
       setErrorMsg(err.response?.data?.message || 'No se pudo completar el turno.');
     } finally {
@@ -138,278 +191,360 @@ const ClientAppointments = () => {
     }
   };
 
+  // ---------------------------------------------------------------
+  // Loading state
+  // ---------------------------------------------------------------
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div
+            className="w-8 h-8 border-2 border-gold-faint border-t-gold rounded-full animate-spin"
+            aria-label="Cargando"
+          />
+        </div>
       </div>
     );
   }
 
-  const totalHistoryPages = Math.ceil(past.length / PAGE_SIZE);
-  const pastPage = past.slice((historyPage - 1) * PAGE_SIZE, historyPage * PAGE_SIZE);
+  const totalHistorialPages = Math.ceil(pasados.length / PAGE_SIZE);
+  const pasadosPagina = pasados.slice((historialPage - 1) * PAGE_SIZE, historialPage * PAGE_SIZE);
 
-  const handlePay = async (appointmentId) => {
-    setPayingId(appointmentId);
-    setErrorMsg('');
-    try {
-      const { paymentUrl } = await getPaymentLink(appointmentId);
-      window.location.href = paymentUrl;
-    } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'No se pudo obtener el link de pago.');
-      setPayingId(null);
-    }
-  };
-
+  // ---------------------------------------------------------------
+  // AppointmentCard — sub-componente
+  // ---------------------------------------------------------------
   const AppointmentCard = ({ appt, isFutureSection, forceClientView = false }) => {
     const cfg = STATUS_CONFIG[appt.status] || STATUS_CONFIG.RESERVED;
     const actingAsTherapist = isTherapist && !forceClientView;
     const canCancel = isFutureSection && appt.status !== 'CANCELLED';
     const canComplete = actingAsTherapist && isFutureSection && appt.status === 'RESERVED';
-    const canPay = !actingAsTherapist && isFutureSection && appt.status === 'PENDING_PAYMENT';
+    const isConfirming = confirmId === appt.id;
 
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        {/* Inline confirmation */}
-        {confirmId === appt.id && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-            <p className="text-sm text-red-700 font-medium mb-3">¿Confirmás que querés cancelar este turno?</p>
-            <div className="flex gap-3">
+      <div className="bg-navy-card border border-gold-faint p-6">
+        {/* Confirmación inline (reemplaza contenido del card) */}
+        {isConfirming ? (
+          <div className="space-y-5">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+              <p className="font-serif font-light text-base text-white leading-relaxed">
+                Confirmás cancelar este turno.
+              </p>
+            </div>
+            <p className="font-serif italic font-light text-sm text-white-dim leading-relaxed pl-7">
+              {formatDatetime(appt.startAt)}
+            </p>
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setConfirmId(null)}
-                className="flex-1 py-2 rounded-lg border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+                className="flex-1 py-2.5 border border-gold-faint hover:border-gold-dim font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-white transition-all duration-300"
               >
-                Mantener
+                Mantener turno
               </button>
               <button
                 onClick={() => handleCancel(appt.id)}
-                className="flex-1 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
+                className="flex-1 py-2.5 font-sans text-[11px] font-semibold uppercase tracking-eyebrow transition-all duration-300"
+                style={{
+                  background: 'rgba(160, 74, 58, 0.15)',
+                  border: '1px solid rgba(160, 74, 58, 0.5)',
+                  color: '#A04A3A',
+                }}
               >
-                Sí, cancelar
+                Confirmar cancelación
               </button>
             </div>
           </div>
-        )}
+        ) : (
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              {/* Fecha + hora */}
+              <p className="font-serif font-normal text-lg text-white capitalize leading-snug">
+                {formatDatetime(appt.startAt)}
+              </p>
 
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-900 capitalize leading-snug">
-              {formatDatetime(appt.startAt)}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              {actingAsTherapist ? appt.clientFullName : appt.therapistFullName}
-            </p>
+              {/* Nombre del otro participante */}
+              <p className="font-serif font-light text-base text-white-dim mt-1">
+                {actingAsTherapist ? appt.clientFullName : appt.therapistFullName}
+              </p>
 
-            {/* Contacto del cliente (solo vista terapeuta) */}
-            {actingAsTherapist && (appt.clientPhone || appt.clientEmail) && (
-              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-                {appt.clientPhone && (
-                  <span className="text-xs text-gray-400">{appt.clientPhone}</span>
+              {/* Contacto del cliente (solo vista terapeuta) */}
+              {actingAsTherapist && (appt.clientPhone || appt.clientEmail) && (
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                  {appt.clientPhone && (
+                    <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                      {appt.clientPhone}
+                    </span>
+                  )}
+                  {appt.clientEmail && (
+                    <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                      {appt.clientEmail}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Badge + precio */}
+              <div className="flex items-center gap-3 mt-4">
+                <span
+                  className="font-sans text-[10px] font-medium uppercase tracking-eyebrow px-2.5 py-1"
+                  style={cfg.style}
+                >
+                  {cfg.label}
+                </span>
+                {appt.priceAmountCents != null && (
+                  <span className="font-serif font-normal text-sm text-white">
+                    {(appt.priceAmountCents / 100).toLocaleString('es-AR', {
+                      style: 'currency', currency: appt.currency || 'ARS',
+                    })}
+                  </span>
                 )}
-                {appt.clientEmail && (
-                  <span className="text-xs text-gray-400">{appt.clientEmail}</span>
+              </div>
+
+              {/* Link de Zoom */}
+              {isFutureSection && appt.zoomJoinUrl && (
+                <a
+                  href={appt.zoomJoinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+                >
+                  <VideoIcon />
+                  <span>Unirse a la sesión</span>
+                </a>
+              )}
+            </div>
+
+            {/* Acciones */}
+            {(canCancel || canComplete) && (
+              <div className="flex flex-col gap-2 flex-shrink-0 items-end">
+                {canComplete && (
+                  <button
+                    onClick={() => handleComplete(appt.id)}
+                    disabled={completingId === appt.id}
+                    className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300 disabled:opacity-50 underline underline-offset-4"
+                  >
+                    {completingId === appt.id ? 'Guardando...' : 'Marcar completado'}
+                  </button>
+                )}
+                {canCancel && (
+                  <button
+                    onClick={() => setConfirmId(appt.id)}
+                    disabled={cancellingId === appt.id}
+                    className="font-sans text-[10px] font-medium uppercase tracking-eyebrow hover:opacity-80 transition-opacity duration-300 disabled:opacity-50 underline underline-offset-4"
+                    style={{ color: '#A04A3A' }}
+                  >
+                    {cancellingId === appt.id ? 'Cancelando...' : 'Cancelar'}
+                  </button>
                 )}
               </div>
             )}
-
-            <div className="flex items-center gap-3 mt-3">
-              <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${cfg.className}`}>
-                {cfg.label}
-              </span>
-              {appt.priceAmountCents != null && (
-                <span className="text-xs text-gray-400">
-                  {(appt.priceAmountCents / 100).toLocaleString('es-AR', {
-                    style: 'currency', currency: appt.currency || 'ARS',
-                  })}
-                </span>
-              )}
-            </div>
-
-            {/* Link de Zoom (solo en próximos con sesión confirmada) */}
-            {isFutureSection && appt.zoomJoinUrl && (
-              <a
-                href={appt.zoomJoinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 mt-3 text-xs font-medium text-primary-600 hover:text-primary-800 transition-colors"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.069A1 1 0 0121 8.867v6.266a1 1 0 01-1.447.902L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Unirse a la sesión (Zoom)
-              </a>
-            )}
           </div>
-
-          {(canCancel || canComplete || canPay) && confirmId !== appt.id && (
-            <div className="flex flex-col gap-2 flex-shrink-0">
-              {canPay && (
-                <button
-                  onClick={() => handlePay(appt.id)}
-                  disabled={payingId === appt.id}
-                  className="text-sm font-semibold text-white bg-gradient-to-r from-mystic-500 to-primary-600 hover:from-mystic-600 hover:to-primary-700 transition-all disabled:opacity-50 px-3 py-1.5 rounded-lg shadow-sm"
-                >
-                  {payingId === appt.id ? 'Cargando...' : 'Pagar'}
-                </button>
-              )}
-              {canComplete && (
-                <button
-                  onClick={() => handleComplete(appt.id)}
-                  disabled={completingId === appt.id}
-                  className="text-sm text-green-600 hover:text-green-800 font-medium transition-colors disabled:opacity-50 px-2 py-1.5 hover:bg-green-50 rounded-lg"
-                >
-                  {completingId === appt.id ? 'Guardando...' : 'Completado'}
-                </button>
-              )}
-              {canCancel && (
-                <button
-                  onClick={() => setConfirmId(appt.id)}
-                  disabled={cancellingId === appt.id}
-                  className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors disabled:opacity-50 px-2 py-1.5 hover:bg-red-50 rounded-lg"
-                >
-                  {cancellingId === appt.id ? 'Cancelando...' : 'Cancelar'}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+        )}
       </div>
     );
   };
 
+  // ---------------------------------------------------------------
+  // Render principal
+  // ---------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-        {/* Volver */}
+      <main className="flex-1 max-w-3xl mx-auto w-full px-6 lg:px-10 pt-32 lg:pt-40 pb-24">
+
+        {/* Volver al dashboard */}
         <button
           onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 font-medium transition-colors mb-6"
+          className="group inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300 mb-10"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          Dashboard
+          <span className="transition-transform duration-400 ease-expo-out group-hover:-translate-x-2">←</span>
+          <span>Dashboard</span>
         </button>
 
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+        <div className="mb-12 flex items-start justify-between gap-6">
+          <div className="min-w-0">
+            <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold mb-4">
+              Turnos
+            </p>
+            <h1
+              className="font-serif font-light text-white"
+              style={{ fontSize: 'clamp(36px, 4vw, 56px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+            >
               {isTherapist ? 'Turnos reservados' : 'Mis turnos'}
             </h1>
-            <p className="mt-1 text-gray-500">
-              {isTherapist ? 'Clientes que reservaron contigo' : 'Tus reservas con terapeutas'}
+            <p className="mt-3 font-serif font-light text-white-dim leading-relaxed" style={{ fontSize: 'clamp(16px, 1.2vw, 18px)' }}>
+              {isTherapist ? (
+                'Quienes reservaron sesiones con vos.'
+              ) : (
+                <>
+                  El ritmo de tu{' '}
+                  <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+                    tránsito
+                  </em>
+                  .
+                </>
+              )}
             </p>
           </div>
+
           {!isTherapist && (
             <Link
               to="/terapeutas"
-              className="text-sm text-mystic-600 hover:text-mystic-700 font-medium transition-colors flex-shrink-0 mt-1"
+              className="group inline-flex items-center gap-2 font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300 flex-shrink-0 mt-12 whitespace-nowrap"
             >
-              Explorar terapeutas
+              <span>Explorar terapeutas</span>
+              <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
             </Link>
           )}
         </div>
 
+        {/* Error general */}
         {errorMsg && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-            {errorMsg}
+          <div
+            className="mb-8 px-5 py-4 flex items-start gap-3"
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+            <p className="font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
+              {errorMsg}
+            </p>
           </div>
         )}
 
         {/* Próximos */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-gray-800">Próximos</h2>
-            {upcoming.length > 0 && (
-              <span className="text-sm text-gray-400">{upcoming.length} turno{upcoming.length !== 1 ? 's' : ''}</span>
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="font-serif font-light text-2xl text-white">
+              Próximos
+            </h2>
+            {proximos.length > 0 && (
+              <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                {proximos.length} turno{proximos.length !== 1 ? 's' : ''}
+              </span>
             )}
           </div>
 
-          {upcoming.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-400">
+          {proximos.length === 0 ? (
+            <div className="bg-navy-card border border-gold-faint p-10 text-center">
               {isTherapist ? (
-                <p>No tenés turnos próximos reservados</p>
+                <p className="font-serif italic font-light text-base text-white-dim">
+                  No tenés turnos próximos reservados.
+                </p>
               ) : (
                 <>
-                  <p className="mb-3">No tenés turnos próximos</p>
+                  <p className="font-serif italic font-light text-base text-white-dim mb-6">
+                    No tenés turnos próximos.
+                  </p>
                   <Link
                     to="/terapeutas"
-                    className="inline-block text-sm text-primary-600 hover:underline font-medium"
+                    className="inline-flex items-center gap-3 px-8 py-3 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
                   >
-                    Reservar un turno
+                    <span>Reservar un turno</span>
+                    <span>→</span>
                   </Link>
                 </>
               )}
             </div>
           ) : (
-            <div className="space-y-3">
-              {upcoming.map((a) => <AppointmentCard key={a.id} appt={a} isFutureSection={true} />)}
+            <div className="space-y-4">
+              {proximos.map((a) => <AppointmentCard key={a.id} appt={a} isFutureSection={true} />)}
             </div>
           )}
-        </div>
+        </section>
 
         {/* Historial */}
-        {past.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-gray-800">Historial</h2>
-              <span className="text-sm text-gray-400">{past.length} turno{past.length !== 1 ? 's' : ''}</span>
+        {pasados.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-serif font-light text-2xl text-white">
+                Historial
+              </h2>
+              <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                {pasados.length} turno{pasados.length !== 1 ? 's' : ''}
+              </span>
             </div>
-            <div className="space-y-3">
-              {pastPage.map((a) => <AppointmentCard key={a.id} appt={a} isFutureSection={false} />)}
+            <div className="space-y-4">
+              {pasadosPagina.map((a) => <AppointmentCard key={a.id} appt={a} isFutureSection={false} />)}
             </div>
-            <Pagination page={historyPage} totalPages={totalHistoryPages} onChange={setHistoryPage} />
-          </div>
+            <Pagination page={historialPage} totalPages={totalHistorialPages} onChange={setHistorialPage} />
+          </section>
         )}
 
         {/* Sección "Mis reservas como cliente" — solo para terapeutas */}
-        {isTherapist && (upcomingAsClient.length > 0 || pastAsClient.length > 0) && (
-          <div className="mt-10">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1 h-px bg-gray-200" />
-              <h2 className="text-base font-semibold text-gray-500 whitespace-nowrap">Mis reservas como cliente</h2>
-              <div className="flex-1 h-px bg-gray-200" />
+        {isTherapist && (proximosCliente.length > 0 || pasadosCliente.length > 0) && (
+          <section className="mt-16">
+            <div className="flex items-center gap-4 mb-8">
+              <div
+                className="flex-1 h-px"
+                style={{
+                  background: 'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), rgba(198, 167, 94, 0.4))',
+                }}
+                aria-hidden="true"
+              />
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim whitespace-nowrap">
+                Mis reservas como cliente
+              </p>
+              <div
+                className="flex-1 h-px"
+                style={{
+                  background: 'linear-gradient(to left, transparent, rgba(198, 167, 94, 0.4), rgba(198, 167, 94, 0.4))',
+                }}
+                aria-hidden="true"
+              />
             </div>
 
-            {upcomingAsClient.length > 0 && (
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-700">Próximas</h3>
-                  <span className="text-xs text-gray-400">{upcomingAsClient.length} sesión{upcomingAsClient.length !== 1 ? 'es' : ''}</span>
+            {proximosCliente.length > 0 && (
+              <div className="mb-10">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="font-serif font-light text-xl text-white">
+                    Próximas
+                  </h3>
+                  <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                    {proximosCliente.length} sesión{proximosCliente.length !== 1 ? 'es' : ''}
+                  </span>
                 </div>
-                <div className="space-y-3">
-                  {upcomingAsClient.map((a) => (
+                <div className="space-y-4">
+                  {proximosCliente.map((a) => (
                     <AppointmentCard key={`cliente-${a.id}`} appt={a} isFutureSection={true} forceClientView={true} />
                   ))}
                 </div>
               </div>
             )}
 
-            {pastAsClient.length > 0 && (
+            {pasadosCliente.length > 0 && (
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-700">Historial</h3>
-                  <span className="text-xs text-gray-400">{pastAsClient.length} sesión{pastAsClient.length !== 1 ? 'es' : ''}</span>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="font-serif font-light text-xl text-white">
+                    Historial
+                  </h3>
+                  <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                    {pasadosCliente.length} sesión{pasadosCliente.length !== 1 ? 'es' : ''}
+                  </span>
                 </div>
-                <div className="space-y-3">
-                  {pastAsClient
-                    .slice((clientHistoryPage - 1) * PAGE_SIZE, clientHistoryPage * PAGE_SIZE)
+                <div className="space-y-4">
+                  {pasadosCliente
+                    .slice((historialClientePage - 1) * PAGE_SIZE, historialClientePage * PAGE_SIZE)
                     .map((a) => <AppointmentCard key={`cliente-hist-${a.id}`} appt={a} isFutureSection={false} forceClientView={true} />)}
                 </div>
                 <Pagination
-                  page={clientHistoryPage}
-                  totalPages={Math.ceil(pastAsClient.length / PAGE_SIZE)}
-                  onChange={setClientHistoryPage}
+                  page={historialClientePage}
+                  totalPages={Math.ceil(pasadosCliente.length / PAGE_SIZE)}
+                  onChange={setHistorialClientePage}
                 />
               </div>
             )}
-          </div>
+          </section>
         )}
 
-      </div>
+      </main>
     </div>
   );
 };

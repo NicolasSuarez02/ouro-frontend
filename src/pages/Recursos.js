@@ -4,6 +4,51 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { getResources, downloadResource, deleteResource } from '../services/api';
 
+// ---------------------------------------------------------------
+// Iconos inline — stroke 1.5px.
+// ---------------------------------------------------------------
+const DocumentIcon = ({ className = '' }) => (
+  <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+  </svg>
+);
+
+const TrashIcon = ({ className = '' }) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+    <path d="M10 11v6" />
+    <path d="M14 11v6" />
+    <path d="M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2" />
+  </svg>
+);
+
+const AlertCircle = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+const PlusIcon = ({ className = '' }) => (
+  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+const CloseIcon = ({ className = '' }) => (
+  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="6" y1="6" x2="18" y2="18" />
+    <line x1="6" y1="18" x2="18" y2="6" />
+  </svg>
+);
+
+// ---------------------------------------------------------------
+// Pagination
+// ---------------------------------------------------------------
 const PAGE_SIZE = 9;
 
 const formatFileSize = (bytes) => {
@@ -15,39 +60,46 @@ const formatFileSize = (bytes) => {
 const Pagination = ({ page, totalPages, onChange }) => {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-center gap-3 mt-8">
+    <div className="flex items-center justify-center gap-4 mt-12">
       <button
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
-        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        aria-label="Página anterior"
+        className="p-3 border border-gold-dim text-gold hover:bg-gold hover:text-navy disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gold transition-all duration-400 ease-expo-out"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
-      <span className="text-sm text-gray-500 font-medium px-2">{page} de {totalPages}</span>
+      <span className="font-sans text-[11px] uppercase tracking-eyebrow text-white-dim px-2">
+        {page} de {totalPages}
+      </span>
       <button
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
-        className="p-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        aria-label="Página siguiente"
+        className="p-3 border border-gold-dim text-gold hover:bg-gold hover:text-navy disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gold transition-all duration-400 ease-expo-out"
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </button>
     </div>
   );
 };
 
+// ---------------------------------------------------------------
+// Recursos — Biblioteca / Formaciones
+// ---------------------------------------------------------------
 const Recursos = ({ category, titulo }) => {
   const navigate = useNavigate();
-  const [resources, setResources] = useState([]);
+  const [recursos, setRecursos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [downloading, setDownloading] = useState({});
-  const [deleting, setDeleting] = useState({});
+  const [descargando, setDescargando] = useState({});
+  const [eliminando, setEliminando] = useState({});
   const [actionError, setActionError] = useState('');
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmEliminar, setConfirmEliminar] = useState(null);
   const [user, setUser] = useState(null);
   const [page, setPage] = useState(1);
 
@@ -62,7 +114,6 @@ const Recursos = ({ category, titulo }) => {
     cargarRecursos();
   }, [user, category]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reset page when category changes
   useEffect(() => {
     setPage(1);
   }, [category]);
@@ -72,23 +123,23 @@ const Recursos = ({ category, titulo }) => {
       setLoading(true);
       setError(null);
       const data = await getResources(category);
-      setResources(data);
+      setRecursos(data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al cargar los resources');
+      setError(err.response?.data?.message || 'Error al cargar los recursos');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDownload = async (resource) => {
+  const handleDescargar = async (recurso) => {
     setActionError('');
-    setDownloading((prev) => ({ ...prev, [resource.id]: true }));
+    setDescargando((prev) => ({ ...prev, [recurso.id]: true }));
     try {
-      const response = await downloadResource(resource.id);
+      const response = await downloadResource(recurso.id);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', resource.originalFileName);
+      link.setAttribute('download', recurso.originalFileName);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -96,76 +147,70 @@ const Recursos = ({ category, titulo }) => {
     } catch (err) {
       setActionError(err.response?.data?.message || 'Error al descargar el archivo');
     } finally {
-      setDownloading((prev) => ({ ...prev, [resource.id]: false }));
+      setDescargando((prev) => ({ ...prev, [recurso.id]: false }));
     }
   };
 
-  const handleDelete = async (resource) => {
-    setConfirmDelete(null);
+  const handleEliminar = async (recurso) => {
+    setConfirmEliminar(null);
     setActionError('');
-    setDeleting((prev) => ({ ...prev, [resource.id]: true }));
+    setEliminando((prev) => ({ ...prev, [recurso.id]: true }));
     try {
-      await deleteResource(resource.id);
-      setResources((prev) => prev.filter((r) => r.id !== resource.id));
+      await deleteResource(recurso.id);
+      setRecursos((prev) => prev.filter((r) => r.id !== recurso.id));
     } catch (err) {
-      setActionError(err.response?.data?.message || 'Error al eliminar el resource');
+      setActionError(err.response?.data?.message || 'Error al eliminar el recurso');
     } finally {
-      setDeleting((prev) => ({ ...prev, [resource.id]: false }));
+      setEliminando((prev) => ({ ...prev, [recurso.id]: false }));
     }
   };
 
-  const canDelete = (resource) => {
+  const puedeEliminar = (recurso) => {
     if (!user) return false;
-    return user.role === 'ADMIN' || resource.uploadedByUserId === user.id;
+    return user.role === 'ADMIN' || recurso.uploadedByUserId === user.id;
   };
 
   const esTerapeuta = user?.role === 'THERAPIST' || user?.role === 'ADMIN';
 
-  const totalPages = Math.ceil(resources.length / PAGE_SIZE);
-  const resourcesPage = resources.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.ceil(recursos.length / PAGE_SIZE);
+  const recursosPagina = recursos.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Header */}
-      <div className="bg-gradient-to-r from-mystic-500 to-primary-600 pt-24 pb-12">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{titulo}</h1>
-          <p className="text-white/80 text-lg">
-            {category === 'BIBLIOTECA'
-              ? 'Artículos, guías y resources para tu camino'
-              : 'Materiales y programas de formación'}
-          </p>
-        </div>
-      </div>
+      <main className="flex-1 max-w-container mx-auto px-6 lg:px-10 pt-32 lg:pt-40 pb-24 w-full">
 
-      {/* Contenido */}
-      <div className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-
-        {/* Modal confirmación eliminar */}
-        {confirmDelete && (
-          <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
-              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-gray-900 text-center mb-2">¿Eliminar resource?</h3>
-              <p className="text-sm text-gray-500 text-center mb-5">
-                "{confirmDelete.title}" será eliminado permanentemente.
+        {/* ============================================
+            Modal confirmación eliminar
+            ============================================ */}
+        {confirmEliminar && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
+            <div className="w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
+              <p className="font-sans text-[10px] uppercase tracking-eyebrow text-center mb-4" style={{ color: '#A04A3A' }}>
+                Eliminar
+              </p>
+              <h3 className="font-serif font-light text-2xl text-white text-center mb-3">
+                Eliminar recurso
+              </h3>
+              <p className="font-serif font-light text-base text-white-dim text-center mb-8 leading-relaxed">
+                <em className="italic">&ldquo;{confirmEliminar.title}&rdquo;</em> será eliminado permanentemente.
               </p>
               <div className="flex gap-3">
                 <button
-                  onClick={() => setConfirmDelete(null)}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+                  onClick={() => setConfirmEliminar(null)}
+                  className="flex-1 py-3 border border-gold-faint hover:border-gold-dim font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-white transition-all duration-300"
                 >
                   Cancelar
                 </button>
                 <button
-                  onClick={() => handleDelete(confirmDelete)}
-                  className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors"
+                  onClick={() => handleEliminar(confirmEliminar)}
+                  className="flex-1 py-3 font-sans text-[11px] font-semibold uppercase tracking-eyebrow transition-all duration-300"
+                  style={{
+                    background: 'rgba(160, 74, 58, 0.15)',
+                    border: '1px solid rgba(160, 74, 58, 0.5)',
+                    color: '#A04A3A',
+                  }}
                 >
                   Eliminar
                 </button>
@@ -174,122 +219,197 @@ const Recursos = ({ category, titulo }) => {
           </div>
         )}
 
-        {/* Acciones */}
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-gray-400">
-            {!loading && resources.length > 0 && `${resources.length} resource${resources.length !== 1 ? 's' : ''}`}
+        {/* ============================================
+            Header de sección
+            ============================================ */}
+        <div className="text-center mb-16 lg:mb-20">
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+            <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
+              {category === 'BIBLIOTECA' ? 'Biblioteca' : 'Formaciones'}
+            </span>
+            <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
+          </div>
+          <h1
+            className="font-serif font-light text-white mb-6"
+            style={{ fontSize: 'clamp(40px, 5vw, 72px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+          >
+            {titulo}
+          </h1>
+          <p className="font-serif font-light text-white-dim max-w-xl mx-auto leading-relaxed" style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}>
+            {category === 'BIBLIOTECA'
+              ? 'Artículos, guías y recursos para tu camino.'
+              : 'Materiales y programas de formación.'}
+          </p>
+        </div>
+
+        {/* ============================================
+            Barra de acciones: contador + Subir archivo
+            ============================================ */}
+        <div className="flex items-center justify-between mb-10">
+          <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+            {!loading && recursos.length > 0 && `${recursos.length} recurso${recursos.length !== 1 ? 's' : ''}`}
           </p>
           {esTerapeuta && (
             <button
-              onClick={() => navigate('/subir-resource')}
-              className="bg-gradient-to-r from-mystic-500 to-primary-600 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:from-mystic-600 hover:to-primary-700 transition-all shadow-md flex items-center gap-1.5"
+              onClick={() => navigate('/subir-recurso')}
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Subir archivo
+              <PlusIcon />
+              <span>Subir archivo</span>
             </button>
           )}
         </div>
 
-        {/* Estados */}
+        {/* ============================================
+            Estados
+            ============================================ */}
         {loading && (
-          <div className="flex justify-center py-16">
-            <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+          <div className="flex justify-center py-20">
+            <div
+              className="w-8 h-8 border-2 border-gold-faint border-t-gold rounded-full animate-spin"
+              aria-label="Cargando"
+            />
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 flex items-center justify-between">
-            <span>{error}</span>
-            <button onClick={cargarRecursos} className="text-sm underline ml-4 flex-shrink-0">Reintentar</button>
-          </div>
-        )}
-
-        {actionError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 flex items-center justify-between">
-            <span>{actionError}</span>
-            <button onClick={() => setActionError('')} className="text-gray-400 hover:text-gray-600 ml-4 flex-shrink-0 p-0.5">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+          <div
+            className="mb-6 px-5 py-4 flex items-start gap-3"
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+            <p className="flex-1 font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
+              {error}
+            </p>
+            <button
+              onClick={cargarRecursos}
+              className="font-sans text-[11px] uppercase tracking-eyebrow underline underline-offset-4 hover:opacity-80 transition-opacity duration-300 flex-shrink-0"
+              style={{ color: '#A04A3A' }}
+            >
+              Reintentar
             </button>
           </div>
         )}
 
-        {!loading && !error && resources.length === 0 && (
-          <div className="text-center py-16 text-gray-400">
-            <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <p>No hay resources disponibles todavía</p>
+        {actionError && (
+          <div
+            className="mb-6 px-5 py-4 flex items-start gap-3"
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+            <p className="flex-1 font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
+              {actionError}
+            </p>
+            <button
+              onClick={() => setActionError('')}
+              aria-label="Cerrar"
+              className="hover:opacity-80 transition-opacity duration-300 flex-shrink-0"
+              style={{ color: '#A04A3A' }}
+            >
+              <CloseIcon />
+            </button>
           </div>
         )}
 
-        {/* Grid de resources */}
-        {!loading && !error && resourcesPage.length > 0 && (
+        {!loading && !error && recursos.length === 0 && (
+          <div className="text-center py-20 space-y-5">
+            <DocumentIcon className="mx-auto text-gold-dim w-10 h-10" />
+            <p className="font-serif italic font-light text-lg text-white-dim">
+              Todavía no hay recursos.
+            </p>
+          </div>
+        )}
+
+        {/* ============================================
+            Grid de recursos
+            ============================================ */}
+        {!loading && !error && recursosPagina.length > 0 && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {resourcesPage.map((resource) => (
-                <div
-                  key={resource.id}
-                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col gap-3"
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {recursosPagina.map((recurso) => (
+                <article
+                  key={recurso.id}
+                  className="group relative bg-navy-card border border-gold-faint p-7 flex flex-col gap-4 transition-all duration-600 ease-expo-out hover:-translate-y-1 hover:border-gold-dim hover:shadow-card-hover overflow-hidden"
                 >
-                  {/* Icono + título */}
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-primary-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                  {/* Línea superior animada en hover */}
+                  <span
+                    className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+                    aria-hidden="true"
+                  />
+
+                  {/* Icono + título + autor */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-11 h-11 border border-gold-dim flex items-center justify-center flex-shrink-0 text-gold">
+                      <DocumentIcon />
                     </div>
-                    <div className="min-w-0">
-                      <h3 className="font-semibold text-gray-900 leading-snug">{resource.title}</h3>
-                      <p className="text-xs text-gray-400 mt-0.5">{resource.uploadedByName}</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-serif font-light text-lg text-white leading-snug">
+                        {recurso.title}
+                      </h3>
+                      {recurso.uploadedByName && (
+                        <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mt-2 truncate">
+                          {recurso.uploadedByName}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   {/* Descripción */}
-                  {resource.description && (
-                    <p className="text-sm text-gray-500 line-clamp-2">{resource.description}</p>
+                  {recurso.description && (
+                    <p className="font-serif font-light text-sm text-white-dim leading-relaxed line-clamp-3">
+                      {recurso.description}
+                    </p>
                   )}
 
                   {/* Meta */}
-                  <div className="flex items-center gap-2 text-xs text-gray-400">
-                    <span className="truncate">{resource.originalFileName}</span>
+                  <div className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                    <span className="truncate">{recurso.originalFileName}</span>
                     <span className="flex-shrink-0">·</span>
-                    <span className="flex-shrink-0">{formatFileSize(resource.fileSize)}</span>
+                    <span className="flex-shrink-0">{formatFileSize(recurso.fileSize)}</span>
                   </div>
 
                   {/* Acciones */}
-                  <div className="flex items-center gap-2 mt-auto pt-2 border-t border-gray-50">
+                  <div className="flex items-stretch gap-2 mt-auto pt-4 border-t border-gold-faint">
                     <button
-                      onClick={() => handleDownload(resource)}
-                      disabled={downloading[resource.id]}
-                      className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                      onClick={() => handleDescargar(recurso)}
+                      disabled={descargando[recurso.id]}
+                      className="flex-1 inline-flex items-center justify-center gap-2 bg-gold-gradient py-2.5 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                     >
-                      {downloading[resource.id] ? 'Descargando...' : 'Descargar'}
+                      <span>{descargando[recurso.id] ? 'Descargando...' : 'Descargar'}</span>
+                      {!descargando[recurso.id] && <span>→</span>}
                     </button>
-                    {canDelete(resource) && (
+                    {puedeEliminar(recurso) && (
                       <button
-                        onClick={() => setConfirmDelete(resource)}
-                        disabled={deleting[resource.id]}
-                        className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        onClick={() => setConfirmEliminar(recurso)}
+                        disabled={eliminando[recurso.id]}
+                        aria-label="Eliminar recurso"
                         title="Eliminar"
+                        className="px-3 border border-gold-faint hover:border-[#A04A3A] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={eliminando[recurso.id] ? {} : undefined}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
+                        <TrashIcon className="text-white-faint group-hover:text-[#A04A3A]" />
                       </button>
                     )}
                   </div>
-                </div>
+                </article>
               ))}
             </div>
 
             <Pagination page={page} totalPages={totalPages} onChange={setPage} />
           </>
         )}
-      </div>
+      </main>
 
       <Footer />
     </div>

@@ -1,6 +1,32 @@
 import React, { useState, useRef } from 'react';
 import { uploadTherapistPhoto } from '../services/api';
 
+// ---------------------------------------------------------------
+// Iconos inline — stroke 1.5px.
+// Pendiente reemplazar por lucide-react al sumar la dependencia.
+// ---------------------------------------------------------------
+const AlertCircle = ({ className = '', style }) => (
+  <svg className={className} style={style} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+const UserIcon = ({ className = '' }) => (
+  <svg className={className} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+const PlusIcon = ({ className = '' }) => (
+  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
 const LEAD_TIME_OPTIONS = [
   { value: 1,   label: '1 hora' },
   { value: 2,   label: '2 horas' },
@@ -17,15 +43,13 @@ const LEAD_TIME_OPTIONS = [
 const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitLabel = 'Guardar', userId }) => {
   const [formData, setFormData] = useState({
     bio: initialValues.bio || '',
-    specialty: initialValues.specialty || '',
     photoUrl: initialValues.photoUrl || '',
-    priceInCurrency: initialValues.priceInCurrency || '',
     priceCurrency: initialValues.priceCurrency || 'ARS',
-    minBookingLeadHours: initialValues.minBookingLeadHours || 1,
   });
   const [specialties, setSpecialties] = useState(initialValues.specialties || []);
   const [newSpecName, setNewSpecName] = useState('');
   const [newSpecLeadHours, setNewSpecLeadHours] = useState(1);
+  const [newSpecPrice, setNewSpecPrice] = useState('');
   const [localError, setLocalError] = useState('');
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(initialValues.photoUrl || '');
@@ -58,14 +82,13 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
     e.preventDefault();
     setLocalError('');
 
-    if (!formData.bio.trim() || !formData.specialty.trim() || !formData.priceInCurrency) {
-      setLocalError('Completá los campos obligatorios');
+    if (!formData.bio.trim()) {
+      setLocalError('La bio es obligatoria');
       return;
     }
 
-    const price = parseFloat(formData.priceInCurrency);
-    if (isNaN(price) || price <= 0) {
-      setLocalError('El precio debe ser un número mayor a 0');
+    if (specialties.length === 0) {
+      setLocalError('Agregá al menos una especialidad');
       return;
     }
 
@@ -87,45 +110,45 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
 
     onSubmit({
       bio: formData.bio,
-      specialty: formData.specialty,
       photoUrl: finalPhotoUrl || null,
-      priceAmountCents: Math.round(price * 100),
       priceCurrency: formData.priceCurrency,
-      minBookingLeadHours: formData.minBookingLeadHours,
-      specialties: specialties.length > 0 ? specialties : null,
+      specialties,
     });
   };
 
   const displayError = localError || apiError;
   const isWorking = saving || uploadingPhoto;
 
+  // Clases reutilizables
+  const labelClass = 'block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3';
+  const inputClass = 'w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300';
+  const selectClass = 'w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white py-3 transition-colors duration-300 cursor-pointer';
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-10">
+
+      {/* Banner error (terracota) */}
       {displayError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-          {displayError}
+        <div
+          className="px-5 py-4 flex items-start gap-3"
+          style={{
+            borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+            borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+            background: 'rgba(160, 74, 58, 0.08)',
+          }}
+          role="alert"
+        >
+          <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+          <p className="font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
+            {displayError}
+          </p>
         </div>
       )}
 
+      {/* Bio */}
       <div>
-        <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 mb-2">
-          Especialidad <span className="text-red-500">*</span>
-        </label>
-        <input
-          id="specialty"
-          name="specialty"
-          type="text"
-          required
-          value={formData.specialty}
-          onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-          placeholder="Ej: Astrología, Tarot, Reiki"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
-          Bio profesional <span className="text-red-500">*</span>
+        <label htmlFor="bio" className={labelClass}>
+          Bio profesional
         </label>
         <textarea
           id="bio"
@@ -134,88 +157,53 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
           rows={4}
           value={formData.bio}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
-          placeholder="Contá tu experiencia, formación y enfoque de trabajo..."
+          placeholder="Contá tu experiencia, formación y enfoque de trabajo"
+          className={`${inputClass} resize-none`}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="priceInCurrency" className="block text-sm font-medium text-gray-700 mb-2">
-            Precio por sesión <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="priceInCurrency"
-            name="priceInCurrency"
-            type="number"
-            required
-            min="1"
-            step="1"
-            value={formData.priceInCurrency}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-            placeholder="5000"
-          />
-        </div>
-        <div>
-          <label htmlFor="priceCurrency" className="block text-sm font-medium text-gray-700 mb-2">
-            Moneda
-          </label>
-          <select
-            id="priceCurrency"
-            name="priceCurrency"
-            value={formData.priceCurrency}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
-          >
-            <option value="ARS">ARS</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Anticipo mínimo para reservas */}
-      <div>
-        <label htmlFor="minBookingLeadHours" className="block text-sm font-medium text-gray-700 mb-1">
-          Anticipación mínima para reservar <span className="text-red-500">*</span>
+      {/* Moneda */}
+      <div className="max-w-[160px]">
+        <label htmlFor="priceCurrency" className={labelClass}>
+          Moneda
         </label>
-        <p className="text-xs text-gray-500 mb-2">
-          Los clientes solo podrán reservar turnos con al menos esta anticipación.
-        </p>
         <select
-          id="minBookingLeadHours"
-          name="minBookingLeadHours"
-          value={formData.minBookingLeadHours}
+          id="priceCurrency"
+          name="priceCurrency"
+          value={formData.priceCurrency}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
+          style={{ colorScheme: 'dark' }}
+          className={selectClass}
         >
-          {LEAD_TIME_OPTIONS.map(({ value, label }) => (
-            <option key={value} value={value}>{label}</option>
-          ))}
+          <option value="ARS">ARS</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
         </select>
       </div>
 
       {/* Foto de perfil */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Foto de perfil <span className="text-gray-400">(opcional)</span>
-        </label>
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-full overflow-hidden bg-gradient-to-br from-mystic-400 to-primary-500 flex items-center justify-center flex-shrink-0 ring-2 ring-gray-100">
+        <div className="flex items-baseline gap-3 mb-3">
+          <label className={`${labelClass} mb-0`}>
+            Foto de perfil
+          </label>
+          <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+            Opcional
+          </span>
+        </div>
+        <div className="flex items-center gap-5">
+          <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 border border-gold-faint flex items-center justify-center bg-navy-soft/40">
             {photoPreview ? (
-              <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+              <img src={photoPreview} alt="Vista previa" className="w-full h-full object-cover" />
             ) : (
-              <svg className="w-8 h-8 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+              <UserIcon className="text-gold-dim" />
             )}
           </div>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full py-2.5 px-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-primary-400 hover:text-primary-600 transition-colors text-center"
+              className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
             >
               {photoPreview ? 'Cambiar foto' : 'Subir foto'}
             </button>
@@ -228,12 +216,15 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
                   setFormData((prev) => ({ ...prev, photoUrl: '' }));
                   if (fileInputRef.current) fileInputRef.current.value = '';
                 }}
-                className="mt-1 w-full text-xs text-red-400 hover:text-red-600 transition-colors"
+                className="mt-2 w-full font-sans text-[10px] uppercase tracking-eyebrow hover:opacity-80 transition-opacity duration-300"
+                style={{ color: '#A04A3A' }}
               >
                 Quitar foto
               </button>
             )}
-            <p className="text-xs text-gray-400 mt-1">JPG, PNG o WebP · Máx. 5 MB</p>
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mt-2">
+              JPG, PNG o WebP · Máximo 5 MB
+            </p>
           </div>
         </div>
         <input
@@ -245,73 +236,122 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
         />
       </div>
 
-
-      {/* Especialidades adicionales (opcional, para terapeutas con múltiples tipos de sesión) */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Especialidades adicionales <span className="text-gray-400">(opcional)</span>
+      {/* Especialidades */}
+      <div className="pt-2">
+        <label className={`${labelClass} mb-1`}>
+          Especialidades
         </label>
-        <p className="text-xs text-gray-500 mb-2">
-          Si ofrecés distintos tipos de sesión con diferente anticipación requerida, agregalas acá.
+        <p className="font-serif italic font-light text-sm text-white-faint mb-5">
+          Cada especialidad tiene su propio precio y anticipación mínima.
         </p>
+
+        {/* Lista de especialidades ya agregadas */}
         {specialties.length > 0 && (
-          <div className="space-y-2 mb-3">
+          <ul className="space-y-2 mb-5">
             {specialties.map((sp, i) => (
-              <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100">
-                <span className="flex-1 text-sm text-gray-800 font-medium">{sp.name}</span>
-                <span className="text-xs text-gray-400">{sp.minBookingLeadHours}h</span>
+              <li
+                key={i}
+                className="flex items-center gap-4 px-4 py-3 border border-gold-faint bg-navy-soft/30"
+              >
+                <span className="flex-1 font-serif font-normal text-base text-white truncate">
+                  {sp.name}
+                </span>
+                <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-dim flex-shrink-0">
+                  {(sp.priceAmountCents / 100).toLocaleString('es-AR', { style: 'currency', currency: formData.priceCurrency, maximumFractionDigits: 0 })}
+                </span>
+                <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim flex-shrink-0">
+                  {sp.minBookingLeadHours}h
+                </span>
                 <button
                   type="button"
                   onClick={() => setSpecialties(specialties.filter((_, j) => j !== i))}
-                  className="text-red-400 hover:text-red-600 text-xs ml-2"
+                  className="font-sans text-[10px] uppercase tracking-eyebrow hover:opacity-80 transition-opacity duration-300 flex-shrink-0"
+                  style={{ color: '#A04A3A' }}
                 >
                   Quitar
                 </button>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-        <div className="space-y-2">
+
+        {/* Inputs para agregar nueva especialidad */}
+        <div className="space-y-4 border-t border-gold-faint pt-5">
           <input
             type="text"
             value={newSpecName}
             onChange={(e) => setNewSpecName(e.target.value)}
-            placeholder="Ej: Carta natal, Lecturas de tarot"
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder="Nombre de la especialidad"
+            className={inputClass}
           />
-          <div className="flex gap-2">
-            <select
-              value={newSpecLeadHours}
-              onChange={(e) => setNewSpecLeadHours(Number(e.target.value))}
-              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
-            >
-              {LEAD_TIME_OPTIONS.map(({ value, label }) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => {
-                if (!newSpecName.trim()) return;
-                setSpecialties([...specialties, { name: newSpecName.trim(), minBookingLeadHours: newSpecLeadHours }]);
-                setNewSpecName('');
-                setNewSpecLeadHours(1);
-              }}
-              className="px-4 py-2 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-200 transition-colors flex-shrink-0"
-            >
-              + Agregar
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-2">
+                Precio
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={newSpecPrice}
+                onChange={(e) => setNewSpecPrice(e.target.value)}
+                placeholder="5000"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-2">
+                Anticipación mínima
+              </label>
+              <select
+                value={newSpecLeadHours}
+                onChange={(e) => setNewSpecLeadHours(Number(e.target.value))}
+                style={{ colorScheme: 'dark' }}
+                className={selectClass}
+              >
+                {LEAD_TIME_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (!newSpecName.trim()) return;
+              const precio = parseFloat(newSpecPrice);
+              if (isNaN(precio) || precio < 0) return;
+              setSpecialties([...specialties, {
+                name: newSpecName.trim(),
+                minBookingLeadHours: newSpecLeadHours,
+                priceAmountCents: Math.round(precio * 100),
+              }]);
+              setNewSpecName('');
+              setNewSpecPrice('');
+              setNewSpecLeadHours(1);
+            }}
+            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+          >
+            <PlusIcon />
+            <span>Agregar especialidad</span>
+          </button>
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={isWorking}
-        className="w-full bg-gradient-to-r from-mystic-500 to-primary-600 text-white py-3 rounded-lg hover:from-mystic-600 hover:to-primary-700 transition-all font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-      >
-        {uploadingPhoto ? 'Subiendo foto...' : saving ? 'Guardando...' : submitLabel}
-      </button>
+      {/* Submit — acción crítica única del form: gold-gradient */}
+      <div className="pt-4">
+        <button
+          type="submit"
+          disabled={isWorking}
+          className="w-full inline-flex items-center justify-center gap-3 bg-gold-gradient py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+        >
+          <span>
+            {uploadingPhoto ? 'Subiendo foto...' : saving ? 'Guardando...' : submitLabel}
+          </span>
+          {!isWorking && <span>→</span>}
+        </button>
+      </div>
+
     </form>
   );
 };
