@@ -349,7 +349,7 @@ export const sendEmail = async (emailData) => {
 
 export const sendContactMessage = async ({ name, email, message }) => {
   const response = await api.post('/email/send', {
-    to: 'contacto@ouro.com',
+    to: 'ouro.contacto2026@gmail.com',
     subject: `Consulta de ${name} <${email}>`,
     body: `Nombre: ${name}\nEmail: ${email}\n\n${message}`,
     html: false,
