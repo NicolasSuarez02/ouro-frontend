@@ -27,14 +27,6 @@ const STATUS_CONFIG = {
       color: 'var(--gold)',
     },
   },
-  PENDING_PAYMENT: {
-    label: 'Pendiente de pago',
-    style: {
-      background: 'transparent',
-      border: '1px solid rgba(198, 167, 94, 0.4)',
-      color: 'rgba(198, 167, 94, 0.7)',
-    },
-  },
   CANCELLED: {
     label: 'Cancelado',
     style: {

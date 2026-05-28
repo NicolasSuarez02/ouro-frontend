@@ -179,6 +179,11 @@ export const updateClient = async (id, clientData) => {
   return response.data;
 };
 
+export const updateClientMe = async (clientData) => {
+  const response = await api.put('/clients/me', clientData);
+  return response.data;
+};
+
 // ==================== AVAILABILITY ENDPOINTS ====================
 
 export const getTherapistAvailability = async (therapistId) => {
@@ -219,6 +224,11 @@ export const cancelAppointment = async (id) => {
 
 export const completeAppointment = async (id) => {
   const response = await api.put(`/appointments/${id}/complete`);
+  return response.data;
+};
+
+export const getPaymentLink = async (id) => {
+  const response = await api.get(`/appointments/${id}/payment-link`);
   return response.data;
 };
 

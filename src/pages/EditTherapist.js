@@ -33,13 +33,8 @@ const EditTherapist = () => {
         setTherapistId(therapist.id);
         setInitialValues({
           bio: therapist.bio || '',
-          specialty: therapist.specialty || '',
           photoUrl: therapist.photoUrl || '',
-          precioEnPesos: therapist.priceAmountCents != null
-            ? (therapist.priceAmountCents / 100).toString()
-            : '',
           priceCurrency: therapist.priceCurrency || 'ARS',
-          minBookingLeadHours: therapist.minBookingLeadHours || 1,
           specialties: therapist.specialties || [],
         });
       })
