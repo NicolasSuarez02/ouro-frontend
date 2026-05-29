@@ -45,6 +45,14 @@ const STATUS_CONFIG = {
   },
 };
 
+const canJoinMeeting = (startAt) => {
+  if (!startAt) return false;
+  const start = new Date(startAt);
+  const now = new Date();
+  const minutesUntilStart = (start - now) / 60000;
+  return minutesUntilStart <= 10;
+};
+
 const formatDatetime = (isoStr) => {
   if (!isoStr) return '';
   const d = new Date(isoStr);
@@ -302,7 +310,7 @@ const ClientAppointments = () => {
               </div>
 
               {/* Link de Zoom */}
-              {isFutureSection && appt.zoomJoinUrl && (
+              {isFutureSection && appt.zoomJoinUrl && canJoinMeeting(appt.startAt) && (
                 <a
                   href={appt.zoomJoinUrl}
                   target="_blank"
