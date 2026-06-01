@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getMpConnectUrl } from '../services/api';
+import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getAppointmentsByTherapist, getMpConnectUrl } from '../services/api';
 
 // ---------------------------------------------------------------
 // Iconos inline — stroke 1.5px.
@@ -38,6 +38,21 @@ const CloseIcon = ({ className = '' }) => (
   </svg>
 );
 
+const VideoIcon = ({ className = '' }) => (
+  <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polygon points="23 7 16 12 23 17 23 7" />
+    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+  </svg>
+);
+
+const canJoinMeeting = (startAt) => {
+  if (!startAt) return false;
+  const start = new Date(startAt);
+  const now = new Date();
+  const minutesUntilStart = (start - now) / 60000;
+  return minutesUntilStart <= 10;
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -72,7 +87,11 @@ const Dashboard = () => {
     if (user?.role === 'THERAPIST') {
       setLoadingTherapist(true);
       getTherapistByUserId(user.id)
-        .then((data) => setTherapist(data))
+        .then((data) => {
+          setTherapist(data);
+          return getAppointmentsByTherapist(data.id);
+        })
+        .then((agenda) => setNextAppointment(agenda.proximos?.[0] || null))
         .catch(() => setTherapist(null))
         .finally(() => setLoadingTherapist(false));
     } else if (user?.role === 'USER') {
@@ -305,7 +324,7 @@ const Dashboard = () => {
                     Próximo turno
                   </p>
                   <p className="font-serif font-normal text-base text-white truncate">
-                    {nextAppointment.therapistFullName}
+                    {user.role === 'THERAPIST' ? nextAppointment.clientFullName : nextAppointment.therapistFullName}
                   </p>
                   <p className="font-serif font-light text-sm text-white-dim mt-1 capitalize">
                     {new Date(nextAppointment.startAt).toLocaleDateString('es-AR', {
@@ -317,6 +336,22 @@ const Dashboard = () => {
                     })}
                     {' hs'}
                   </p>
+                  {canJoinMeeting(nextAppointment.startAt) && (() => {
+                    const url = user.role === 'THERAPIST' ? nextAppointment.zoomStartUrl : nextAppointment.zoomJoinUrl;
+                    const label = user.role === 'THERAPIST' ? 'Iniciar sesión' : 'Unirse a la sesión';
+                    if (!url) return null;
+                    return (
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+                      >
+                        <VideoIcon />
+                        <span>{label}</span>
+                      </a>
+                    );
+                  })()}
                 </div>
               </div>
             ) : (

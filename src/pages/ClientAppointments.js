@@ -310,17 +310,22 @@ const ClientAppointments = () => {
               </div>
 
               {/* Link de Zoom */}
-              {isFutureSection && appt.zoomJoinUrl && canJoinMeeting(appt.startAt) && (
-                <a
-                  href={appt.zoomJoinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
-                >
-                  <VideoIcon />
-                  <span>Unirse a la sesión</span>
-                </a>
-              )}
+              {isFutureSection && canJoinMeeting(appt.startAt) && (() => {
+                const url = actingAsTherapist ? appt.zoomStartUrl : appt.zoomJoinUrl;
+                const label = actingAsTherapist ? 'Iniciar sesión' : 'Unirse a la sesión';
+                if (!url) return null;
+                return (
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+                  >
+                    <VideoIcon />
+                    <span>{label}</span>
+                  </a>
+                );
+              })()}
             </div>
 
             {/* Acciones */}
