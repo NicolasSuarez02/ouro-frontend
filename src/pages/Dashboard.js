@@ -65,6 +65,7 @@ const Dashboard = () => {
   const [mpStatus, setMpStatus] = useState(null); // 'success' | 'error' | null
   const [connectingMp, setConnectingMp] = useState(false);
   const [joiningZoom, setJoiningZoom] = useState(false);
+  const [zoomError, setZoomError] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('ouro_user');
@@ -341,24 +342,32 @@ const Dashboard = () => {
                     if (!nextAppointment.zoomJoinUrl) return null;
                     if (user.role === 'THERAPIST') {
                       return (
-                        <button
-                          onClick={async () => {
-                            setJoiningZoom(true);
-                            try {
-                              const freshUrl = await getFreshZoomStartUrl(nextAppointment.id);
-                              window.open(freshUrl, '_blank', 'noopener,noreferrer');
-                            } catch {
-                              // silencioso — el terapeuta puede ir a /mis-turnos si falla
-                            } finally {
-                              setJoiningZoom(false);
-                            }
-                          }}
-                          disabled={joiningZoom}
-                          className="inline-flex items-center gap-2 mt-3 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out disabled:opacity-50"
-                        >
-                          <VideoIcon />
-                          <span>{joiningZoom ? 'Cargando...' : 'Iniciar sesión'}</span>
-                        </button>
+                        <div className="flex flex-col gap-1">
+                          <button
+                            onClick={async () => {
+                              setJoiningZoom(true);
+                              setZoomError(false);
+                              try {
+                                const freshUrl = await getFreshZoomStartUrl(nextAppointment.id);
+                                window.open(freshUrl, '_blank', 'noopener,noreferrer');
+                              } catch {
+                                setZoomError(true);
+                              } finally {
+                                setJoiningZoom(false);
+                              }
+                            }}
+                            disabled={joiningZoom}
+                            className="inline-flex items-center gap-2 mt-3 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out disabled:opacity-50"
+                          >
+                            <VideoIcon />
+                            <span>{joiningZoom ? 'Cargando...' : 'Iniciar sesión'}</span>
+                          </button>
+                          {zoomError && (
+                            <p className="font-sans text-[10px] text-red-400 mt-1">
+                              No se pudo obtener el link. Intentá de nuevo o ingresá desde <a href="/mis-turnos" className="underline">Mis turnos</a>.
+                            </p>
+                          )}
+                        </div>
                       );
                     }
                     return (
