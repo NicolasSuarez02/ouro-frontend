@@ -318,11 +318,13 @@ const ClientAppointments = () => {
                   return (
                     <button
                       onClick={async () => {
+                        const newTab = window.open('', '_blank');
                         setJoiningZoomId(appt.id);
                         try {
                           const freshUrl = await getFreshZoomStartUrl(appt.id);
-                          window.open(freshUrl, '_blank', 'noopener,noreferrer');
+                          newTab.location.href = freshUrl;
                         } catch {
+                          newTab.close();
                           setErrorMsg('No se pudo obtener el link de Zoom. Intentá de nuevo.');
                         } finally {
                           setJoiningZoomId(null);

@@ -345,12 +345,14 @@ const Dashboard = () => {
                         <div className="flex flex-col gap-1">
                           <button
                             onClick={async () => {
+                              const newTab = window.open('', '_blank');
                               setJoiningZoom(true);
                               setZoomError(false);
                               try {
                                 const freshUrl = await getFreshZoomStartUrl(nextAppointment.id);
-                                window.open(freshUrl, '_blank', 'noopener,noreferrer');
+                                newTab.location.href = freshUrl;
                               } catch {
+                                newTab.close();
                                 setZoomError(true);
                               } finally {
                                 setJoiningZoom(false);
