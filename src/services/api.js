@@ -237,6 +237,11 @@ export const getAppointmentById = async (id) => {
   return response.data;
 };
 
+export const getFreshZoomStartUrl = async (id) => {
+  const response = await api.get(`/appointments/${id}/zoom-start-url`);
+  return response.data.startUrl;
+};
+
 export const getAppointmentsByUser = async (userId) => {
   const response = await api.get(`/appointments/user/${userId}`);
   return response.data;

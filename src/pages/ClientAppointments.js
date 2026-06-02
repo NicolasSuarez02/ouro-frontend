@@ -7,6 +7,7 @@ import {
   getTherapistByUserId,
   cancelAppointment,
   completeAppointment,
+  getFreshZoomStartUrl,
 } from '../services/api';
 
 const PAGE_SIZE = 5;
@@ -130,6 +131,7 @@ const ClientAppointments = () => {
   const [cancellingId, setCancellingId] = useState(null);
   const [confirmId, setConfirmId] = useState(null);
   const [completingId, setCompletingId] = useState(null);
+  const [joiningZoomId, setJoiningZoomId] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [isTherapist, setIsTherapist] = useState(false);
   const [historialPage, setHistorialPage] = useState(1);
@@ -311,18 +313,39 @@ const ClientAppointments = () => {
 
               {/* Link de Zoom */}
               {isFutureSection && canJoinMeeting(appt.startAt) && (() => {
-                const url = actingAsTherapist ? appt.zoomStartUrl : appt.zoomJoinUrl;
-                const label = actingAsTherapist ? 'Iniciar sesión' : 'Unirse a la sesión';
-                if (!url) return null;
+                if (actingAsTherapist) {
+                  if (!appt.zoomJoinUrl) return null;
+                  return (
+                    <button
+                      onClick={async () => {
+                        setJoiningZoomId(appt.id);
+                        try {
+                          const freshUrl = await getFreshZoomStartUrl(appt.id);
+                          window.open(freshUrl, '_blank', 'noopener,noreferrer');
+                        } catch {
+                          setErrorMsg('No se pudo obtener el link de Zoom. Intentá de nuevo.');
+                        } finally {
+                          setJoiningZoomId(null);
+                        }
+                      }}
+                      disabled={joiningZoomId === appt.id}
+                      className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out disabled:opacity-50"
+                    >
+                      <VideoIcon />
+                      <span>{joiningZoomId === appt.id ? 'Cargando...' : 'Iniciar sesión'}</span>
+                    </button>
+                  );
+                }
+                if (!appt.zoomJoinUrl) return null;
                 return (
                   <a
-                    href={url}
+                    href={appt.zoomJoinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
                   >
                     <VideoIcon />
-                    <span>{label}</span>
+                    <span>Unirse a la sesión</span>
                   </a>
                 );
               })()}

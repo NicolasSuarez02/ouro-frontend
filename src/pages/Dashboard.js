@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getAppointmentsByTherapist, getMpConnectUrl } from '../services/api';
+import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getAppointmentsByTherapist, getMpConnectUrl, getFreshZoomStartUrl } from '../services/api';
 
 // ---------------------------------------------------------------
 // Iconos inline — stroke 1.5px.
@@ -64,6 +64,7 @@ const Dashboard = () => {
   const [pageLoading, setPageLoading] = useState(true);
   const [mpStatus, setMpStatus] = useState(null); // 'success' | 'error' | null
   const [connectingMp, setConnectingMp] = useState(false);
+  const [joiningZoom, setJoiningZoom] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('ouro_user');
@@ -337,18 +338,38 @@ const Dashboard = () => {
                     {' hs'}
                   </p>
                   {canJoinMeeting(nextAppointment.startAt) && (() => {
-                    const url = user.role === 'THERAPIST' ? nextAppointment.zoomStartUrl : nextAppointment.zoomJoinUrl;
-                    const label = user.role === 'THERAPIST' ? 'Iniciar sesión' : 'Unirse a la sesión';
-                    if (!url) return null;
+                    if (!nextAppointment.zoomJoinUrl) return null;
+                    if (user.role === 'THERAPIST') {
+                      return (
+                        <button
+                          onClick={async () => {
+                            setJoiningZoom(true);
+                            try {
+                              const freshUrl = await getFreshZoomStartUrl(nextAppointment.id);
+                              window.open(freshUrl, '_blank', 'noopener,noreferrer');
+                            } catch {
+                              // silencioso — el terapeuta puede ir a /mis-turnos si falla
+                            } finally {
+                              setJoiningZoom(false);
+                            }
+                          }}
+                          disabled={joiningZoom}
+                          className="inline-flex items-center gap-2 mt-3 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out disabled:opacity-50"
+                        >
+                          <VideoIcon />
+                          <span>{joiningZoom ? 'Cargando...' : 'Iniciar sesión'}</span>
+                        </button>
+                      );
+                    }
                     return (
                       <a
-                        href={url}
+                        href={nextAppointment.zoomJoinUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 mt-3 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
                       >
                         <VideoIcon />
-                        <span>{label}</span>
+                        <span>Unirse a la sesión</span>
                       </a>
                     );
                   })()}
