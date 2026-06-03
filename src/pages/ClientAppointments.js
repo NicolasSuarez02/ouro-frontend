@@ -314,7 +314,6 @@ const ClientAppointments = () => {
               {/* Link de Zoom */}
               {isFutureSection && canJoinMeeting(appt.startAt) && (() => {
                 if (actingAsTherapist) {
-                  if (!appt.zoomJoinUrl) return null;
                   return (
                     <button
                       onClick={async () => {

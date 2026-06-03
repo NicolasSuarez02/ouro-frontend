@@ -339,7 +339,6 @@ const Dashboard = () => {
                     {' hs'}
                   </p>
                   {canJoinMeeting(nextAppointment.startAt) && (() => {
-                    if (!nextAppointment.zoomJoinUrl) return null;
                     if (user.role === 'THERAPIST') {
                       return (
                         <div className="flex flex-col gap-1">
