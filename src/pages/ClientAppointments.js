@@ -337,7 +337,11 @@ const ClientAppointments = () => {
                     </button>
                   );
                 }
-                if (!appt.zoomJoinUrl) return null;
+                if (!appt.zoomJoinUrl) return (
+                  <p className="mt-4 font-sans text-[10px] text-white-dim uppercase tracking-eyebrow">
+                    El terapeuta abrirá la sala en breve
+                  </p>
+                );
                 return (
                   <a
                     href={appt.zoomJoinUrl}

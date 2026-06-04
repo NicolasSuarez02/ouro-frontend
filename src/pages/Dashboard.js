@@ -371,6 +371,11 @@ const Dashboard = () => {
                         </div>
                       );
                     }
+                    if (!nextAppointment.zoomJoinUrl) return (
+                      <p className="mt-3 font-sans text-[10px] text-white-dim uppercase tracking-eyebrow">
+                        El terapeuta abrirá la sala en breve
+                      </p>
+                    );
                     return (
                       <a
                         href={nextAppointment.zoomJoinUrl}
