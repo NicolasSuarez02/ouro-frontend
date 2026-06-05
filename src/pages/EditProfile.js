@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { updateUser, getClientByUserId, updateClientMe } from '../services/api';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import AuthLayout from '../components/AuthLayout';
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -67,7 +66,6 @@ const EditProfile = () => {
     try {
       const updatedUser = await updateUser(user.id, { fullName: fullName.trim(), phone: phone.trim(), email: email.trim() });
 
-      // Actualizar datos de nacimiento en perfil de cliente
       if (dateOfBirth || timeOfBirth) {
         let birthDate = null;
         if (dateOfBirth) {
@@ -82,7 +80,6 @@ const EditProfile = () => {
         }
       }
 
-      // Actualizar localStorage
       const newUserData = { ...user, fullName: updatedUser.fullName, phone: updatedUser.phone, email: updatedUser.email };
       localStorage.setItem('ouro_user', JSON.stringify(newUserData));
 
@@ -105,124 +102,127 @@ const EditProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+      <div className="relative min-h-screen flex items-center justify-center">
+        <div className="w-6 h-6 rounded-full border border-gold-faint border-t-gold animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-white flex flex-col">
-      <Navbar />
-      <main className="flex-1 flex items-center justify-center px-4 py-16">
-        <div className="max-w-md w-full">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Editar mis datos</h2>
-            <p className="mt-2 text-gray-600">Actualizá tu información personal</p>
-          </div>
+    <AuthLayout
+      eyebrow="Mi cuenta"
+      title={<>Editar <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">mis datos</em></>}
+      subtitle="Actualizá tu información personal"
+      backTo="/dashboard"
+      backLabel="Volver al dashboard"
+    >
+      {success && (
+        <div className="mb-6 border border-gold-faint bg-gold-ghost px-5 py-4 flex items-start gap-3">
+          <span className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-gold shadow-gold-glow-soft" aria-hidden="true" />
+          <p className="font-serif font-light text-base text-white leading-relaxed">{success}</p>
+        </div>
+      )}
+      {error && (
+        <div
+          className="mb-6 px-5 py-4 flex items-start gap-3"
+          style={{ borderTop: '1px solid rgba(160,74,58,0.4)', borderBottom: '1px solid rgba(160,74,58,0.4)' }}
+        >
+          <span className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-[#A04A3A]" aria-hidden="true" />
+          <p className="font-serif font-light text-base text-white leading-relaxed">{error}</p>
+        </div>
+      )}
 
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            {success && (
-              <div className="mb-5 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
-                {success}
-              </div>
-            )}
-            {error && (
-              <div className="mb-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div>
+          <label className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3">
+            Nombre completo <span className="text-[#A04A3A]">*</span>
+          </label>
+          <input
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+            placeholder="Tu nombre completo"
+            className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+          />
+        </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3">
+            Email <span className="text-[#A04A3A]">*</span>
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="tu@email.com"
+            className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+          />
+          <p className="font-sans text-[10px] text-white-faint mt-2">Si cambiás el email, deberás re-verificar tu cuenta.</p>
+        </div>
+
+        <div>
+          <label className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3">
+            Teléfono <span className="text-[#A04A3A]">*</span>
+          </label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+            placeholder="+54 11 1234-5678"
+            className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
+          />
+        </div>
+
+        {user?.role !== 'THERAPIST' && (
+          <div className="border-l-2 border-gold pl-5 pr-4 py-4 bg-gold-ghost">
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-4">
+              Fecha y hora de nacimiento
+            </p>
+            <p className="font-serif font-light text-sm text-white-dim mb-5 leading-relaxed">
+              Usados por los terapeutas para personalizar las sesiones.
+            </p>
+            <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre completo <span className="text-red-500">*</span>
+                <label className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3">
+                  Fecha
                 </label>
                 <input
                   type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  inputMode="numeric"
+                  value={dateOfBirth}
+                  onChange={handleDateChange}
+                  placeholder="dd/mm/aaaa"
+                  maxLength={10}
+                  className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white placeholder:text-white-faint placeholder:italic py-3 transition-colors duration-300"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email <span className="text-red-500">*</span>
+                <label className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3">
+                  Hora
                 </label>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                />
-                <p className="text-xs text-gray-400 mt-1">Si cambiás el email, deberás re-verificar tu cuenta.</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Teléfono <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                  placeholder="+54 11 1234-5678"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  type="time"
+                  value={timeOfBirth}
+                  onChange={(e) => setTimeOfBirth(e.target.value)}
+                  className="w-full bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-serif font-light text-lg text-white py-3 transition-colors duration-300 [color-scheme:dark]"
                 />
               </div>
-
-              {user?.role !== 'THERAPIST' && (
-                <div className="p-4 bg-mystic-50 border border-mystic-100 rounded-xl">
-                  <p className="text-xs text-mystic-700 mb-3">Fecha y hora de nacimiento — usados por los terapeutas para personalizar las sesiones.</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de nacimiento</label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={dateOfBirth}
-                        onChange={handleDateChange}
-                        placeholder="dd/mm/aaaa"
-                        maxLength={10}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Hora de nacimiento</label>
-                      <input
-                        type="time"
-                        value={timeOfBirth}
-                        onChange={(e) => setTimeOfBirth(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all bg-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full bg-gradient-to-r from-mystic-500 to-primary-600 text-white py-3 rounded-lg hover:from-mystic-600 hover:to-primary-700 transition-all font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-              >
-                {saving ? 'Guardando...' : 'Guardar cambios'}
-              </button>
-            </form>
-
-            <div className="mt-6 text-center">
-              <Link to="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">
-                ← Volver al dashboard
-              </Link>
             </div>
           </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={saving}
+          className="w-full inline-flex items-center justify-center gap-3 bg-gold-gradient py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+        >
+          {saving ? 'Guardando...' : 'Guardar cambios'}
+        </button>
+      </form>
+    </AuthLayout>
   );
 };
 

@@ -36,10 +36,10 @@ const Footer = () => {
 
           {/* Contacto */}
           <a
-            href="mailto:contactoouro@gmail.com"
+            href="mailto:ouro.contacto2026@gmail.com"
             className="group relative font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-2"
           >
-            contactoouro@gmail.com
+            ouro.contacto2026@gmail.com
             <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
           </a>
 
