@@ -133,6 +133,59 @@ code {
 }
 
 /* ============================================================
+   Cursor custom OURO (DS v2 sección 8) — solo desktop con mouse.
+   El cursor nativo se oculta en desktop con puntero fino; el
+   componente <CustomCursor> dibuja anillo + dot dorados.
+   En inputs/textarea/select mantenemos `cursor: text` para que
+   el usuario tenga el caret nativo al escribir (el componente
+   se auto-oculta sobre esos elementos).
+   En touch / coarse pointer el cursor nativo se preserva.
+   ============================================================ */
+@media (hover: hover) and (pointer: fine) {
+  body,
+  a,
+  button {
+    cursor: none;
+  }
+  input,
+  textarea,
+  select,
+  [contenteditable="true"] {
+    cursor: text;
+  }
+}
+
+.ouro-cursor-ring,
+.ouro-cursor-dot {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998; /* debajo del ruido fractal (9999), sobre todo lo demás */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  will-change: transform, width, height, background-color;
+}
+
+.ouro-cursor-ring {
+  border: 1px solid var(--gold-dim);
+  transition:
+    width 0.4s var(--expo-out),
+    height 0.4s var(--expo-out),
+    background-color 0.4s var(--expo-out);
+}
+
+.ouro-cursor-dot {
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ouro-cursor-ring {
+    transition: none;
+  }
+}
+
+/* ============================================================
    Ruido fractal SVG de fondo (DS v2 sección 6)
    Capa fija que cubre todo el viewport con textura "papel".
    - SVG con feTurbulence (fractalNoise) embebido como dataURI:

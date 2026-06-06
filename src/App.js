@@ -26,11 +26,14 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentPending from './pages/PaymentPending';
 import PaymentFailure from './pages/PaymentFailure';
 import PrivateRoute from './components/PrivateRoute';
+import CustomCursor from './components/CustomCursor';
 
 function App() {
   return (
-    <Router>
-      <Routes>
+    <>
+      <CustomCursor />
+      <Router>
+        <Routes>
         {/* Públicas */}
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
@@ -62,8 +65,9 @@ function App() {
 
         {/* Protegida — solo ADMIN */}
         <Route path="/admin" element={<PrivateRoute requiredRole="ADMIN"><AdminDashboard /></PrivateRoute>} />
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </>
   );
 }
 
