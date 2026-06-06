@@ -311,7 +311,7 @@ const Dashboard = () => {
                 to="/mis-turnos"
                 className="group inline-flex items-center gap-2 font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
               >
-                <span>Ver todos</span>
+                <span>Ver mis turnos</span>
                 <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
               </Link>
             </div>
@@ -402,6 +402,15 @@ const Dashboard = () => {
                   <span>Reservar un turno</span>
                   <span>→</span>
                 </Link>
+                <div className="mt-4">
+                  <Link
+                    to="/mis-turnos"
+                    className="group inline-flex items-center gap-2 font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold-dim hover:text-gold transition-colors duration-300"
+                  >
+                    <span>Ver mis turnos</span>
+                    <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
+                  </Link>
+                </div>
               </div>
             )}
           </section>
