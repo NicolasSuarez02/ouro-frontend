@@ -23,8 +23,10 @@ import React, { useEffect, useRef, useState } from 'react';
 
 // Sobre estos selectores ocultamos el cursor custom y dejamos al navegador
 // mostrar el cursor nativo (text en inputs, pointer / not-allowed en grids
-// interactivos de turnos marcados explícitamente con data-cursor-native).
-const HIDE_SELECTORS = 'input, textarea, select, [contenteditable="true"], [data-cursor-native]';
+// interactivos de turnos marcados explícitamente con data-native-cursor).
+// El CSS en index.css restaura el cursor nativo dentro de las zonas
+// data-native-cursor (sobreescribe `body { cursor: none }`).
+const HIDE_SELECTORS = 'input, textarea, select, [contenteditable="true"], [data-native-cursor]';
 const HOVER_SELECTORS = 'a, button, [role="button"], summary, label[for], [data-cursor-hover]';
 
 const CustomCursor = () => {

@@ -535,10 +535,12 @@ const TherapistDetail = () => {
             )}
 
             {/* Calendario + reserva
-                data-cursor-native: en grids de slots de turnos respetamos
-                el cursor nativo (pointer / not-allowed). El cursor custom
-                se oculta dentro de este bloque. */}
-            <div className="bg-navy-card border border-gold-faint p-8" data-cursor-native>
+                data-native-cursor: en grids de slots de turnos respetamos
+                el cursor nativo del navegador (auto en zonas vacías,
+                pointer en clickables, not-allowed en disabled, text en
+                inputs). El cursor custom se oculta dentro de este bloque
+                y el CSS sobreescribe el `cursor: none` global. */}
+            <div className="bg-navy-card border border-gold-faint p-8" data-native-cursor>
               <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-6">
                 Reservar turno
               </p>

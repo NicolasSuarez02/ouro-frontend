@@ -149,8 +149,35 @@ code {
   }
   input,
   textarea,
-  select,
   [contenteditable="true"] {
+    cursor: text;
+  }
+
+  /* --------------------------------------------------------------
+     Zonas con cursor nativo (turneros, grids de slots).
+     Marcadas con `data-native-cursor` en el contenedor.
+     Sobreescriben las reglas globales `body|a|button { cursor: none }`
+     por mayor especificidad. El cursor custom se auto-oculta acá
+     (ver lógica en CustomCursor.js).
+     -------------------------------------------------------------- */
+  [data-native-cursor],
+  [data-native-cursor] a,
+  [data-native-cursor] button {
+    cursor: auto;
+  }
+  [data-native-cursor] a,
+  [data-native-cursor] button:not(:disabled),
+  [data-native-cursor] [role="button"]:not([aria-disabled="true"]),
+  [data-native-cursor] select {
+    cursor: pointer;
+  }
+  [data-native-cursor] button:disabled,
+  [data-native-cursor] [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+  [data-native-cursor] input,
+  [data-native-cursor] textarea,
+  [data-native-cursor] [contenteditable="true"] {
     cursor: text;
   }
 }
