@@ -48,7 +48,7 @@ const SideRail = () => {
     <aside className="ouro-side-rail" aria-hidden="true">
       <span className="ouro-side-rail__dot" />
       <span className="ouro-side-rail__line" />
-      <span className="ouro-side-rail__label">OURO</span>
+      <span className="ouro-side-rail__label">Explorar</span>
     </aside>
   );
 };
