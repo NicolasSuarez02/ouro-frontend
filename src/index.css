@@ -149,6 +149,37 @@ code {
 }
 
 /* ============================================================
+   FadeUp — Utility de entrada por scroll (Intersection Observer)
+   Aplicada vía <FadeUp> + useInView hook.
+   Estado inicial: invisible y desplazado 40px hacia abajo.
+   Estado .is-visible: en posición, opaco.
+   Curva editorial OURO (expo-out, 1.2s).
+   ============================================================ */
+.fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity 1.2s var(--expo-out),
+    transform 1.2s var(--expo-out);
+  will-change: opacity, transform;
+}
+.fade-up.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Si el usuario pide reducir movimiento, anular completamente la
+   animación y mostrar el contenido sin transformar. */
+@media (prefers-reduced-motion: reduce) {
+  .fade-up,
+  .fade-up.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ============================================================
    Neutralizar el autofill style de WebKit (Chrome / Edge / Safari)
    Sin este fix, los inputs rellenados por el browser muestran un
    fondo blanco/amarillento/lila que rompe el estilo underline-only.

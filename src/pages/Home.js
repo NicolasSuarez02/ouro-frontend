@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import FadeUp from '../components/FadeUp';
 import { sendContactMessage, getAllTherapists } from '../services/api';
 
 const PASOS = [
@@ -111,7 +112,7 @@ const Home = () => {
       <Navbar />
 
       {/* ── 1. INICIO (Hero) ── */}
-      <section id="inicio" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
+      <FadeUp as="section" id="inicio" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
         <div className="max-w-container mx-auto px-6 lg:px-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
 
@@ -204,10 +205,10 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </section>
+      </FadeUp>
 
       {/* ── 2. QUIÉNES SOMOS ── */}
-      <section id="quienes-somos" className="relative py-24 lg:py-32">
+      <FadeUp as="section" id="quienes-somos" className="relative py-24 lg:py-32">
         <div className="max-w-container mx-auto px-6 lg:px-10">
           {/* Header de sección */}
           <div className="text-center mb-20 lg:mb-24">
@@ -341,10 +342,10 @@ const Home = () => {
             </article>
           </div>
         </div>
-      </section>
+      </FadeUp>
 
       {/* ── 3. TERAPEUTAS ── */}
-      <section id="terapeutas" className="relative py-24 lg:py-32">
+      <FadeUp as="section" id="terapeutas" className="relative py-24 lg:py-32">
         {/* Separador superior con línea-gradiente */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px"
@@ -447,10 +448,10 @@ const Home = () => {
             </div>
           )}
         </div>
-      </section>
+      </FadeUp>
 
       {/* ── 4. CÓMO EMPEZAR ── */}
-      <section id="como-empezar" className="relative py-24 lg:py-32">
+      <FadeUp as="section" id="como-empezar" className="relative py-24 lg:py-32">
         {/* Separador superior con línea-gradiente */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px"
@@ -588,13 +589,13 @@ const Home = () => {
             </article>
           </div>
         </div>
-      </section>
+      </FadeUp>
 
       {/* ── CTA grande (entre Cómo empezar y Contacto) ── */}
       {/* Alternativas de copy de título conservadas como referencia:
             B) "Cada retorno abre un ciclo."
             C) "Integrar lo vivido. Volver al ciclo." */}
-      <section className="relative py-32 lg:py-40 bg-navy-deep overflow-hidden">
+      <FadeUp as="section" className="relative py-32 lg:py-40 bg-navy-deep overflow-hidden">
         {/* Anillos decorativos sutiles, centrados */}
         <div
           className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full border border-gold-faint animate-spin"
@@ -643,10 +644,10 @@ const Home = () => {
             <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
           </Link>
         </div>
-      </section>
+      </FadeUp>
 
       {/* ── 5. CONTACTO ── */}
-      <section id="contacto" className="relative py-24 lg:py-32">
+      <FadeUp as="section" id="contacto" className="relative py-24 lg:py-32">
         {/* Separador superior con línea-gradiente */}
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px"
@@ -785,7 +786,7 @@ const Home = () => {
             </div>
           </form>
         </div>
-      </section>
+      </FadeUp>
 
       <Footer />
     </div>
