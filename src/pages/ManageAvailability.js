@@ -315,8 +315,8 @@ const ManageAvailability = () => {
           MODAL — Cancelar turno individual
           ═══════════════════════════════════════════════ */}
       {confirmSlot && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
+        <div className="ouro-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
+          <div className="ouro-modal w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
             <div className="flex items-start gap-3 mb-5">
               <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
               <p className="font-sans text-[10px] uppercase tracking-eyebrow" style={{ color: '#A04A3A' }}>
@@ -356,8 +356,8 @@ const ManageAvailability = () => {
           MODAL — Cancelar día completo
           ═══════════════════════════════════════════════ */}
       {confirmDia && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
+        <div className="ouro-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
+          <div className="ouro-modal w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
             <div className="flex items-start gap-3 mb-5">
               <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
               <p className="font-sans text-[10px] uppercase tracking-eyebrow" style={{ color: '#A04A3A' }}>

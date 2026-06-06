@@ -235,7 +235,7 @@ const ClientAppointments = () => {
       <div className="bg-navy-card border border-gold-faint p-6">
         {/* Confirmación inline (reemplaza contenido del card) */}
         {isConfirming ? (
-          <div className="space-y-5">
+          <div className="ouro-inline-enter space-y-5">
             <div className="flex items-start gap-3">
               <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
               <p className="font-serif font-light text-base text-white leading-relaxed">

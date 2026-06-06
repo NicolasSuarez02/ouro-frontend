@@ -462,6 +462,50 @@ body::after {
 }
 
 /* ============================================================
+   Modales, drawer mobile y banners inline (8.G) — entradas animadas.
+   Hasta acá los modales/drawer aparecían abruptamente. Tres keyframes
+   utility para envolver:
+     .ouro-backdrop      → fade-in del backdrop (0.3s)
+     .ouro-modal         → scale-up + fade del card del modal (0.4s,
+                           delay 0.1s para que entre después del backdrop)
+     .ouro-drawer        → slide-in lateral derecho del drawer mobile
+     .ouro-inline-enter  → fade + translateY chico para reemplazos
+                           inline (ej. confirmación de cancelar turno
+                           dentro de AppointmentCard).
+   prefers-reduced-motion: anula todas las animaciones.
+   ============================================================ */
+@keyframes ouro-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ouro-modal-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ouro-drawer-in {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes ouro-inline-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.ouro-backdrop     { animation: ouro-backdrop-in 0.3s var(--expo-out) both; }
+.ouro-modal        { animation: ouro-modal-in 0.4s var(--expo-out) 0.1s both; }
+.ouro-drawer       { animation: ouro-drawer-in 0.5s var(--expo-out) both; }
+.ouro-inline-enter { animation: ouro-inline-in 0.35s var(--expo-out) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ouro-backdrop,
+  .ouro-modal,
+  .ouro-drawer,
+  .ouro-inline-enter {
+    animation: none;
+  }
+}
+
+/* ============================================================
    Home — Línea conectora de "Cómo empezar" (8.F.2)
    Se "dibuja" de izquierda a derecha cuando la sección entra en
    viewport. Aprovecha la clase .fade-up.is-visible que <FadeUp>

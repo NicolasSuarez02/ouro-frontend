@@ -178,8 +178,8 @@ const Recursos = ({ category, titulo }) => {
             Modal confirmación eliminar
             ============================================ */}
         {confirmEliminar && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
-            <div className="w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
+          <div className="ouro-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
+            <div className="ouro-modal w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
               <p className="font-sans text-[10px] uppercase tracking-eyebrow text-center mb-4" style={{ color: '#A04A3A' }}>
                 Eliminar
               </p>

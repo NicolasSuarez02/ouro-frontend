@@ -158,8 +158,8 @@ const Navbar = () => {
           MODAL — Confirmación de logout
           ======================================================= */}
       {confirmLogout && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
+        <div className="ouro-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
+          <div className="ouro-modal w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
             <h3 className="font-serif text-2xl font-light text-white text-center mb-2">
               ¿Cerrar sesión?
             </h3>
@@ -371,12 +371,12 @@ const Navbar = () => {
         <div className="fixed inset-0 z-40 lg:hidden">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-navy-deep/80 backdrop-blur-sm"
+            className="ouro-backdrop absolute inset-0 bg-navy-deep/80 backdrop-blur-sm"
             onClick={() => setIsMenuOpen(false)}
           />
 
           {/* Drawer */}
-          <aside className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-navy-deep border-l border-gold-faint shadow-card-hover overflow-y-auto">
+          <aside className="ouro-drawer absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-navy-deep border-l border-gold-faint shadow-card-hover overflow-y-auto">
             <div className="px-8 pt-24 pb-10 space-y-1">
               <MobileItem onClick={() => scrollToSection('inicio')}>Inicio</MobileItem>
               <MobileItem onClick={() => scrollToSection('quienes-somos')}>Quiénes somos</MobileItem>
