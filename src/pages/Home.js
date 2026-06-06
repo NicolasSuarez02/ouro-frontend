@@ -155,14 +155,26 @@ const Home = () => {
             {/* Columna placeholder de video con anillos decorativos */}
             <div className="relative">
               {/* Anillos concéntricos decorativos (versión simplificada del astral del DS) */}
+              {/* Astral del hero — 4 anillos concéntricos, velocidades del DS v2 sección 8
+                  (480s / 360s / 240s / 180s) alternando CW/CCW desde el más externo. */}
               <div
-                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] aspect-square rounded-full border border-gold-faint animate-spin"
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[190%] aspect-square rounded-full border border-gold-faint animate-spin"
                 style={{ animationDuration: '480s' }}
                 aria-hidden="true"
               />
               <div
-                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] aspect-square rounded-full border border-gold-ghost animate-spin"
-                style={{ animationDuration: '720s', animationDirection: 'reverse' }}
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] aspect-square rounded-full border border-gold-ghost animate-spin"
+                style={{ animationDuration: '360s', animationDirection: 'reverse' }}
+                aria-hidden="true"
+              />
+              <div
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] aspect-square rounded-full border border-gold-faint animate-spin"
+                style={{ animationDuration: '240s' }}
+                aria-hidden="true"
+              />
+              <div
+                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] aspect-square rounded-full border border-gold-ghost animate-spin"
+                style={{ animationDuration: '180s', animationDirection: 'reverse' }}
                 aria-hidden="true"
               />
 
@@ -241,6 +253,8 @@ const Home = () => {
                 className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
                 aria-hidden="true"
               />
+              {/* Decoración circular: rota 180° en hover del card (CSS en index.css) */}
+              <span className="founder-decoration" aria-hidden="true" />
               {/* Inicial gigante */}
               <div className="text-center mb-6">
                 <span
@@ -277,6 +291,8 @@ const Home = () => {
                 className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
                 aria-hidden="true"
               />
+              {/* Decoración circular: rota 180° en hover del card (CSS en index.css) */}
+              <span className="founder-decoration" aria-hidden="true" />
               <div className="text-center mb-6">
                 <span
                   className="font-serif italic font-light bg-gold-gradient bg-clip-text text-transparent inline-block leading-none"
@@ -312,6 +328,8 @@ const Home = () => {
                 className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
                 aria-hidden="true"
               />
+              {/* Decoración circular: rota 180° en hover del card (CSS en index.css) */}
+              <span className="founder-decoration" aria-hidden="true" />
               <div className="text-center mb-6">
                 <span
                   className="font-serif italic font-light bg-gold-gradient bg-clip-text text-transparent inline-block leading-none"
@@ -486,9 +504,11 @@ const Home = () => {
           {/* 5 pasos */}
           <div className="relative mb-24 lg:mb-32">
             {/* Línea conectora (desktop) — centrada verticalmente sobre los círculos
-                de 80px. Eyebrow "Paso 01" (~31px) + mitad del círculo (40px) = ~72px */}
+                de 80px. Eyebrow "Paso 01" (~31px) + mitad del círculo (40px) = ~72px
+                home-step-connector: se "dibuja" de izquierda a derecha cuando la
+                sección entra en viewport (CSS en index.css usa .fade-up.is-visible). */}
             <div
-              className="hidden lg:block absolute top-[72px] left-[10%] right-[10%] h-px"
+              className="home-step-connector hidden lg:block absolute top-[72px] left-[10%] right-[10%] h-px"
               style={{
                 background:
                   'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), rgba(198, 167, 94, 0.4), transparent)',

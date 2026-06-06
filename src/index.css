@@ -462,6 +462,69 @@ body::after {
 }
 
 /* ============================================================
+   Home — Línea conectora de "Cómo empezar" (8.F.2)
+   Se "dibuja" de izquierda a derecha cuando la sección entra en
+   viewport. Aprovecha la clase .fade-up.is-visible que <FadeUp>
+   pone en la <section> envolvente; un descendant con la clase
+   .home-step-connector se anima con scaleX 0 → 1.
+   ============================================================ */
+.home-step-connector {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1.5s var(--expo-out) 0.4s;
+  will-change: transform;
+}
+.fade-up.is-visible .home-step-connector {
+  transform: scaleX(1);
+}
+
+/* ============================================================
+   Home — Founder decoration (8.F.3)
+   Círculo decorativo con punto dorado arriba, posicionado detrás
+   de la inicial gigante de cada founder card. Al hacer hover sobre
+   el <article class="group"> el círculo rota 180° con transición
+   larga (1s ease-expo-out) — el punto pasa de arriba a abajo.
+   ============================================================ */
+.founder-decoration {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%) rotate(0deg);
+  width: clamp(180px, 16vw, 240px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(198, 167, 94, 0.15);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform 1s var(--expo-out);
+  z-index: 0;
+}
+.founder-decoration::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  opacity: 0.6;
+}
+.group:hover .founder-decoration {
+  transform: translateX(-50%) rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-step-connector,
+  .founder-decoration {
+    transition: none;
+  }
+  .home-step-connector {
+    transform: scaleX(1);
+  }
+}
+
+/* ============================================================
    FadeUp — Utility de entrada por scroll (Intersection Observer)
    Aplicada vía <FadeUp> + useInView hook.
    Estado inicial: invisible y desplazado 40px hacia abajo.
