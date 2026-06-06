@@ -133,6 +133,36 @@ code {
 }
 
 /* ============================================================
+   Ruido fractal SVG de fondo (DS v2 sección 6)
+   Capa fija que cubre todo el viewport con textura "papel".
+   - SVG con feTurbulence (fractalNoise) embebido como dataURI:
+     el navegador lo cachea como imagen, no recalcula el filter
+     en cada frame.
+   - mix-blend-mode: overlay + opacity 0.07 → textura sutil que
+     evita la frialdad del navy plano sin pelear con el contenido.
+   - pointer-events: none → no captura clicks ni scrolls.
+   - En mobile (≤640px) bajamos opacity a 0.04 por performance
+     y para que no pese sobre pantallas más densas.
+   ============================================================ */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  opacity: 0.07;
+}
+
+@media (max-width: 640px) {
+  body::after {
+    opacity: 0.04;
+  }
+}
+
+/* ============================================================
    Accesibilidad — Reducción de movimiento
    OURO es plataforma de terapia: hay usuarios con vértigo,
    ansiedad o sensibilidades. Respetamos prefers-reduced-motion.
