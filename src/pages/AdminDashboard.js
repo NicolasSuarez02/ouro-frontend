@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ReactComponent as Isotipo } from '../assets/logo/ouro-isotipo.svg';
 import {
   getPendingTherapists,
@@ -257,6 +257,12 @@ const AdminDashboard = () => {
             <span className="hidden sm:block font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
               {admin.email}
             </span>
+            <Link
+              to="/"
+              className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
+            >
+              Ver sitio
+            </Link>
             <button
               onClick={() => { localStorage.removeItem('ouro_user'); localStorage.removeItem('ouro_token'); navigate('/'); }}
               className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
