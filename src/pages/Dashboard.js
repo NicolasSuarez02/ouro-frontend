@@ -213,71 +213,6 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Card: Tus datos */}
-        <section className="bg-navy-card border border-gold-faint p-8 mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
-              Tus datos
-            </p>
-            <Link
-              to="/editar-perfil"
-              className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim hover:text-gold transition-colors duration-300"
-            >
-              Editar →
-            </Link>
-          </div>
-          <dl className="space-y-4">
-            <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
-              <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
-                Nombre completo
-              </dt>
-              <dd className="font-serif font-light text-base text-white text-right">
-                {user.fullName}
-              </dd>
-            </div>
-            <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
-              <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
-                Email
-              </dt>
-              <dd className="font-serif font-light text-base text-white text-right break-all">
-                {user.email}
-              </dd>
-            </div>
-            {user.phone && (
-              <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
-                <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
-                  Teléfono
-                </dt>
-                <dd className="font-serif font-light text-base text-white text-right">
-                  {user.phone}
-                </dd>
-              </div>
-            )}
-            {client?.dateOfBirth && (
-              <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
-                <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
-                  Fecha de nacimiento
-                </dt>
-                <dd className="font-serif font-light text-base text-white text-right">
-                  {new Date(client.dateOfBirth).toLocaleDateString('es-AR', {
-                    day: 'numeric', month: 'long', year: 'numeric',
-                  })}
-                </dd>
-              </div>
-            )}
-            {client?.timeOfBirth && (
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
-                  Hora de nacimiento
-                </dt>
-                <dd className="font-serif font-light text-base text-white text-right">
-                  {client.timeOfBirth.slice(0, 5)} hs
-                </dd>
-              </div>
-            )}
-          </dl>
-        </section>
-
         {/* Card: Mis turnos — acceso directo para ADMIN.
             Separada de la card de USER/THERAPIST porque acá no
             cargamos nextAppointment (el admin no es un cliente
@@ -303,28 +238,6 @@ const Dashboard = () => {
                 <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
               </Link>
             </div>
-          </section>
-        )}
-
-        {/* Card: Postulate como terapeuta (solo USER) */}
-        {user.role === 'USER' && (
-          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
-            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-4">
-              Sumate al equipo
-            </p>
-            <h2 className="font-serif font-light text-2xl text-white mb-3 leading-tight">
-              Postulate como terapeuta
-            </h2>
-            <p className="font-serif font-light text-base text-white-dim leading-relaxed mb-6">
-              Sumate al equipo profesional de OURO. Cada perfil es revisado.
-            </p>
-            <Link
-              to="/register-therapist"
-              className="group inline-flex items-center gap-3 px-7 py-3 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
-            >
-              <span>Postular mi perfil</span>
-              <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
-            </Link>
           </section>
         )}
 
@@ -441,6 +354,93 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
+          </section>
+        )}
+
+        {/* Card: Tus datos */}
+        <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
+              Tus datos
+            </p>
+            <Link
+              to="/editar-perfil"
+              className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim hover:text-gold transition-colors duration-300"
+            >
+              Editar →
+            </Link>
+          </div>
+          <dl className="space-y-4">
+            <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+              <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                Nombre completo
+              </dt>
+              <dd className="font-serif font-light text-base text-white text-right">
+                {user.fullName}
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+              <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                Email
+              </dt>
+              <dd className="font-serif font-light text-base text-white text-right break-all">
+                {user.email}
+              </dd>
+            </div>
+            {user.phone && (
+              <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+                <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                  Teléfono
+                </dt>
+                <dd className="font-serif font-light text-base text-white text-right">
+                  {user.phone}
+                </dd>
+              </div>
+            )}
+            {client?.dateOfBirth && (
+              <div className="flex items-baseline justify-between gap-4 pb-3 border-b border-gold-faint">
+                <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                  Fecha de nacimiento
+                </dt>
+                <dd className="font-serif font-light text-base text-white text-right">
+                  {new Date(client.dateOfBirth).toLocaleDateString('es-AR', {
+                    day: 'numeric', month: 'long', year: 'numeric',
+                  })}
+                </dd>
+              </div>
+            )}
+            {client?.timeOfBirth && (
+              <div className="flex items-baseline justify-between gap-4">
+                <dt className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint flex-shrink-0">
+                  Hora de nacimiento
+                </dt>
+                <dd className="font-serif font-light text-base text-white text-right">
+                  {client.timeOfBirth.slice(0, 5)} hs
+                </dd>
+              </div>
+            )}
+          </dl>
+        </section>
+
+        {/* Card: Postulate como terapeuta (solo USER) */}
+        {user.role === 'USER' && (
+          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-4">
+              Sumate al equipo
+            </p>
+            <h2 className="font-serif font-light text-2xl text-white mb-3 leading-tight">
+              Postulate como terapeuta
+            </h2>
+            <p className="font-serif font-light text-base text-white-dim leading-relaxed mb-6">
+              Sumate al equipo profesional de OURO. Cada perfil es revisado.
+            </p>
+            <Link
+              to="/register-therapist"
+              className="group inline-flex items-center gap-3 px-7 py-3 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+            >
+              <span>Postular mi perfil</span>
+              <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
+            </Link>
           </section>
         )}
 
