@@ -28,6 +28,7 @@ import PaymentFailure from './pages/PaymentFailure';
 import PrivateRoute from './components/PrivateRoute';
 import CustomCursor from './components/CustomCursor';
 import InitialLoader from './components/InitialLoader';
+import SideRail from './components/SideRail';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
       <InitialLoader />
       <CustomCursor />
       <Router>
+        <SideRail />
         <Routes>
         {/* Públicas */}
         <Route path="/" element={<Home />} />
