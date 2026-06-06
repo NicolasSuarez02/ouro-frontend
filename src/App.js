@@ -27,10 +27,12 @@ import PaymentPending from './pages/PaymentPending';
 import PaymentFailure from './pages/PaymentFailure';
 import PrivateRoute from './components/PrivateRoute';
 import CustomCursor from './components/CustomCursor';
+import InitialLoader from './components/InitialLoader';
 
 function App() {
   return (
     <>
+      <InitialLoader />
       <CustomCursor />
       <Router>
         <Routes>

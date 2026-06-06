@@ -133,6 +133,74 @@ code {
 }
 
 /* ============================================================
+   Loader inicial (DS v2 sección 8) — primera carga de la sesión.
+   Capa fija full-viewport sobre todo (z-index 10000). Fondo
+   navy-deep + isotipo gold + palabra OURO. Fade-in inicial sutil.
+   El componente <InitialLoader> maneja las fases visible / fading /
+   gone con sessionStorage para que solo aparezca una vez por sesión.
+   prefers-reduced-motion: anula las animaciones.
+   ============================================================ */
+.ouro-initial-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 10000; /* sobre ruido (9999) y cursor (9998) */
+  background: var(--navy-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.4s var(--expo-out);
+  pointer-events: none;
+}
+
+.ouro-initial-loader.is-fading {
+  opacity: 0;
+}
+
+.ouro-initial-loader__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  animation: ouro-loader-enter 0.6s var(--expo-out) both;
+}
+
+.ouro-initial-loader__mark {
+  width: 80px;
+  height: 80px;
+  color: var(--gold);
+}
+
+.ouro-initial-loader__brand {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 1rem;
+  letter-spacing: 0.45em;
+  padding-right: 0.45em; /* compensa el letter-spacing final */
+  color: var(--white);
+}
+
+@keyframes ouro-loader-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ouro-initial-loader {
+    transition: opacity 0.05s linear;
+  }
+  .ouro-initial-loader__inner {
+    animation: none;
+  }
+}
+
+/* ============================================================
    Cursor custom OURO (DS v2 sección 8) — solo desktop con mouse.
    El cursor nativo se oculta en desktop con puntero fino; el
    componente <CustomCursor> dibuja anillo + dot dorados.
