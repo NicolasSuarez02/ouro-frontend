@@ -583,7 +583,10 @@ const ManageAvailability = () => {
             TAB: Cancelar turnos (calendario)
             ═══════════════════════════════════════════════ */}
         {tab === 'slots' && (
-          <div>
+          // data-cursor-native: este tab es un turnero (calendario + lista
+          // de slots). Respetamos el cursor nativo (pointer / not-allowed)
+          // y ocultamos el cursor custom dentro de este bloque.
+          <div data-cursor-native>
             {/* Banner informativo */}
             <div className="mb-6 border-l-2 border-gold pl-5 pr-4 py-4 bg-gold-ghost">
               <p className="font-serif font-light text-base text-white leading-relaxed">

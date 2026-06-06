@@ -21,14 +21,17 @@ import React, { useEffect, useRef, useState } from 'react';
  *   - 2 divs `position: fixed` que siguen al mouse vía inline style.
  */
 
-const INPUT_SELECTORS = 'input, textarea, select, [contenteditable="true"]';
+// Sobre estos selectores ocultamos el cursor custom y dejamos al navegador
+// mostrar el cursor nativo (text en inputs, pointer / not-allowed en grids
+// interactivos de turnos marcados explícitamente con data-cursor-native).
+const HIDE_SELECTORS = 'input, textarea, select, [contenteditable="true"], [data-cursor-native]';
 const HOVER_SELECTORS = 'a, button, [role="button"], summary, label[for], [data-cursor-hover]';
 
 const CustomCursor = () => {
   const [enabled, setEnabled] = useState(false);
   const [pos, setPos] = useState({ x: -100, y: -100 });
   const [isHover, setIsHover] = useState(false);
-  const [hideOnInput, setHideOnInput] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const rafRef = useRef(null);
 
   // Detectar si el entorno es desktop con mouse
@@ -54,13 +57,13 @@ const CustomCursor = () => {
       setPos({ x: clientX, y: clientY });
       const el = document.elementFromPoint(clientX, clientY);
       if (!el) {
-        setHideOnInput(false);
+        setHidden(false);
         setIsHover(false);
         return;
       }
-      const overInput = !!el.closest(INPUT_SELECTORS);
-      setHideOnInput(overInput);
-      setIsHover(!overInput && !!el.closest(HOVER_SELECTORS));
+      const shouldHide = !!el.closest(HIDE_SELECTORS);
+      setHidden(shouldHide);
+      setIsHover(!shouldHide && !!el.closest(HOVER_SELECTORS));
     };
 
     const onMove = (e) => {
@@ -73,7 +76,7 @@ const CustomCursor = () => {
     const onLeave = () => {
       setPos({ x: -100, y: -100 });
       setIsHover(false);
-      setHideOnInput(false);
+      setHidden(false);
     };
 
     window.addEventListener('mousemove', onMove, { passive: true });
@@ -86,15 +89,18 @@ const CustomCursor = () => {
     };
   }, [enabled]);
 
-  if (!enabled || hideOnInput) return null;
+  if (!enabled || hidden) return null;
 
-  const ringSize = isHover ? 48 : 20;
+  // Hover: expansión sutil (1.3×), bg dorado apenas perceptible.
+  // Era 48px / 0.08 — demasiado invasivo. Bajado a 26px / 0.05 para que
+  // el feedback sugiera, no tape.
+  const ringSize = isHover ? 26 : 20;
   const ringStyle = {
     width: `${ringSize}px`,
     height: `${ringSize}px`,
     left: `${pos.x}px`,
     top: `${pos.y}px`,
-    background: isHover ? 'rgba(198, 167, 94, 0.08)' : 'transparent',
+    background: isHover ? 'rgba(198, 167, 94, 0.05)' : 'transparent',
   };
   const dotStyle = {
     left: `${pos.x}px`,
