@@ -257,12 +257,6 @@ const AdminDashboard = () => {
             <span className="hidden sm:block font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
               {admin.email}
             </span>
-            <Link
-              to="/"
-              className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
-            >
-              Ver sitio
-            </Link>
             <button
               onClick={() => { localStorage.removeItem('ouro_user'); localStorage.removeItem('ouro_token'); navigate('/'); }}
               className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300"
@@ -277,6 +271,15 @@ const AdminDashboard = () => {
           Contenido
           ═══════════════════════════════════════════════ */}
       <main className="flex-1 max-w-container mx-auto w-full px-6 lg:px-10 py-12">
+
+        {/* Volver al sitio público — patrón breadcrumb (TherapistDetail) */}
+        <Link
+          to="/"
+          className="group inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-faint hover:text-gold transition-colors duration-300 mb-10"
+        >
+          <span className="transition-transform duration-400 ease-expo-out group-hover:-translate-x-2">←</span>
+          <span>Volver al sitio</span>
+        </Link>
 
         {/* Tabs */}
         <div className="flex flex-wrap gap-3 mb-8">
