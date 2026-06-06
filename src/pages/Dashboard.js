@@ -278,6 +278,34 @@ const Dashboard = () => {
           </dl>
         </section>
 
+        {/* Card: Mis turnos — acceso directo para ADMIN.
+            Separada de la card de USER/THERAPIST porque acá no
+            cargamos nextAppointment (el admin no es un cliente
+            típico). Solo damos un acceso visible y claro a la
+            pantalla /mis-turnos, que sí tiene su propia lógica
+            por user.id y funciona para cualquier rol logueado. */}
+        {user.role === 'ADMIN' && (
+          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+            <div className="flex items-start justify-between gap-6 flex-wrap">
+              <div className="min-w-0 flex-1">
+                <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-2">
+                  Mis turnos
+                </p>
+                <p className="font-serif font-light text-base text-white-dim leading-relaxed">
+                  Acceso a tu agenda personal de turnos.
+                </p>
+              </div>
+              <Link
+                to="/mis-turnos"
+                className="group inline-flex items-center gap-3 px-6 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out flex-shrink-0"
+              >
+                <span>Ver mis turnos</span>
+                <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
+              </Link>
+            </div>
+          </section>
+        )}
+
         {/* Card: Postulate como terapeuta (solo USER) */}
         {user.role === 'USER' && (
           <section className="bg-navy-card border border-gold-faint p-8 mb-6">
