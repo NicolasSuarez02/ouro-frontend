@@ -42,6 +42,19 @@ module.exports = {
         },
 
         // -------------------------------------------------
+        // MARCAS EXTERNAS — colores oficiales de servicios
+        // de terceros (DS Operativo, sección 5). Se usan SOLO
+        // en botones de acción que invocan ese servicio, para
+        // que el usuario reconozca la herramienta. No mezclar
+        // con la paleta OURO ni usarlos para acciones propias.
+        // -------------------------------------------------
+        brand: {
+          mp:        '#009ee3', // Mercado Pago — azul corporativo
+          'mp-dark': '#0080c0', // Mercado Pago — hover (oscurecido)
+          zoom:      '#2D8CFF', // Zoom — azul de marca
+        },
+
+        // -------------------------------------------------
         // LEGACY — colores del sistema anterior.
         // Coexisten temporalmente con los del nuevo sistema
         // para no romper componentes aún no migrados.

@@ -150,12 +150,12 @@ const Dashboard = () => {
 
         {/* Encabezado */}
         <div className="mb-12">
-          <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold mb-4">
+          <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold-dim mb-4">
             Mi espacio
           </p>
           <h1
             className="font-serif font-light text-white mb-3"
-            style={{ fontSize: 'clamp(36px, 4vw, 56px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+            style={{ fontSize: 'clamp(28px, 3vw, 40px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
           >
             Hola,{' '}
             <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
@@ -163,7 +163,7 @@ const Dashboard = () => {
             </em>
           </h1>
           <p className="font-serif font-light text-white-dim leading-relaxed" style={{ fontSize: 'clamp(16px, 1.2vw, 18px)' }}>
-            Tu <em className="italic">ciclo</em> en curso.
+            Tu ciclo en curso.
           </p>
         </div>
 
@@ -551,7 +551,7 @@ const Dashboard = () => {
                         <button
                           onClick={handleConnectMp}
                           disabled={connectingMp}
-                          className="flex-shrink-0 font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300 underline underline-offset-4 disabled:opacity-50"
+                          className="flex-shrink-0 font-sans text-[10px] font-medium uppercase tracking-eyebrow text-brand-mp hover:opacity-80 transition-opacity duration-300 underline underline-offset-4 disabled:opacity-50"
                         >
                           {connectingMp ? 'Redirigiendo...' : 'Reconectar'}
                         </button>
@@ -574,7 +574,7 @@ const Dashboard = () => {
                         <button
                           onClick={handleConnectMp}
                           disabled={connectingMp}
-                          className="inline-flex items-center gap-3 bg-gold-gradient px-6 py-2.5 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="inline-flex items-center gap-3 bg-brand-mp hover:bg-brand-mp-dark px-6 py-2.5 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-white transition-all duration-400 ease-expo-out hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <span>{connectingMp ? 'Redirigiendo...' : 'Conectar'}</span>
                           {!connectingMp && <span>→</span>}
