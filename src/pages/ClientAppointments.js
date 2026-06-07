@@ -393,7 +393,7 @@ const ClientAppointments = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-3xl mx-auto w-full px-6 lg:px-10 pt-32 lg:pt-40 pb-24">
+      <main className="flex-1 max-w-3xl mx-auto w-full px-6 lg:px-10 pt-24 lg:pt-32 pb-24">
 
         {/* Volver al dashboard */}
         <button

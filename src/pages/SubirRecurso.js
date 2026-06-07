@@ -95,7 +95,7 @@ const SubirRecurso = () => {
       <div className="min-h-screen flex flex-col">
         <Navbar />
 
-        <main className="flex-1 flex items-center justify-center px-6 pt-32 lg:pt-40 pb-24">
+        <main className="flex-1 flex items-center justify-center px-6 pt-24 lg:pt-32 pb-24">
           <div className="max-w-md w-full">
 
             {/* Marca circular sobria */}
@@ -110,12 +110,12 @@ const SubirRecurso = () => {
 
             {/* Eyebrow + Title + Subtitle */}
             <div className="text-center mb-10">
-              <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold mb-5">
+              <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold-dim mb-5">
                 Archivo enviado
               </p>
               <h1
                 className="font-serif font-light text-white mb-4"
-                style={{ fontSize: 'clamp(32px, 4vw, 48px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+                style={{ fontSize: 'clamp(28px, 3vw, 40px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
               >
                 Recibido
               </h1>
@@ -163,20 +163,16 @@ const SubirRecurso = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-2xl mx-auto w-full px-6 lg:px-10 pt-32 lg:pt-40 pb-24">
+      <main className="flex-1 max-w-2xl mx-auto w-full px-6 lg:px-10 pt-24 lg:pt-32 pb-24">
 
         {/* Header de sección */}
         <div className="text-center mb-12 lg:mb-16">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
-            <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
-              Recursos
-            </span>
-            <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
-          </div>
+          <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold-dim mb-6">
+            Recursos
+          </p>
           <h1
             className="font-serif font-light text-white mb-5"
-            style={{ fontSize: 'clamp(36px, 4vw, 56px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+            style={{ fontSize: 'clamp(28px, 3vw, 40px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
           >
             Subir recurso
           </h1>
