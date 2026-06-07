@@ -299,7 +299,7 @@ const Dashboard = () => {
                               }
                             }}
                             disabled={joiningZoom}
-                            className="inline-flex items-center gap-2 mt-3 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out disabled:opacity-50"
+                            className="inline-flex items-center gap-2 mt-3 px-4 py-2 border border-brand-zoom/40 hover:bg-brand-zoom hover:text-white font-sans text-[10px] font-medium uppercase tracking-eyebrow text-brand-zoom transition-all duration-400 ease-expo-out disabled:opacity-50"
                           >
                             <VideoIcon />
                             <span>{joiningZoom ? 'Cargando...' : 'Iniciar sesión'}</span>
@@ -322,7 +322,7 @@ const Dashboard = () => {
                         href={nextAppointment.zoomJoinUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 border border-brand-zoom/40 hover:bg-brand-zoom hover:text-white font-sans text-[10px] font-medium uppercase tracking-eyebrow text-brand-zoom transition-all duration-400 ease-expo-out"
                       >
                         <VideoIcon />
                         <span>Unirse a la sesión</span>

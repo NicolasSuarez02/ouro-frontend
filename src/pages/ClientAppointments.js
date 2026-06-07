@@ -330,7 +330,7 @@ const ClientAppointments = () => {
                         }
                       }}
                       disabled={joiningZoomId === appt.id}
-                      className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out disabled:opacity-50"
+                      className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-brand-zoom/40 hover:bg-brand-zoom hover:text-white font-sans text-[10px] font-medium uppercase tracking-eyebrow text-brand-zoom transition-all duration-400 ease-expo-out disabled:opacity-50"
                     >
                       <VideoIcon />
                       <span>{joiningZoomId === appt.id ? 'Cargando...' : 'Iniciar sesión'}</span>
@@ -347,7 +347,7 @@ const ClientAppointments = () => {
                     href={appt.zoomJoinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-gold-dim hover:bg-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"
+                    className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-brand-zoom/40 hover:bg-brand-zoom hover:text-white font-sans text-[10px] font-medium uppercase tracking-eyebrow text-brand-zoom transition-all duration-400 ease-expo-out"
                   >
                     <VideoIcon />
                     <span>Unirse a la sesión</span>
@@ -407,12 +407,12 @@ const ClientAppointments = () => {
         {/* Header */}
         <div className="mb-12 flex items-start justify-between gap-6">
           <div className="min-w-0">
-            <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold mb-4">
+            <p className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold-dim mb-4">
               Turnos
             </p>
             <h1
               className="font-serif font-light text-white"
-              style={{ fontSize: 'clamp(36px, 4vw, 56px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
+              style={{ fontSize: 'clamp(28px, 3vw, 40px)', lineHeight: 1.1, letterSpacing: '-0.01em' }}
             >
               {isTherapist ? 'Turnos reservados' : 'Mis turnos'}
             </h1>
