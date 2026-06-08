@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FadeUp from '../components/FadeUp';
 import TherapistCarousel from '../components/TherapistCarousel';
+import FounderCard from '../components/FounderCard';
 import { sendContactMessage, getAllTherapists } from '../services/api';
 
 const PASOS = [
@@ -56,6 +57,32 @@ const PASOS = [
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.069A1 1 0 0121 8.868v6.264a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
       </svg>
     ),
+  },
+];
+
+// Equipo fundador. El campo `photo` apunta a public/equipo/<archivo>;
+// si todavía no existe, FounderCard cae a la inicial gigante (sin romper).
+const FUNDADORAS = [
+  {
+    name: 'Lucila',
+    initial: 'L',
+    role: 'Co-fundadora',
+    photo: 'Lucila.png',
+    desc: 'Acompaña procesos de transformación y autoconocimiento.',
+  },
+  {
+    name: 'Elina',
+    initial: 'E',
+    role: 'Co-fundadora',
+    photo: 'Elina.jpeg',
+    desc: 'Especialista en bienestar integral. Dedicada a sostener espacios de crecimiento personal.',
+  },
+  {
+    name: 'Celina',
+    initial: 'C',
+    role: 'Co-fundadora',
+    photo: 'Celina.png',
+    desc: 'Apasionada por el desarrollo humano y el acompañamiento terapéutico en cada tránsito vital.',
   },
 ];
 
@@ -249,118 +276,9 @@ const Home = () => {
           {/* Grilla de fundadoras */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-            {/* Fundadora 1 — Lucila */}
-            <article className="group relative bg-gradient-to-b from-navy-soft to-navy border border-gold-faint px-8 pt-9 pb-10 transition-all duration-600 ease-expo-out hover:-translate-y-3 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
-              {/* Línea superior animada */}
-              <span
-                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
-                aria-hidden="true"
-              />
-              {/* Decoración circular: rota 180° en hover del card (CSS en index.css) */}
-              <span className="founder-decoration" aria-hidden="true" />
-              {/* Inicial gigante */}
-              <div className="text-center mb-6">
-                <span
-                  className="font-serif italic font-light bg-gold-gradient bg-clip-text text-transparent inline-block leading-none"
-                  style={{ fontSize: 'clamp(120px, 14vw, 180px)' }}
-                  aria-hidden="true"
-                >
-                  L
-                </span>
-              </div>
-              <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim text-center mb-3">
-                Co-fundadora
-              </p>
-              <h3 className="font-serif font-light text-3xl text-white text-center mb-4">
-                Lucila
-              </h3>
-              <p className="font-serif font-light text-base text-white-dim leading-relaxed text-center mb-8">
-                Acompaña procesos de transformación y autoconocimiento.
-              </p>
-              <div className="text-center">
-                <Link
-                  to="/terapeutas"
-                  className="inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
-                >
-                  <span>Ver terapeutas</span>
-                  <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
-                </Link>
-              </div>
-            </article>
-
-            {/* Fundadora 2 — Elina */}
-            <article className="group relative bg-gradient-to-b from-navy-soft to-navy border border-gold-faint px-8 pt-9 pb-10 transition-all duration-600 ease-expo-out hover:-translate-y-3 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
-              <span
-                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
-                aria-hidden="true"
-              />
-              {/* Decoración circular: rota 180° en hover del card (CSS en index.css) */}
-              <span className="founder-decoration" aria-hidden="true" />
-              <div className="text-center mb-6">
-                <span
-                  className="font-serif italic font-light bg-gold-gradient bg-clip-text text-transparent inline-block leading-none"
-                  style={{ fontSize: 'clamp(120px, 14vw, 180px)' }}
-                  aria-hidden="true"
-                >
-                  E
-                </span>
-              </div>
-              <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim text-center mb-3">
-                Co-fundadora
-              </p>
-              <h3 className="font-serif font-light text-3xl text-white text-center mb-4">
-                Elina
-              </h3>
-              <p className="font-serif font-light text-base text-white-dim leading-relaxed text-center mb-8">
-                Especialista en bienestar integral. Dedicada a sostener espacios de crecimiento personal.
-              </p>
-              <div className="text-center">
-                <Link
-                  to="/terapeutas"
-                  className="inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
-                >
-                  <span>Ver terapeutas</span>
-                  <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
-                </Link>
-              </div>
-            </article>
-
-            {/* Fundadora 3 — Celina */}
-            <article className="group relative bg-gradient-to-b from-navy-soft to-navy border border-gold-faint px-8 pt-9 pb-10 transition-all duration-600 ease-expo-out hover:-translate-y-3 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
-              <span
-                className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
-                aria-hidden="true"
-              />
-              {/* Decoración circular: rota 180° en hover del card (CSS en index.css) */}
-              <span className="founder-decoration" aria-hidden="true" />
-              <div className="text-center mb-6">
-                <span
-                  className="font-serif italic font-light bg-gold-gradient bg-clip-text text-transparent inline-block leading-none"
-                  style={{ fontSize: 'clamp(120px, 14vw, 180px)' }}
-                  aria-hidden="true"
-                >
-                  C
-                </span>
-              </div>
-              <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim text-center mb-3">
-                Co-fundadora
-              </p>
-              <h3 className="font-serif font-light text-3xl text-white text-center mb-4">
-                Celina
-              </h3>
-              <p className="font-serif font-light text-base text-white-dim leading-relaxed text-center mb-8">
-                Apasionada por el desarrollo humano y el acompañamiento terapéutico en cada tránsito vital.
-              </p>
-              <div className="text-center">
-                <Link
-                  to="/terapeutas"
-                  className="inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
-                >
-                  <span>Ver terapeutas</span>
-                  <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
-                </Link>
-              </div>
-            </article>
+            {FUNDADORAS.map((f) => (
+              <FounderCard key={f.name} f={f} />
+            ))}
           </div>
         </div>
       </FadeUp>
