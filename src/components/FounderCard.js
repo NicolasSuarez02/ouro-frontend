@@ -28,7 +28,7 @@ const FounderCard = ({ f }) => {
     return (
       <article className="group relative bg-gradient-to-b from-navy-soft to-navy border border-gold-faint px-8 pt-9 pb-10 transition-all duration-600 ease-expo-out hover:-translate-y-3 hover:border-gold-dim hover:shadow-card-hover overflow-hidden">
         <span
-          className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
+          className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out"
           aria-hidden="true"
         />
         {/* Carga oculta: si la foto existe activa el modo foto en el próximo render */}
@@ -72,7 +72,7 @@ const FounderCard = ({ f }) => {
     <article className="group relative h-[440px] sm:h-[460px] overflow-hidden bg-navy border border-gold-faint transition-all duration-600 ease-expo-out hover:-translate-y-3 hover:border-gold-dim hover:shadow-card-hover">
       {/* Línea superior dorada */}
       <span
-        className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out z-20"
+        className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out z-20"
         aria-hidden="true"
       />
 

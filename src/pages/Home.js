@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import FadeUp from '../components/FadeUp';
 import TherapistCarousel from '../components/TherapistCarousel';
 import FounderCard from '../components/FounderCard';
+import { ReactComponent as Isotipo } from '../assets/logo/ouro-isotipo.svg';
 import { sendContactMessage, getAllTherapists } from '../services/api';
 
 const PASOS = [
@@ -67,21 +68,21 @@ const FUNDADORAS = [
     name: 'Lucila',
     initial: 'L',
     role: 'Co-fundadora',
-    photo: 'Lucila.png',
+    photo: 'lucila.jpg',
     desc: 'Acompaña procesos de transformación y autoconocimiento.',
   },
   {
     name: 'Elina',
     initial: 'E',
     role: 'Co-fundadora',
-    photo: 'Elina.jpeg',
+    photo: 'elina.jpg',
     desc: 'Especialista en bienestar integral. Dedicada a sostener espacios de crecimiento personal.',
   },
   {
     name: 'Celina',
     initial: 'C',
     role: 'Co-fundadora',
-    photo: 'Celina.png',
+    photo: 'celina.jpg',
     desc: 'Apasionada por el desarrollo humano y el acompañamiento terapéutico en cada tránsito vital.',
   },
 ];
@@ -142,46 +143,74 @@ const Home = () => {
       <Navbar />
 
       {/* ── 1. INICIO (Hero) ── */}
-      <FadeUp as="section" id="inicio" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
-        <div className="max-w-container mx-auto px-6 lg:px-10">
-          <div className="max-w-4xl mx-auto text-center">
+      <FadeUp as="section" id="inicio" className="relative flex items-center min-h-[86vh] pt-28 lg:pt-32 pb-24 overflow-hidden">
+        {/* Decoración: ouroboros girando + anillos concéntricos a la derecha
+            (reemplaza el espacio donde estaba el placeholder de video). */}
+        <div
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-[-30%] sm:right-[-16%] lg:right-[-6%] xl:right-[2%] w-[78vmin] max-w-[640px] aspect-square z-0"
+          aria-hidden="true"
+        >
+          <span className="absolute inset-0 rounded-full border border-gold-faint" />
+          <span className="absolute inset-[12%] rounded-full border border-gold-ghost" />
+          <span className="absolute inset-[26%] rounded-full border border-gold-faint" />
+          <Isotipo
+            className="absolute inset-[35%] text-gold opacity-[0.12] animate-spin"
+            style={{ animationDuration: '160s' }}
+          />
+        </div>
 
-            {/* Texto del hero */}
-            <div className="relative z-10">
-              {/* Eyebrow con líneas laterales */}
-              <div className="flex items-center justify-center gap-4 mb-10">
-                <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
-                <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
-                  El ciclo consciente
-                </span>
-                <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
-              </div>
-
-              {/* Título display */}
-              {/* Copy original conservado. El DS v2 sugiere tono contemplativo: ver propuesta al cerrar bloque. */}
-              <h1
-                className="font-serif font-light text-white mb-10 leading-[0.95]"
-                style={{ fontSize: 'clamp(56px, 8.5vw, 128px)', letterSpacing: '-0.02em' }}
-              >
-                Renacé en
-                <br />
-                <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
-                  cada ciclo
-                </em>
-              </h1>
-
-              {/* Lead text */}
-              <p
-                className="font-serif font-light text-white-dim leading-relaxed max-w-2xl mx-auto"
-                style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}
-              >
-                Un espacio de encuentro entre quienes buscan y quienes acompañan.
-                Ouro nació del símbolo del ouroboros, presente en culturas que nunca
-                se conocieron entre sí, como memoria de transformación, retorno y
-                autoconocimiento.
-              </p>
+        <div className="relative max-w-container mx-auto px-6 lg:px-10 w-full">
+          <div className="max-w-2xl relative z-10">
+            {/* Eyebrow con línea + puntos */}
+            <div className="flex flex-wrap items-center gap-3 mb-10">
+              <span className="h-px w-12 bg-gold/60" aria-hidden="true" />
+              <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">Ouroboros</span>
+              <span className="w-1 h-1 rounded-full bg-gold" aria-hidden="true" />
+              <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">Transformación</span>
+              <span className="w-1 h-1 rounded-full bg-gold" aria-hidden="true" />
+              <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">Ciclos</span>
             </div>
 
+            {/* Título display */}
+            <h1
+              className="font-serif font-light text-white mb-8 leading-[0.95]"
+              style={{ fontSize: 'clamp(54px, 8vw, 120px)', letterSpacing: '-0.02em' }}
+            >
+              Renacé en
+              <br />
+              <em className="italic font-normal bg-gold-gradient bg-clip-text text-transparent">
+                cada ciclo
+              </em>
+            </h1>
+
+            {/* Lead text */}
+            <p
+              className="font-serif font-light text-white-dim leading-relaxed max-w-xl"
+              style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}
+            >
+              Un espacio de encuentro entre quienes buscan y quienes acompañan.
+              Ouro nació del símbolo del ouroboros, presente en culturas que nunca
+              se conocieron entre sí, como memoria de transformación, retorno y
+              autoconocimiento.
+            </p>
+
+            {/* Acciones */}
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 mt-12">
+              <Link
+                to="/register"
+                className="group inline-flex items-center gap-3 bg-gold-gradient px-9 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"
+              >
+                <span>Empezar ahora</span>
+                <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
+              </Link>
+              <Link
+                to="/terapeutas"
+                className="group inline-flex items-center gap-2 font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300"
+              >
+                <span>Conocer terapeutas</span>
+                <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
+              </Link>
+            </div>
           </div>
         </div>
       </FadeUp>
