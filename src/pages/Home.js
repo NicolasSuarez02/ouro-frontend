@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import FadeUp from '../components/FadeUp';
 import TherapistCarousel from '../components/TherapistCarousel';
 import FounderCard from '../components/FounderCard';
-import Ouroboros from '../components/Ouroboros';
+import OuroHeroSymbol from '../components/OuroHeroSymbol';
 import { sendContactMessage, getAllTherapists } from '../services/api';
 
 const PASOS = [
@@ -147,15 +147,10 @@ const Home = () => {
         {/* Decoración: ouroboros girando + anillos concéntricos a la derecha
             (reemplaza el espacio donde estaba el placeholder de video). */}
         <div
-          className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-[-30%] sm:right-[-16%] lg:right-[-6%] xl:right-[2%] w-[80vmin] max-w-[660px] aspect-square z-0"
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-[-26%] sm:right-[-12%] lg:right-[-2%] xl:right-[4%] w-[88vmin] max-w-[700px] aspect-square z-0 opacity-90"
           aria-hidden="true"
         >
-          <span className="absolute inset-0 rounded-full border border-gold-faint" />
-          <span className="absolute inset-[14%] rounded-full border border-gold-ghost" />
-          <Ouroboros
-            className="absolute inset-[22%] text-gold opacity-[0.18] animate-spin"
-            style={{ animationDuration: '200s' }}
-          />
+          <OuroHeroSymbol className="w-full h-full" />
         </div>
 
         <div className="relative max-w-container mx-auto px-6 lg:px-10 w-full">

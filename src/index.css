@@ -649,6 +649,52 @@ input::-ms-clear {
 }
 
 /* ============================================================
+   OuroHeroSymbol — sello astral del hero (Fase 11.G).
+   Animación por capas a velocidades distintas para una sensación
+   de "respiración / órbita ritual", no de loader. Cada capa que
+   rota lo hace alrededor del centro del viewBox (transform-box:
+   view-box). En mobile se oculta el detalle más fino y se respeta
+   prefers-reduced-motion.
+   ============================================================ */
+.ouro-seal__spin-slow,
+.ouro-seal__spin-rev,
+.ouro-seal__spin-vslow,
+.ouro-seal__spin-geo {
+  transform-box: view-box;
+  transform-origin: center;
+  will-change: transform;
+}
+.ouro-seal__spin-slow  { animation: ouro-seal-rot     240s linear infinite; }
+.ouro-seal__spin-rev   { animation: ouro-seal-rot-rev 300s linear infinite; }
+.ouro-seal__spin-vslow { animation: ouro-seal-rot     600s linear infinite; }
+.ouro-seal__spin-geo   { animation: ouro-seal-rot-rev 520s linear infinite; }
+
+@keyframes ouro-seal-rot     { to { transform: rotate(360deg); } }
+@keyframes ouro-seal-rot-rev { to { transform: rotate(-360deg); } }
+
+.ouro-seal__eye-pulse { animation: ouro-seal-breathe 7s ease-in-out infinite; }
+@keyframes ouro-seal-breathe { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.95; } }
+
+.ouro-seal__spark { animation: ouro-seal-twinkle 4.5s ease-in-out infinite; }
+@keyframes ouro-seal-twinkle { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.9; } }
+
+/* Mobile: bajar la complejidad interior, manteniendo el ouróboros + ojo. */
+@media (max-width: 640px) {
+  .ouro-seal__detail { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ouro-seal__spin-slow,
+  .ouro-seal__spin-rev,
+  .ouro-seal__spin-vslow,
+  .ouro-seal__spin-geo,
+  .ouro-seal__eye-pulse,
+  .ouro-seal__spark {
+    animation: none;
+  }
+}
+
+/* ============================================================
    Home — "Cómo empezar": entrada escalonada de los 5 pasos
    (Fase 11.C). Cada paso entra con un pequeño retardo cuando la
    sección aparece en viewport (la <section> FadeUp agrega
