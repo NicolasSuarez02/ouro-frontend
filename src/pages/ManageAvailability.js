@@ -672,7 +672,7 @@ const ManageAvailability = () => {
                   {/* Encabezados de días */}
                   <div className="grid grid-cols-7 px-3 pt-3">
                     {DIAS_SEMANA.map((d) => (
-                      <div key={d} className="text-center font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim py-2">
+                      <div key={d} className="text-center font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold-dim py-2">
                         {d}
                       </div>
                     ))}
@@ -689,22 +689,25 @@ const ManageAvailability = () => {
                       const isSel = selectedDate === dateStr;
                       const isToday = dateStr === toDateStr(todayBase);
 
-                      let cellClasses = 'flex flex-col items-center justify-center min-h-[3rem] py-1 font-serif font-light text-sm transition-all duration-300 ease-expo-out ';
+                      // Estados visuales (Fase 11.E: igualado al calendario de
+                      // reserva — número más grande/legible, día con turnos más
+                      // visible, seleccionado más evidente, hoy con anillo dorado).
+                      let cellClasses = 'flex flex-col items-center justify-center min-h-[3rem] py-1 font-serif font-normal text-base transition-all duration-300 ease-expo-out ';
                       let countColor = 'text-gold';
                       let outlineStyle = {};
 
                       if (isSel) {
-                        cellClasses += 'bg-gold text-navy cursor-pointer';
+                        cellClasses += 'bg-gold text-navy font-semibold cursor-pointer';
                         countColor = 'text-navy';
                         if (isToday) {
                           outlineStyle = { outline: '1px solid #A8842C', outlineOffset: '1px' };
                         }
                       } else if (!hasSlots || isPast) {
-                        cellClasses += 'text-white-faint cursor-not-allowed';
+                        cellClasses += 'text-white-faint opacity-40 cursor-not-allowed';
                         if (isToday && !isPast) cellClasses += ' ring-1 ring-gold-faint';
                       } else {
-                        cellClasses += 'bg-gold-ghost text-gold hover:bg-gold-faint cursor-pointer';
-                        if (isToday) cellClasses += ' ring-1 ring-gold-dim';
+                        cellClasses += 'bg-gold-faint text-gold hover:bg-gold-dim cursor-pointer';
+                        if (isToday) cellClasses += ' ring-1 ring-gold';
                       }
 
                       return (
@@ -729,12 +732,16 @@ const ManageAvailability = () => {
                   {/* Leyenda */}
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-2 px-5 pb-5 pt-3 border-t border-gold-faint">
                     <span className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
-                      <span className="w-2.5 h-2.5 bg-gold-ghost border border-gold-dim" aria-hidden="true" />
+                      <span className="w-2.5 h-2.5 bg-gold-faint border border-gold-dim" aria-hidden="true" />
                       Con turnos
                     </span>
                     <span className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
                       <span className="w-2.5 h-2.5 bg-gold" aria-hidden="true" />
                       Seleccionado
+                    </span>
+                    <span className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                      <span className="w-2.5 h-2.5 ring-1 ring-gold" aria-hidden="true" />
+                      Hoy
                     </span>
                     <span className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
                       <span className="font-sans text-[10px] font-medium text-gold">N</span>
@@ -751,7 +758,7 @@ const ManageAvailability = () => {
                         <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1">
                           Día seleccionado
                         </p>
-                        <p className="font-serif font-normal text-base text-white capitalize">
+                        <p className="font-serif font-normal text-lg text-white capitalize">
                           {formatDayLabel(selectedDate)}
                         </p>
                         <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mt-1">
@@ -786,7 +793,7 @@ const ManageAvailability = () => {
                                   className="w-1.5 h-1.5 rounded-full bg-gold shadow-gold-glow-soft flex-shrink-0"
                                   aria-hidden="true"
                                 />
-                                <span className="font-serif font-normal text-base text-white">
+                                <span className="font-serif font-normal text-lg text-white">
                                   {formatHora(slot.startAt)} – {formatHora(slot.endAt)} hs
                                 </span>
                               </div>
