@@ -70,21 +70,21 @@ const OuroHeroSymbol = ({ className = '' }) => (
 
     {/* 4 · Ouróboros — giro casi imperceptible horario */}
     <g className="ouro-seal__spin-vslow">
-      {/* cuerpo: arco mayor, deja la boca arriba a la derecha */}
-      <path d="M302.9 100.6 A143 143 0 1 1 229.7 60.1" stroke="#C6A75E" strokeWidth="6" strokeLinecap="round" opacity="0.92" />
+      {/* OUROBOROS SIMBÓLICO (sin cabeza literal): anillo casi completo que
+          se cierra sobre sí mismo mediante superposición + nodo de encuentro.
+
+          cuerpo: anillo mayor con una pequeña apertura arriba a la derecha */}
+      <path d="M299.3 97.1 A143 143 0 1 1 248.9 65.6" stroke="#C6A75E" strokeWidth="5.5" strokeLinecap="round" opacity="0.92" />
       {/* contorno interior fino (vientre) */}
-      <path d="M297 106.2 A135 135 0 1 1 234.9 69.6" stroke="#A8842C" strokeWidth="0.75" opacity="0.45" />
-      {/* escamas: muescas oscuras periódicas sobre el cuerpo */}
-      <path d="M302.9 100.6 A143 143 0 1 1 229.7 60.1" stroke="#0B1C2D" strokeWidth="6" opacity="0.4" pathLength="320" strokeDasharray="1.4 9" />
-      {/* cabeza del dragón/serpiente */}
-      <path d="M307.9 95.7 C 292 58, 255 45, 228 58 C 244 70, 251 84, 263 86 C 277 89, 291 98, 297.8 105.5 Z" fill="#C6A75E" opacity="0.92" />
-      {/* cresta / fin */}
-      <path d="M300 80 C 309 64, 318 60, 324 65 C 317 71, 312 82, 304 88 Z" fill="#A8842C" opacity="0.8" />
-      {/* ojo de la serpiente */}
-      <circle cx="281" cy="76" r="4.3" fill="#0B1C2D" />
-      <circle cx="281" cy="76" r="2" fill="#E0C780" />
-      {/* boca hacia la cola (la muerde) */}
-      <path d="M228 58 C 240 66, 248 72, 256 74" stroke="#0B1C2D" strokeWidth="1" opacity="0.5" fill="none" />
+      <path d="M293.8 102.9 A135 135 0 1 1 246.2 73.1" stroke="#A8842C" strokeWidth="0.75" opacity="0.4" />
+      {/* segmentación sutil — escamas abstractas (ritmo de serpiente, sin cabeza) */}
+      <path d="M299.3 97.1 A143 143 0 1 1 248.9 65.6" stroke="#0B1C2D" strokeWidth="5.5" opacity="0.38" pathLength="320" strokeDasharray="1.3 9.5" />
+      {/* extremo que se superpone sobre el otro (el ciclo se encuentra consigo) */}
+      <path d="M295.8 85.9 A149 149 0 0 0 231.0 54.3" stroke="#C6A75E" strokeWidth="4" strokeLinecap="round" opacity="0.9" />
+      {/* nodo del encuentro (remate simbólico): halo + rombo + centro */}
+      <circle cx="237.6" cy="59.9" r="9" fill="none" stroke="#C6A75E" strokeWidth="0.6" opacity="0.4" />
+      <path d="M237.6 52.9 L244.6 59.9 L237.6 66.9 L230.6 59.9 Z" fill="#C6A75E" opacity="0.95" />
+      <circle cx="237.6" cy="59.9" r="1.5" fill="#0B1C2D" />
     </g>
 
     {/* 5 · Ojo central — fijo, con respiración luminosa */}
