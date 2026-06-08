@@ -144,12 +144,12 @@ const Home = () => {
       {/* ── 1. INICIO (Hero) ── */}
       <FadeUp as="section" id="inicio" className="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden">
         <div className="max-w-container mx-auto px-6 lg:px-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+          <div className="max-w-4xl mx-auto text-center">
 
-            {/* Columna texto */}
+            {/* Texto del hero */}
             <div className="relative z-10">
               {/* Eyebrow con líneas laterales */}
-              <div className="flex items-center gap-4 mb-10">
+              <div className="flex items-center justify-center gap-4 mb-10">
                 <span className="h-px w-8 bg-gold/50" aria-hidden="true" />
                 <span className="font-sans text-[11px] font-medium uppercase tracking-eyebrow-wide text-gold">
                   El ciclo consciente
@@ -172,7 +172,7 @@ const Home = () => {
 
               {/* Lead text */}
               <p
-                className="font-serif font-light text-white-dim leading-relaxed max-w-xl"
+                className="font-serif font-light text-white-dim leading-relaxed max-w-2xl mx-auto"
                 style={{ fontSize: 'clamp(18px, 1.4vw, 22px)' }}
               >
                 Un espacio de encuentro entre quienes buscan y quienes acompañan.
@@ -182,69 +182,6 @@ const Home = () => {
               </p>
             </div>
 
-            {/* Columna placeholder de video con anillos decorativos */}
-            <div className="relative">
-              {/* Anillos concéntricos decorativos (versión simplificada del astral del DS) */}
-              {/* Astral del hero — 4 anillos concéntricos, velocidades del DS v2 sección 8
-                  (480s / 360s / 240s / 180s) alternando CW/CCW desde el más externo. */}
-              <div
-                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[190%] aspect-square rounded-full border border-gold-faint animate-spin"
-                style={{ animationDuration: '480s' }}
-                aria-hidden="true"
-              />
-              <div
-                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160%] aspect-square rounded-full border border-gold-ghost animate-spin"
-                style={{ animationDuration: '360s', animationDirection: 'reverse' }}
-                aria-hidden="true"
-              />
-              <div
-                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[130%] aspect-square rounded-full border border-gold-faint animate-spin"
-                style={{ animationDuration: '240s' }}
-                aria-hidden="true"
-              />
-              <div
-                className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] aspect-square rounded-full border border-gold-ghost animate-spin"
-                style={{ animationDuration: '180s', animationDirection: 'reverse' }}
-                aria-hidden="true"
-              />
-
-              {/* Placeholder de video */}
-              <div className="relative bg-navy-card border border-gold-faint aspect-video flex items-center justify-center overflow-hidden">
-                {/* Marca de esquina superior izquierda — pequeño detalle ornamental */}
-                <span
-                  className="absolute top-4 left-4 font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim"
-                  aria-hidden="true"
-                >
-                  Próximamente
-                </span>
-
-                <div className="text-center px-8">
-                  {/* Botón play */}
-                  <div className="w-20 h-20 rounded-full border border-gold-dim flex items-center justify-center mx-auto mb-6 transition-all duration-600 ease-expo-out hover:border-gold hover:shadow-gold-glow-soft">
-                    <svg className="w-7 h-7 text-gold ml-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
-
-                  <p className="font-sans text-[11px] uppercase tracking-eyebrow text-white-dim mb-3">
-                    Video inspiracional
-                  </p>
-                  <p className="font-serif italic text-base text-white-faint">
-                    El ouroboros a través de las civilizaciones
-                  </p>
-                </div>
-
-                {/* Línea-gradiente inferior */}
-                <span
-                  className="absolute bottom-0 left-0 right-0 h-px"
-                  style={{
-                    background:
-                      'linear-gradient(to right, transparent, rgba(198, 167, 94, 0.4), transparent)',
-                  }}
-                  aria-hidden="true"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </FadeUp>
@@ -395,16 +332,20 @@ const Home = () => {
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 relative">
-              {PASOS.map((paso) => (
-                <div key={paso.num} className="text-center relative">
+              {PASOS.map((paso, i) => (
+                <div
+                  key={paso.num}
+                  className="home-step group text-center relative"
+                  style={{ transitionDelay: `${i * 120}ms` }}
+                >
                   {/* Número como eyebrow */}
-                  <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim mb-4">
+                  <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim mb-4 transition-colors duration-500 group-hover:text-gold">
                     Paso {String(paso.num).padStart(2, '0')}
                   </p>
 
-                  {/* Círculo con icono */}
-                  <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full border border-gold-dim bg-navy-deep">
-                    <div className="text-gold">
+                  {/* Círculo con icono — se eleva y brilla en hover */}
+                  <div className="relative inline-flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full border border-gold-dim bg-navy-deep transition-all duration-500 ease-expo-out group-hover:-translate-y-1.5 group-hover:border-gold group-hover:shadow-gold-glow-soft">
+                    <div className="text-gold transition-transform duration-500 ease-expo-out group-hover:scale-110">
                       {paso.icon}
                     </div>
                   </div>

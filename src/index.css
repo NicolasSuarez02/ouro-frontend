@@ -647,3 +647,29 @@ input::-ms-clear {
 .ouro-carousel::-webkit-scrollbar {
   display: none;            /* Chrome / Safari / Edge */
 }
+
+/* ============================================================
+   Home — "Cómo empezar": entrada escalonada de los 5 pasos
+   (Fase 11.C). Cada paso entra con un pequeño retardo cuando la
+   sección aparece en viewport (la <section> FadeUp agrega
+   .is-visible). El delay por paso se setea inline (transitionDelay).
+   Junto con la línea conectora que se dibuja, da sensación de
+   recorrido. Respeta prefers-reduced-motion.
+   ============================================================ */
+.home-step {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s var(--expo-out), transform 0.7s var(--expo-out);
+  will-change: opacity, transform;
+}
+.fade-up.is-visible .home-step {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-step {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

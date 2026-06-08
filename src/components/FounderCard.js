@@ -45,12 +45,12 @@ const FounderCard = ({ f }) => {
             {f.initial}
           </span>
         </div>
-        <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim text-center mb-3">
-          {f.role}
-        </p>
-        <h3 className="font-serif font-light text-3xl text-white text-center mb-4">
+        <h3 className="font-serif font-light text-3xl text-white text-center mb-2">
           {f.name}
         </h3>
+        <p className="font-sans text-[9px] uppercase tracking-eyebrow text-gold-dim text-center mb-4">
+          {f.role}
+        </p>
         <p className="font-serif font-light text-base text-white-dim leading-relaxed text-center mb-8">
           {f.desc}
         </p>
@@ -90,23 +90,26 @@ const FounderCard = ({ f }) => {
         style={{ background: 'linear-gradient(to bottom, rgba(11,28,45,0) 0%, rgba(11,28,45,0.10) 38%, rgba(11,28,45,0.92) 70%, #0B1C2D 100%)' }}
         aria-hidden="true"
       />
-      {/* Scrim hover: solo base, para que el nombre se distinga sobre la foto */}
+      {/* Scrim hover: base reforzada, sigue al nombre que baja para que se
+          distinga sobre la foto a color */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-expo-out"
-        style={{ background: 'linear-gradient(to bottom, rgba(11,28,45,0) 55%, rgba(6,19,32,0.80) 100%)' }}
+        style={{ background: 'linear-gradient(to bottom, rgba(11,28,45,0) 30%, rgba(6,19,32,0.55) 70%, rgba(6,19,32,0.88) 100%)' }}
         aria-hidden="true"
       />
 
       {/* Contenido inferior */}
       <div className="absolute inset-x-0 bottom-0 px-8 pb-8 text-center z-10">
-        <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim mb-3 transition-opacity duration-300 group-hover:opacity-0">
-          {f.role}
-        </p>
-        <h3 className="font-serif font-light text-3xl text-white mb-4 transition-all duration-500 ease-expo-out group-hover:translate-y-1.5 group-hover:[text-shadow:0_2px_14px_rgba(0,0,0,0.9)]">
+        {/* Nombre — se mantiene en hover y se desplaza suavemente hacia la base */}
+        <h3 className="font-serif font-light text-3xl text-white transition-transform duration-700 ease-in-out group-hover:translate-y-[86px] group-hover:[text-shadow:0_2px_16px_rgba(0,0,0,0.95)]">
           {f.name}
         </h3>
-        <div className="transition-opacity duration-300 group-hover:opacity-0">
-          <p className="font-serif font-light text-base text-white-dim leading-relaxed mb-8">
+        {/* Rótulo (debajo del nombre, más chico) + bio + link — se desvanecen en hover */}
+        <div className="transition-opacity duration-300 ease-in group-hover:opacity-0">
+          <p className="font-sans text-[9px] uppercase tracking-eyebrow text-gold-dim mt-2.5 mb-3">
+            {f.role}
+          </p>
+          <p className="font-serif font-light text-base text-white-dim leading-relaxed mb-7">
             {f.desc}
           </p>
           <Link
