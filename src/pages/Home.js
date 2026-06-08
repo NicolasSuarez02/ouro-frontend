@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import FadeUp from '../components/FadeUp';
 import TherapistCarousel from '../components/TherapistCarousel';
 import FounderCard from '../components/FounderCard';
-import { ReactComponent as Isotipo } from '../assets/logo/ouro-isotipo.svg';
+import Ouroboros from '../components/Ouroboros';
 import { sendContactMessage, getAllTherapists } from '../services/api';
 
 const PASOS = [
@@ -147,15 +147,14 @@ const Home = () => {
         {/* Decoración: ouroboros girando + anillos concéntricos a la derecha
             (reemplaza el espacio donde estaba el placeholder de video). */}
         <div
-          className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-[-30%] sm:right-[-16%] lg:right-[-6%] xl:right-[2%] w-[78vmin] max-w-[640px] aspect-square z-0"
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 right-[-30%] sm:right-[-16%] lg:right-[-6%] xl:right-[2%] w-[80vmin] max-w-[660px] aspect-square z-0"
           aria-hidden="true"
         >
           <span className="absolute inset-0 rounded-full border border-gold-faint" />
-          <span className="absolute inset-[12%] rounded-full border border-gold-ghost" />
-          <span className="absolute inset-[26%] rounded-full border border-gold-faint" />
-          <Isotipo
-            className="absolute inset-[35%] text-gold opacity-[0.12] animate-spin"
-            style={{ animationDuration: '160s' }}
+          <span className="absolute inset-[14%] rounded-full border border-gold-ghost" />
+          <Ouroboros
+            className="absolute inset-[22%] text-gold opacity-[0.18] animate-spin"
+            style={{ animationDuration: '200s' }}
           />
         </div>
 

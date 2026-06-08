@@ -84,17 +84,19 @@ const FounderCard = ({ f }) => {
         className="absolute inset-0 w-full h-full object-cover object-top grayscale group-hover:grayscale-0 group-hover:scale-[1.03] transition-all duration-[900ms] ease-expo-out"
       />
 
-      {/* Scrim reposo: foto arriba, navy abajo (para leer el texto) */}
+      {/* Scrim reposo: foto arriba, navy abajo (se desvanece en hover para
+          revelar la foto a color en la mitad superior) */}
       <div
         className="absolute inset-0 opacity-100 group-hover:opacity-0 transition-opacity duration-700 ease-expo-out"
-        style={{ background: 'linear-gradient(to bottom, rgba(11,28,45,0) 0%, rgba(11,28,45,0.10) 38%, rgba(11,28,45,0.92) 70%, #0B1C2D 100%)' }}
+        style={{ background: 'linear-gradient(to bottom, rgba(11,28,45,0) 0%, rgba(11,28,45,0.10) 40%, rgba(11,28,45,0.92) 72%, #0B1C2D 100%)' }}
         aria-hidden="true"
       />
-      {/* Scrim hover: base reforzada, sigue al nombre que baja para que se
-          distinga sobre la foto a color */}
+      {/* Base inferior PERMANENTE: el borde de abajo queda SIEMPRE en navy
+          sólido, así no asoma el filo claro de la foto mientras corre el fade
+          (la "línea blanca"), y sostiene la legibilidad del nombre en hover. */}
       <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-expo-out"
-        style={{ background: 'linear-gradient(to bottom, rgba(11,28,45,0) 30%, rgba(6,19,32,0.55) 70%, rgba(6,19,32,0.88) 100%)' }}
+        className="absolute inset-x-0 bottom-0 h-1/2"
+        style={{ background: 'linear-gradient(to top, #0B1C2D 0%, rgba(11,28,45,0.85) 26%, rgba(11,28,45,0) 100%)' }}
         aria-hidden="true"
       />
 
