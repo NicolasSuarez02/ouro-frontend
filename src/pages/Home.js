@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import FadeUp from '../components/FadeUp';
+import TherapistCarousel from '../components/TherapistCarousel';
 import { sendContactMessage, getAllTherapists } from '../services/api';
 
 const PASOS = [
@@ -79,7 +80,9 @@ const Home = () => {
         const sorted = [...data].sort((a, b) =>
           a.userFullName.localeCompare(b.userFullName, 'es')
         );
-        setTherapists(sorted.slice(0, 6));
+        // Carrusel escalable: se muestran todos los terapeutas (el orden
+        // real no se altera; el carrusel arranca en un índice aleatorio).
+        setTherapists(sorted);
       })
       .catch(() => {});
   }, []);
@@ -397,54 +400,11 @@ const Home = () => {
 
           {therapists.length > 0 ? (
             <>
-              {/* Grilla de cards compactas */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                {therapists.map((t) => (
-                  <Link
-                    key={t.id}
-                    to={`/terapeutas/${t.slug}`}
-                    className="group relative bg-navy-card border border-gold-faint px-8 py-10 transition-all duration-600 ease-expo-out hover:-translate-y-2 hover:border-gold-dim hover:shadow-card-hover overflow-hidden text-center"
-                  >
-                    {/* Línea superior animada */}
-                    <span
-                      className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-800 ease-expo-out"
-                      aria-hidden="true"
-                    />
-
-                    {/* Avatar */}
-                    <div className="flex justify-center mb-6">
-                      {t.photoUrl ? (
-                        <img
-                          src={t.photoUrl}
-                          alt={t.userFullName}
-                          className="w-20 h-20 rounded-full object-cover border border-gold-faint"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 rounded-full bg-gold-gradient flex items-center justify-center">
-                          <span className="font-serif font-normal text-3xl text-navy">
-                            {t.userFullName?.charAt(0)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Nombre */}
-                    <h3 className="font-serif font-light text-2xl text-white mb-3 leading-tight">
-                      {t.userFullName}
-                    </h3>
-
-                    {/* Especialidad como eyebrow */}
-                    {t.specialty && (
-                      <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim truncate">
-                        {t.specialty}
-                      </p>
-                    )}
-                  </Link>
-                ))}
-              </div>
+              {/* Carrusel de terapeutas (escalable, sin jerarquía fija) */}
+              <TherapistCarousel therapists={therapists} />
 
               {/* CTA */}
-              <div className="text-center">
+              <div className="text-center mt-16">
                 <Link
                   to="/terapeutas"
                   className="group inline-flex items-center gap-3 bg-gold-gradient px-9 py-4 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow"

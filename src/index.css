@@ -631,3 +631,19 @@ input::-ms-reveal,
 input::-ms-clear {
   display: none;
 }
+
+/* ============================================================
+   Carrusel de terapeutas (Fase 11) — scroll-snap horizontal.
+   La navegación es por flechas / swipe nativo, así que se oculta
+   la scrollbar. `scroll-behavior: auto` permite posicionar el
+   índice inicial aleatorio de forma instantánea (sin animar desde
+   el inicio); las flechas animan con behavior:'smooth' explícito.
+   ============================================================ */
+.ouro-carousel {
+  scroll-behavior: auto;
+  -ms-overflow-style: none; /* IE / Edge antiguo */
+  scrollbar-width: none;    /* Firefox */
+}
+.ouro-carousel::-webkit-scrollbar {
+  display: none;            /* Chrome / Safari / Edge */
+}
