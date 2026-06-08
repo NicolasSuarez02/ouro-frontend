@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ZoomLinkNotice from '../components/ZoomLinkNotice';
 import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getAppointmentsByTherapist, getMpConnectUrl, getFreshZoomStartUrl } from '../services/api';
 
 // ---------------------------------------------------------------
@@ -220,7 +221,7 @@ const Dashboard = () => {
             pantalla /mis-turnos, que sí tiene su propia lógica
             por user.id y funciona para cualquier rol logueado. */}
         {user.role === 'ADMIN' && (
-          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+          <section className="bg-navy-elevated border border-gold-faint p-8 mb-6">
             <div className="flex items-start justify-between gap-6 flex-wrap">
               <div className="min-w-0 flex-1">
                 <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-2">
@@ -243,7 +244,7 @@ const Dashboard = () => {
 
         {/* Card: Mis turnos (USER y THERAPIST) */}
         {(user.role === 'USER' || user.role === 'THERAPIST') && (
-          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+          <section className="bg-navy-elevated border border-gold-faint p-8 mb-6">
             <div className="flex items-center justify-between mb-6">
               <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
                 Mis turnos
@@ -258,6 +259,7 @@ const Dashboard = () => {
             </div>
 
             {nextAppointment ? (
+              <>
               <div className="flex items-start gap-4 p-5 bg-gold-ghost border border-gold-faint">
                 <div className="w-10 h-10 flex items-center justify-center flex-shrink-0 text-gold border border-gold-dim">
                   <CalendarIcon />
@@ -331,6 +333,8 @@ const Dashboard = () => {
                   })()}
                 </div>
               </div>
+              <ZoomLinkNotice className="mt-3" />
+              </>
             ) : (
               <div className="text-center py-6">
                 <p className="font-serif italic font-light text-base text-white-dim mb-4">
@@ -358,7 +362,7 @@ const Dashboard = () => {
         )}
 
         {/* Card: Tus datos */}
-        <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+        <section className="bg-navy-elevated border border-gold-faint p-8 mb-6">
           <div className="flex items-center justify-between mb-6">
             <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
               Tus datos
@@ -424,7 +428,7 @@ const Dashboard = () => {
 
         {/* Card: Postulate como terapeuta (solo USER) */}
         {user.role === 'USER' && (
-          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+          <section className="bg-navy-elevated border border-gold-faint p-8 mb-6">
             <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-4">
               Sumate al equipo
             </p>
@@ -446,7 +450,7 @@ const Dashboard = () => {
 
         {/* Card: Tu perfil de terapeuta (solo THERAPIST) */}
         {user.role === 'THERAPIST' && (
-          <section className="bg-navy-card border border-gold-faint p-8 mb-6">
+          <section className="bg-navy-elevated border border-gold-faint p-8 mb-6">
             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
               <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold">
                 Tu perfil de terapeuta

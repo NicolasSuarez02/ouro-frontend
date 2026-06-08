@@ -316,7 +316,7 @@ const ManageAvailability = () => {
           ═══════════════════════════════════════════════ */}
       {confirmSlot && (
         <div className="ouro-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
-          <div className="ouro-modal w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
+          <div className="ouro-modal w-full max-w-sm bg-navy-elevated border border-gold-faint p-8 shadow-card-hover">
             <div className="flex items-start gap-3 mb-5">
               <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
               <p className="font-sans text-[10px] uppercase tracking-eyebrow" style={{ color: '#A04A3A' }}>
@@ -357,7 +357,7 @@ const ManageAvailability = () => {
           ═══════════════════════════════════════════════ */}
       {confirmDia && (
         <div className="ouro-backdrop fixed inset-0 z-[60] flex items-center justify-center p-4 bg-navy-deep/80 backdrop-blur-sm">
-          <div className="ouro-modal w-full max-w-sm bg-navy-card border border-gold-faint p-8 shadow-card-hover">
+          <div className="ouro-modal w-full max-w-sm bg-navy-elevated border border-gold-faint p-8 shadow-card-hover">
             <div className="flex items-start gap-3 mb-5">
               <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
               <p className="font-sans text-[10px] uppercase tracking-eyebrow" style={{ color: '#A04A3A' }}>
@@ -453,7 +453,7 @@ const ManageAvailability = () => {
               {DIAS.map(({ db, label }) => {
                 const franjas = schedule[db];
                 return (
-                  <div key={db} className="bg-navy-card border border-gold-faint p-5">
+                  <div key={db} className="bg-navy-elevated border border-gold-faint p-5">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <h3 className="font-serif font-light text-lg text-white">{label}</h3>
@@ -639,7 +639,7 @@ const ManageAvailability = () => {
             ) : (
               <>
                 {/* Calendario */}
-                <div className="bg-navy-card border border-gold-faint">
+                <div className="bg-navy-elevated border border-gold-faint">
 
                   {/* Navegación de mes */}
                   <div className="flex items-center justify-between p-5 border-b border-gold-faint">
@@ -745,7 +745,7 @@ const ManageAvailability = () => {
 
                 {/* Slots del día seleccionado */}
                 {selectedDate && (
-                  <div className="mt-6 bg-navy-card border border-gold-faint">
+                  <div className="mt-6 bg-navy-elevated border border-gold-faint">
                     <div className="flex items-center justify-between p-5 border-b border-gold-faint flex-wrap gap-3">
                       <div>
                         <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1">

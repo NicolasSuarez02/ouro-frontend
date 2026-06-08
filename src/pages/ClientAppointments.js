@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import ZoomLinkNotice from '../components/ZoomLinkNotice';
 import {
   getAppointmentsByUser,
   getAppointmentsByTherapist,
@@ -232,7 +233,7 @@ const ClientAppointments = () => {
     const isConfirming = confirmId === appt.id;
 
     return (
-      <div className="bg-navy-card border border-gold-faint p-6">
+      <div className="bg-navy-elevated border border-gold-faint p-6">
         {/* Confirmación inline (reemplaza contenido del card) */}
         {isConfirming ? (
           <div className="ouro-inline-enter space-y-5">
@@ -474,7 +475,7 @@ const ClientAppointments = () => {
           </div>
 
           {proximos.length === 0 ? (
-            <div className="bg-navy-card border border-gold-faint p-10 text-center">
+            <div className="bg-navy-elevated border border-gold-faint p-10 text-center">
               {isTherapist ? (
                 <p className="font-serif italic font-light text-base text-white-dim">
                   No tenés turnos próximos reservados.
@@ -495,9 +496,12 @@ const ClientAppointments = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-4">
-              {proximos.map((a) => <AppointmentCard key={a.id} appt={a} isFutureSection={true} />)}
-            </div>
+            <>
+              <ZoomLinkNotice className="mb-4" />
+              <div className="space-y-4">
+                {proximos.map((a) => <AppointmentCard key={a.id} appt={a} isFutureSection={true} />)}
+              </div>
+            </>
           )}
         </section>
 

@@ -23,6 +23,11 @@ module.exports = {
           deep:    '#061320',
           soft:    '#142940',
           card:    '#0F2236',
+          // Superficie de módulos operativos (Fase 10.C): un navy más
+          // claro que `card` para que las tarjetas tengan contraste real
+          // contra el fondo (#0B1C2D). Mantiene el modelo OURO: navy +
+          // borde fino dorado + esquinas rectas, sin pasar a "app genérica".
+          elevated: '#16293D',
         },
         gold: {
           DEFAULT: '#C6A75E',
@@ -36,6 +41,7 @@ module.exports = {
         },
         white: {
           DEFAULT: '#F2F2F2',
+          soft:    'rgba(242, 242, 242, 0.85)', // secundario más legible (Fase 10.C)
           dim:     'rgba(242, 242, 242, 0.7)',
           faint:   'rgba(242, 242, 242, 0.4)',
           ghost:   'rgba(242, 242, 242, 0.1)',

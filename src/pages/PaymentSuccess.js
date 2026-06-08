@@ -58,7 +58,7 @@ const PaymentSuccess = () => {
       ) : appointment ? (
         <div className="space-y-5">
           {/* Datos del turno */}
-          <div className="bg-navy-card border border-gold-faint p-6 space-y-5">
+          <div className="bg-navy-elevated border border-gold-faint p-6 space-y-5">
             <div>
               <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-2">
                 Terapeuta
@@ -127,10 +127,10 @@ const PaymentSuccess = () => {
           ) : (
             <div className="border-l-2 border-gold pl-5 pr-4 py-4 bg-gold-ghost" role="status">
               <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-2">
-                Próximamente
+                Enlace de Zoom
               </p>
               <p className="font-serif font-light text-base text-white leading-relaxed">
-                El link de Zoom estará disponible en "Mis turnos" en unos instantes.
+                Unos minutos antes de la sesión vas a ver disponible el enlace de Zoom para ingresar. También lo vas a encontrar en "Mis turnos".
               </p>
             </div>
           )}

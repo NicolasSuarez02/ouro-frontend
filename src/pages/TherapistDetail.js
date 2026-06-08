@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ZoomLinkNotice from '../components/ZoomLinkNotice';
 import {
   getTherapistBySlug,
   getAvailableDays,
@@ -315,7 +316,7 @@ const TherapistDetail = () => {
 
           {/* ── Columna izquierda: perfil ── */}
           <div className="lg:col-span-1">
-            <div className="bg-navy-card border border-gold-faint p-8 text-center lg:sticky lg:top-28">
+            <div className="bg-navy-elevated border border-gold-faint p-8 text-center lg:sticky lg:top-28">
               {/* Avatar */}
               {therapist.photoUrl ? (
                 <img
@@ -385,11 +386,11 @@ const TherapistDetail = () => {
 
             {/* Bio */}
             {therapist.bio && (
-              <div className="bg-navy-card border border-gold-faint p-8">
+              <div className="bg-navy-elevated border border-gold-faint p-8">
                 <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-4">
                   Sobre mí
                 </p>
-                <p className="font-serif font-light text-base text-white-dim leading-relaxed whitespace-pre-line">
+                <p className="font-serif font-light text-[17px] text-white-soft leading-relaxed whitespace-pre-line">
                   {therapist.bio}
                 </p>
               </div>
@@ -397,7 +398,7 @@ const TherapistDetail = () => {
 
             {/* Sección de calificación */}
             {currentUser && !isOwnProfile && ratingEstado && (
-              <div className="bg-navy-card border border-gold-faint p-8">
+              <div className="bg-navy-elevated border border-gold-faint p-8">
                 <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-6">
                   Calificación
                 </p>
@@ -540,7 +541,7 @@ const TherapistDetail = () => {
                 pointer en clickables, not-allowed en disabled, text en
                 inputs). El cursor custom se oculta dentro de este bloque
                 y el CSS sobreescribe el `cursor: none` global. */}
-            <div className="bg-navy-card border border-gold-faint p-8" data-native-cursor>
+            <div className="bg-navy-elevated border border-gold-faint p-8" data-native-cursor>
               <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-6">
                 Reservar turno
               </p>
@@ -630,7 +631,7 @@ const TherapistDetail = () => {
               {/* Encabezados días semana */}
               <div className="grid grid-cols-7 mb-2">
                 {DIAS_SEMANA.map((dia) => (
-                  <div key={dia} className="text-center font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim py-2">
+                  <div key={dia} className="text-center font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold-dim py-2">
                     {dia}
                   </div>
                 ))}
@@ -653,30 +654,32 @@ const TherapistDetail = () => {
                     const isSel = selectedDate === dateStr;
 
                     // Mapeo de los 7 estados visuales (ver tabla de aprobación en sesión)
-                    let cellClasses = 'flex flex-col items-center justify-center h-12 font-serif font-light text-sm transition-all duration-300 ease-expo-out ';
+                    // Estados visuales (Fase 10.C: número más grande/legible,
+                    // disponible con superficie dorada más visible, seleccionado
+                    // en relleno pleno y más evidente, no disponible atenuado).
+                    let cellClasses = 'flex flex-col items-center justify-center h-12 font-serif font-normal text-base transition-all duration-300 ease-expo-out ';
                     let dotColor = '';
                     let outlineStyle = {};
 
                     if (isSel && hasSlots && !isPast) {
-                      // Estados 4 y 7: seleccionado
-                      cellClasses += 'bg-gold text-navy';
+                      // Seleccionado: relleno dorado pleno
+                      cellClasses += 'bg-gold text-navy font-semibold';
                       dotColor = 'bg-navy';
                       if (isToday) {
-                        // Estado 7: hoy + seleccionado → outline gold-deep offset
                         outlineStyle = { outline: '1px solid #A8842C', outlineOffset: '1px' };
                       }
                     } else if (isPast) {
-                      // Estado 1: pasado
+                      // Pasado
                       cellClasses += 'text-white-faint cursor-not-allowed';
                     } else if (hasSlots) {
-                      // Estados 3 y 6: con slots, no seleccionado
-                      cellClasses += 'bg-gold-ghost text-gold hover:bg-gold-faint cursor-pointer';
-                      if (isToday) cellClasses += ' ring-1 ring-gold-dim'; // Estado 6
+                      // Disponible: superficie dorada visible
+                      cellClasses += 'bg-gold-faint text-gold hover:bg-gold-dim hover:text-navy cursor-pointer';
+                      if (isToday) cellClasses += ' ring-1 ring-gold'; // Hoy
                       dotColor = 'bg-gold';
                     } else {
-                      // Estados 2 y 5: sin slots, futuro
+                      // Sin slots, futuro
                       cellClasses += 'text-white-faint cursor-not-allowed';
-                      if (isToday) cellClasses += ' ring-1 ring-gold-faint'; // Estado 5
+                      if (isToday) cellClasses += ' ring-1 ring-gold-faint'; // Hoy sin slots
                     }
 
                     return (
@@ -699,14 +702,18 @@ const TherapistDetail = () => {
               )}
 
               {/* Leyenda */}
-              <div className="flex items-center justify-center gap-6 mt-5">
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mt-5">
                 <span className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
-                  <span className="w-2.5 h-2.5 bg-gold-ghost border border-gold-dim" aria-hidden="true" />
+                  <span className="w-2.5 h-2.5 bg-gold-faint border border-gold-dim" aria-hidden="true" />
                   Disponible
                 </span>
                 <span className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
                   <span className="w-2.5 h-2.5 bg-gold" aria-hidden="true" />
                   Seleccionado
+                </span>
+                <span className="flex items-center gap-2 font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                  <span className="w-2.5 h-2.5 ring-1 ring-gold" aria-hidden="true" />
+                  Hoy
                 </span>
               </div>
 
@@ -716,7 +723,7 @@ const TherapistDetail = () => {
                   <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-3">
                     Día seleccionado
                   </p>
-                  <p className="font-serif italic font-light text-base text-white mb-5 capitalize">
+                  <p className="font-serif font-normal text-lg text-white mb-5 capitalize">
                     {formatDateLabel(selectedDate)}
                   </p>
 
@@ -732,7 +739,7 @@ const TherapistDetail = () => {
                           <button
                             key={slot.id}
                             onClick={() => setSelectedSlot(isSel ? null : slot)}
-                            className={`py-2.5 font-sans text-[11px] font-medium uppercase tracking-eyebrow border transition-all duration-400 ease-expo-out ${
+                            className={`py-3 font-sans text-sm font-semibold tracking-wide border transition-all duration-300 ease-expo-out ${
                               isSel
                                 ? 'bg-gold border-gold text-navy'
                                 : 'bg-transparent border-gold-dim text-gold hover:bg-gold hover:text-navy'
@@ -760,13 +767,11 @@ const TherapistDetail = () => {
               {/* Resumen y botón de reserva */}
               <div className="mt-8 pt-8 border-t border-gold-faint">
                 {selectedSlot && (
-                  <div className="flex items-center gap-3 mb-5 p-4 bg-gold-ghost border border-gold-faint">
-                    <svg className="w-4 h-4 text-gold flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span className="font-serif font-light text-base text-white capitalize">
+                  <div className="mb-5 p-4 bg-gold-faint border border-gold-dim">
+                    <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-1">Tu selección</p>
+                    <p className="font-serif font-normal text-lg text-white capitalize">
                       {formatDateLabel(selectedDate)} · {selectedSlot.startTime.slice(0, 5)} hs
-                    </span>
+                    </p>
                   </div>
                 )}
 
@@ -785,6 +790,7 @@ const TherapistDetail = () => {
                       <span>Ver mis turnos</span>
                       <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>
                     </Link>
+                    <ZoomLinkNotice className="!mt-4" />
                   </div>
                 )}
 
