@@ -9,6 +9,9 @@ import {
   cancelAppointment,
   completeAppointment,
   getFreshZoomStartUrl,
+  getAvailableDays,
+  getAvailableSlots,
+  rescheduleAppointment,
 } from '../services/api';
 
 const PAGE_SIZE = 5;
@@ -121,6 +124,229 @@ const Pagination = ({ page, totalPages, onChange }) => {
 };
 
 // ---------------------------------------------------------------
+// RescheduleModal — calendar + slot picker para reprogramar un turno
+// ---------------------------------------------------------------
+const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+const RescheduleModal = ({ appt, onConfirm, onClose }) => {
+  const today = new Date();
+  const [calYear, setCalYear] = useState(today.getFullYear());
+  const [calMonth, setCalMonth] = useState(today.getMonth() + 1);
+  const [availableDays, setAvailableDays] = useState([]);
+  const [loadingDays, setLoadingDays] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    setLoadingDays(true);
+    setSelectedDate(null);
+    setAvailableSlots([]);
+    setSelectedSlot(null);
+    getAvailableDays(appt.therapistId, calYear, calMonth, appt.specialtyName)
+      .then(setAvailableDays)
+      .catch(() => setAvailableDays([]))
+      .finally(() => setLoadingDays(false));
+  }, [calYear, calMonth, appt.therapistId, appt.specialtyName]);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+    setLoadingSlots(true);
+    setAvailableSlots([]);
+    setSelectedSlot(null);
+    getAvailableSlots(appt.therapistId, selectedDate, appt.specialtyName)
+      .then(setAvailableSlots)
+      .catch(() => setAvailableSlots([]))
+      .finally(() => setLoadingSlots(false));
+  }, [selectedDate, appt.therapistId, appt.specialtyName]);
+
+  const prevMonth = () => {
+    if (calMonth === 1) { setCalYear(y => y - 1); setCalMonth(12); }
+    else setCalMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (calMonth === 12) { setCalYear(y => y + 1); setCalMonth(1); }
+    else setCalMonth(m => m + 1);
+  };
+
+  const firstDayOfWeek = (new Date(calYear, calMonth - 1, 1).getDay() + 6) % 7; // 0=Lun
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
+  const cells = Array.from({ length: totalCells }, (_, i) => {
+    const d = i - firstDayOfWeek + 1;
+    return d >= 1 && d <= daysInMonth ? d : null;
+  });
+
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  const handleConfirm = async () => {
+    if (!selectedSlot || confirming) return;
+    setConfirming(true);
+    setError('');
+    try {
+      await onConfirm(selectedSlot.id);
+    } catch (err) {
+      setError(err.response?.data?.message || 'No se pudo reprogramar el turno.');
+      setConfirming(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(10,12,18,0.88)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-navy border border-gold-faint w-full max-w-sm max-h-[90vh] overflow-y-auto p-7">
+
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1">Reprogramar turno</p>
+            <p className="font-serif font-light text-white text-lg leading-snug">Elegí el nuevo horario</p>
+            <p className="font-serif font-light text-white-dim text-sm mt-1.5">
+              Actual: {formatDatetime(appt.startAt)}
+            </p>
+          </div>
+          <button onClick={onClose} aria-label="Cerrar" className="text-white-faint hover:text-white transition-colors p-1 ml-4 flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Navegación de mes */}
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={prevMonth} className="p-2 text-white-faint hover:text-gold transition-colors" aria-label="Mes anterior">
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <span className="font-sans text-[11px] uppercase tracking-eyebrow text-white">
+            {MONTH_NAMES[calMonth - 1]} {calYear}
+          </span>
+          <button onClick={nextMonth} className="p-2 text-white-faint hover:text-gold transition-colors" aria-label="Mes siguiente">
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        {/* Encabezado de días */}
+        <div className="grid grid-cols-7 gap-0.5 mb-1">
+          {['Lu','Ma','Mi','Ju','Vi','Sa','Do'].map(d => (
+            <div key={d} className="text-center font-sans text-[9px] uppercase tracking-eyebrow text-white-faint py-1">{d}</div>
+          ))}
+        </div>
+
+        {/* Grilla de días */}
+        {loadingDays ? (
+          <div className="flex justify-center py-8">
+            <div className="w-5 h-5 border-2 border-gold-faint border-t-gold rounded-full animate-spin" aria-label="Cargando" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-7 gap-0.5 mb-6">
+            {cells.map((dayNum, i) => {
+              if (!dayNum) return <div key={i} />;
+              const dateStr = `${calYear}-${String(calMonth).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+              const isAvailable = availableDays.includes(dateStr);
+              const isSelected = selectedDate === dateStr;
+              const isToday = dateStr === todayStr;
+
+              let cellStyle = {};
+              let cellClass = 'relative text-center py-2 font-sans text-[11px] transition-all duration-200 ';
+
+              if (isSelected) {
+                cellClass += 'bg-gold text-navy font-semibold cursor-pointer';
+              } else if (isAvailable) {
+                cellClass += 'text-gold cursor-pointer hover:opacity-80';
+                cellStyle = { background: 'rgba(198, 167, 94, 0.1)' };
+              } else {
+                cellClass += 'text-white-faint cursor-not-allowed opacity-30';
+              }
+
+              if (isToday && !isSelected) {
+                cellStyle = { ...cellStyle, outline: '1px solid rgba(198, 167, 94, 0.5)' };
+              }
+
+              return (
+                <button
+                  key={i}
+                  disabled={!isAvailable}
+                  onClick={() => setSelectedDate(dateStr)}
+                  className={cellClass}
+                  style={cellStyle}
+                >
+                  {dayNum}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Horarios disponibles */}
+        {selectedDate && (
+          <div className="mb-6">
+            <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-3">Horarios disponibles</p>
+            {loadingSlots ? (
+              <div className="flex justify-center py-4">
+                <div className="w-5 h-5 border-2 border-gold-faint border-t-gold rounded-full animate-spin" aria-label="Cargando" />
+              </div>
+            ) : availableSlots.length === 0 ? (
+              <p className="font-serif font-light text-sm text-white-dim text-center py-3">Sin horarios disponibles para este día.</p>
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                {availableSlots.map(slot => {
+                  const isSlotSelected = selectedSlot?.id === slot.id;
+                  return (
+                    <button
+                      key={slot.id}
+                      onClick={() => setSelectedSlot(slot)}
+                      className="py-2.5 font-sans text-[11px] font-medium border transition-all duration-200"
+                      style={isSlotSelected
+                        ? { background: 'var(--gold)', color: 'var(--navy)', borderColor: 'var(--gold)' }
+                        : { background: 'transparent', color: 'rgba(242,242,242,0.7)', borderColor: 'rgba(198,167,94,0.2)' }
+                      }
+                    >
+                      {slot.startTime.substring(0, 5)}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="mb-4 px-4 py-3 flex items-start gap-2" style={{ background: 'rgba(160,74,58,0.08)', border: '1px solid rgba(160,74,58,0.4)' }}>
+            <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+            <p className="font-serif font-light text-sm leading-relaxed" style={{ color: '#A04A3A' }}>{error}</p>
+          </div>
+        )}
+
+        {/* Acciones */}
+        <div className="flex gap-3 pt-2 border-t border-gold-faint">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 border border-gold-faint hover:border-gold-dim font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-white transition-all duration-300"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={!selectedSlot || confirming}
+            className="flex-1 py-3 font-sans text-[11px] font-semibold uppercase tracking-eyebrow transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: selectedSlot && !confirming ? 'var(--gold)' : undefined, color: selectedSlot && !confirming ? 'var(--navy)' : undefined, border: '1px solid rgba(198,167,94,0.4)' }}
+          >
+            {confirming ? 'Guardando...' : 'Confirmar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------
 // ClientAppointments
 // ---------------------------------------------------------------
 const ClientAppointments = () => {
@@ -139,6 +365,7 @@ const ClientAppointments = () => {
   const [proximosCliente, setProximosCliente] = useState([]);
   const [pasadosCliente, setPasadosCliente] = useState([]);
   const [historialClientePage, setHistorialClientePage] = useState(1);
+  const [reschedulingAppt, setReschedulingAppt] = useState(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('ouro_user');
@@ -186,6 +413,12 @@ const ClientAppointments = () => {
     }
   };
 
+  const handleReschedule = async (appointmentId, newSlotId) => {
+    const updated = await rescheduleAppointment(appointmentId, newSlotId);
+    setProximos((prev) => prev.map((a) => (a.id === appointmentId ? updated : a)));
+    setReschedulingAppt(null);
+  };
+
   const handleComplete = async (appointmentId) => {
     setCompletingId(appointmentId);
     setErrorMsg('');
@@ -230,6 +463,7 @@ const ClientAppointments = () => {
     const actingAsTherapist = isTherapist && !forceClientView;
     const canCancel = isFutureSection && appt.status !== 'CANCELLED';
     const canComplete = actingAsTherapist && isFutureSection && appt.status === 'RESERVED';
+    const canReschedule = actingAsTherapist && isFutureSection && appt.status === 'RESERVED';
     const isConfirming = confirmId === appt.id;
 
     return (
@@ -358,7 +592,7 @@ const ClientAppointments = () => {
             </div>
 
             {/* Acciones */}
-            {(canCancel || canComplete) && (
+            {(canCancel || canComplete || canReschedule) && (
               <div className="flex flex-col gap-2 flex-shrink-0 items-end">
                 {canComplete && (
                   <button
@@ -367,6 +601,14 @@ const ClientAppointments = () => {
                     className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300 disabled:opacity-50 underline underline-offset-4"
                   >
                     {completingId === appt.id ? 'Guardando...' : 'Marcar completado'}
+                  </button>
+                )}
+                {canReschedule && (
+                  <button
+                    onClick={() => setReschedulingAppt(appt)}
+                    className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-white transition-colors duration-300 underline underline-offset-4"
+                  >
+                    Reprogramar
                   </button>
                 )}
                 {canCancel && (
@@ -590,6 +832,14 @@ const ClientAppointments = () => {
         )}
 
       </main>
+
+      {reschedulingAppt && (
+        <RescheduleModal
+          appt={reschedulingAppt}
+          onConfirm={(newSlotId) => handleReschedule(reschedulingAppt.id, newSlotId)}
+          onClose={() => setReschedulingAppt(null)}
+        />
+      )}
     </div>
   );
 };

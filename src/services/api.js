@@ -252,6 +252,11 @@ export const getAppointmentsByTherapist = async (therapistId) => {
   return response.data;
 };
 
+export const rescheduleAppointment = async (id, newTimeSlotId) => {
+  const response = await api.put(`/appointments/${id}/reschedule`, { newTimeSlotId });
+  return response.data;
+};
+
 // ==================== RESOURCE ENDPOINTS ====================
 
 export const uploadResource = async (formData) => {
