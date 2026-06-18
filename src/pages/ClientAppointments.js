@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ZoomLinkNotice from '../components/ZoomLinkNotice';
@@ -56,6 +56,14 @@ const canJoinMeeting = (startAt) => {
   const now = new Date();
   const minutesUntilStart = (start - now) / 60000;
   return minutesUntilStart <= 10;
+};
+
+const canStartMeeting = (startAt) => {
+  if (!startAt) return false;
+  const start = new Date(startAt);
+  const now = new Date();
+  const minutesUntilStart = (start - now) / 60000;
+  return minutesUntilStart <= 30;
 };
 
 const formatDatetime = (isoStr) => {
@@ -351,7 +359,6 @@ const RescheduleModal = ({ appt, onConfirm, onClose }) => {
 // ---------------------------------------------------------------
 const ClientAppointments = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
   const [proximos, setProximos] = useState([]);
   const [pasados, setPasados] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -366,13 +373,15 @@ const ClientAppointments = () => {
   const [pasadosCliente, setPasadosCliente] = useState([]);
   const [historialClientePage, setHistorialClientePage] = useState(1);
   const [reschedulingAppt, setReschedulingAppt] = useState(null);
+  const [startedSessionIds, setStartedSessionIds] = useState(new Set());
+  const userRef = useRef(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('ouro_user');
     if (!userData) { navigate('/login'); return; }
     let parsed;
     try { parsed = JSON.parse(userData); } catch { navigate('/login'); return; }
-    setUser(parsed);
+    userRef.current = parsed;
 
     if (parsed.role === 'THERAPIST') {
       setIsTherapist(true);
@@ -395,6 +404,74 @@ const ClientAppointments = () => {
         .finally(() => setLoading(false));
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const refetchAll = () => {
+      const parsed = userRef.current;
+      if (!parsed) return;
+      if (parsed.role === 'THERAPIST') {
+        Promise.all([
+          getTherapistByUserId(parsed.id).then((t) => getAppointmentsByTherapist(t.id)),
+          getAppointmentsByUser(parsed.id),
+        ])
+          .then(([agendaTerapeuta, agendaCliente]) => {
+            setProximos(agendaTerapeuta.proximos || []);
+            setPasados(agendaTerapeuta.pasados || []);
+            setProximosCliente(agendaCliente.proximos || []);
+            setPasadosCliente(agendaCliente.pasados || []);
+          })
+          .catch(() => {});
+      } else {
+        getAppointmentsByUser(parsed.id)
+          .then((agenda) => { setProximos(agenda.proximos || []); setPasados(agenda.pasados || []); })
+          .catch(() => {});
+      }
+    };
+
+    const handleVisible = () => {
+      if (document.visibilityState === 'visible') refetchAll();
+    };
+    const handlePageShow = (e) => {
+      if (e.persisted) refetchAll();
+    };
+
+    document.addEventListener('visibilitychange', handleVisible);
+    window.addEventListener('pageshow', handlePageShow);
+    const interval = setInterval(refetchAll, 5 * 60 * 1000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisible);
+      window.removeEventListener('pageshow', handlePageShow);
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!userRef.current) return;
+    const interval = setInterval(() => {
+      const parsed = userRef.current;
+      if (!parsed) return;
+      const checkList = parsed.role === 'THERAPIST' ? proximosCliente : proximos;
+      const needsPoll = checkList.some((a) => {
+        if (a.zoomJoinUrl) return false;
+        const minutesUntil = (new Date(a.startAt) - new Date()) / 60000;
+        return minutesUntil <= 60 && minutesUntil > -120;
+      });
+      if (!needsPoll) return;
+      getAppointmentsByUser(parsed.id)
+        .then((agenda) => {
+          if (parsed.role === 'THERAPIST') {
+            setProximosCliente(agenda.proximos || []);
+            setPasadosCliente(agenda.pasados || []);
+          } else {
+            setProximos(agenda.proximos || []);
+            setPasados(agenda.pasados || []);
+          }
+        })
+        .catch(() => {});
+    }, 20000);
+    return () => clearInterval(interval);
+  }, [proximos, proximosCliente]);
 
   const handleCancel = async (appointmentId) => {
     setConfirmId(null);
@@ -546,38 +623,38 @@ const ClientAppointments = () => {
                 )}
               </div>
 
-              {/* Link de Zoom */}
-              {isFutureSection && canJoinMeeting(appt.startAt) && (() => {
-                if (actingAsTherapist) {
-                  return (
-                    <button
-                      onClick={async () => {
-                        const newTab = window.open('', '_blank');
-                        setJoiningZoomId(appt.id);
-                        try {
-                          const freshUrl = await getFreshZoomStartUrl(appt.id);
-                          newTab.location.href = freshUrl;
-                        } catch {
-                          newTab.close();
-                          setErrorMsg('No se pudo obtener el link de Zoom. Intentá de nuevo.');
-                        } finally {
-                          setJoiningZoomId(null);
-                        }
-                      }}
-                      disabled={joiningZoomId === appt.id}
-                      className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-brand-zoom/40 hover:bg-brand-zoom hover:text-white font-sans text-[10px] font-medium uppercase tracking-eyebrow text-brand-zoom transition-all duration-400 ease-expo-out disabled:opacity-50"
-                    >
-                      <VideoIcon />
-                      <span>{joiningZoomId === appt.id ? 'Cargando...' : 'Iniciar sesión'}</span>
-                    </button>
-                  );
-                }
-                if (!appt.zoomJoinUrl) return (
-                  <p className="mt-4 font-sans text-[10px] text-white-dim uppercase tracking-eyebrow">
-                    El terapeuta abrirá la sala en breve
-                  </p>
-                );
+              {/* Link de Zoom - Terapeuta */}
+              {isFutureSection && actingAsTherapist && canStartMeeting(appt.startAt) && (() => {
+                const sessionStarted = !!appt.zoomStartUrl || startedSessionIds.has(appt.id);
                 return (
+                  <button
+                    onClick={async () => {
+                      const newTab = window.open('', '_blank');
+                      setJoiningZoomId(appt.id);
+                      try {
+                        const freshUrl = await getFreshZoomStartUrl(appt.id);
+                        newTab.location.href = freshUrl;
+                        setStartedSessionIds(prev => new Set([...prev, appt.id]));
+                      } catch {
+                        newTab.close();
+                        setErrorMsg('No se pudo obtener el link de Zoom. Intentá de nuevo.');
+                      } finally {
+                        setJoiningZoomId(null);
+                      }
+                    }}
+                    disabled={joiningZoomId === appt.id}
+                    className="group inline-flex items-center gap-2 mt-4 px-4 py-2 border border-brand-zoom/40 hover:bg-brand-zoom hover:text-white font-sans text-[10px] font-medium uppercase tracking-eyebrow text-brand-zoom transition-all duration-400 ease-expo-out disabled:opacity-50"
+                  >
+                    <VideoIcon />
+                    <span>
+                      {joiningZoomId === appt.id ? 'Cargando...' : sessionStarted ? 'Sesión en curso · Volver a Zoom' : 'Iniciar sesión'}
+                    </span>
+                  </button>
+                );
+              })()}
+              {/* Link de Zoom - Cliente */}
+              {isFutureSection && !actingAsTherapist && (
+                appt.zoomJoinUrl ? (
                   <a
                     href={appt.zoomJoinUrl}
                     target="_blank"
@@ -587,8 +664,12 @@ const ClientAppointments = () => {
                     <VideoIcon />
                     <span>Unirse a la sesión</span>
                   </a>
-                );
-              })()}
+                ) : canJoinMeeting(appt.startAt) ? (
+                  <p className="mt-4 font-sans text-[10px] text-white-dim uppercase tracking-eyebrow">
+                    El terapeuta abrirá la sala en breve
+                  </p>
+                ) : null
+              )}
             </div>
 
             {/* Acciones */}

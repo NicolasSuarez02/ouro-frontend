@@ -195,12 +195,12 @@ const Navbar = () => {
         }`}
       >
         <div className="max-w-container mx-auto px-6 lg:px-10">
-          <div className="flex justify-between items-center h-20">
+          <div className="relative flex items-center h-20">
 
-            {/* ---------- Logo ---------- */}
+            {/* ---------- Logo — centrado en mobile, a la izquierda en desktop ---------- */}
             <Link
               to="/"
-              className="group flex items-center gap-3 text-gold"
+              className="group absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 flex items-center gap-3 text-gold"
               aria-label="OURO — Inicio"
             >
               <Isotipo
@@ -216,7 +216,7 @@ const Navbar = () => {
             </Link>
 
             {/* ---------- Menú desktop ---------- */}
-            <div className="hidden lg:flex items-center gap-8">
+            <div className="hidden lg:flex flex-1 justify-end items-center gap-8">
               <NavLink onClick={() => scrollToSection('inicio')}>Inicio</NavLink>
               <NavLink onClick={() => scrollToSection('quienes-somos')}>Quiénes somos</NavLink>
 
@@ -355,7 +355,7 @@ const Navbar = () => {
             {/* ---------- Botón mobile menu ---------- */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden text-gold hover:text-gold-bright transition-colors duration-300"
+              className="lg:hidden ml-auto text-gold hover:text-gold-bright transition-colors duration-300"
               aria-label="Abrir menú"
             >
               {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
