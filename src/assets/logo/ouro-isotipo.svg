@@ -7,7 +7,7 @@
   Uso previsto: favicon, loader, mobile compacto, decoraciones puntuales.
   Color por defecto: currentColor (controlable desde CSS).
 -->
-<svg id="ouro-isotipo" data-name="OURO isotipo (placeholder)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 853 853">
+<svg id="ouro-isotipo" data-name="OURO isotipo (placeholder)" xmlns="http://www.w3.org/2000/svg" viewBox="-13 31 853 853">
   <defs>
     <style>
       .logo-isotipo { fill: currentColor; }
