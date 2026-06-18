@@ -255,7 +255,6 @@ code {
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
-  transform: translateX(15px);
 }
 
 .ouro-initial-loader__mark {

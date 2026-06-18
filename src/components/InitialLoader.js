@@ -65,15 +65,24 @@ const InitialLoader = () => {
       /* ignore */
     }
 
+    // Ocultar scrollbar mientras el loader está visible para que
+    // position:fixed quede centrado respecto al viewport visual (no al layout
+    // viewport que se achica ~12px cuando hay scrollbar clásico en desktop).
+    document.body.style.overflowY = 'hidden';
+
     const prefersReduced = window.matchMedia &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const visibleMs = prefersReduced ? REDUCED_VISIBLE_MS : VISIBLE_MS;
     const fadeMs = prefersReduced ? REDUCED_FADE_MS : FADE_MS;
 
     const fadeTimer = setTimeout(() => setPhase('fading'), visibleMs);
-    const goneTimer = setTimeout(() => setPhase('gone'), visibleMs + fadeMs);
+    const goneTimer = setTimeout(() => {
+      document.body.style.overflowY = '';
+      setPhase('gone');
+    }, visibleMs + fadeMs);
 
     return () => {
+      document.body.style.overflowY = '';
       clearTimeout(fadeTimer);
       clearTimeout(goneTimer);
     };
