@@ -37,6 +37,7 @@ const Login = () => {
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem('ouro_user')) {
@@ -67,7 +68,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const response = await loginUser(formData);
+      const response = await loginUser({ ...formData, rememberMe });
       if (response.success) {
         clearError();
         localStorage.setItem('ouro_token', response.token);
@@ -203,6 +204,31 @@ const Login = () => {
               <EyeIcon open={showPassword} />
             </button>
           </div>
+        </div>
+
+        {/* Recordarme */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={rememberMe}
+            onClick={() => setRememberMe((v) => !v)}
+            className={`w-4 h-4 border flex-shrink-0 flex items-center justify-center transition-colors duration-300 ${
+              rememberMe ? 'bg-gold border-gold' : 'bg-transparent border-gold-faint'
+            }`}
+          >
+            {rememberMe && (
+              <svg className="w-2.5 h-2.5 text-navy" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="2,6 5,9 10,3" />
+              </svg>
+            )}
+          </button>
+          <span
+            className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint cursor-pointer select-none"
+            onClick={() => setRememberMe((v) => !v)}
+          >
+            Recordarme
+          </span>
         </div>
 
         {/* Submit */}
