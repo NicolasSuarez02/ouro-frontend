@@ -35,13 +35,22 @@ const Footer = () => {
           </p>
 
           {/* Contacto */}
-          <a
-            href="mailto:ouro.contacto2026@gmail.com"
-            className="group relative font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-2"
-          >
-            ouro.contacto2026@gmail.com
-            <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
-          </a>
+          <div className="flex flex-col items-center gap-3">
+            <a
+              href="mailto:ouro.contacto2026@gmail.com"
+              className="group relative font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-1"
+            >
+              ouro.contacto2026@gmail.com
+              <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
+            </a>
+            <a
+              href="tel:+5493413021109"
+              className="group relative font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-1"
+            >
+              +54 9 341 302-1109
+              <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
+            </a>
+          </div>
 
           {/* Links legales */}
           <div className="flex items-center gap-4">

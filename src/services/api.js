@@ -261,7 +261,7 @@ export const rescheduleAppointment = async (id, newTimeSlotId) => {
 
 export const uploadResource = async (formData) => {
   const response = await api.post('/resources/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { 'Content-Type': undefined },
   });
   return response.data;
 };
@@ -302,7 +302,7 @@ export const uploadTherapistPhoto = async (file) => {
   const formData = new FormData();
   formData.append('photo', file);
   const response = await api.post('/therapists/upload-photo', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { 'Content-Type': undefined },
   });
   return response.data;
 };
