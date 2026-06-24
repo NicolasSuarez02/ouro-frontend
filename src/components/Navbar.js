@@ -286,9 +286,9 @@ const Navbar = () => {
                               <p className="font-serif text-base text-white truncate leading-tight">
                                 {t.userFullName}
                               </p>
-                              {t.specialty && (
+                              {(t.specialties?.length > 0 || t.specialty) && (
                                 <p className="font-sans text-[10px] uppercase tracking-dropdown text-white-faint truncate mt-1">
-                                  {t.specialty}
+                                  {t.specialties?.[0]?.name || t.specialty}
                                 </p>
                               )}
                             </div>
