@@ -585,33 +585,40 @@ const Dashboard = () => {
                     <p className="font-serif font-light text-xl text-white leading-tight">
                       {user.fullName}
                     </p>
-                    {therapist.specialty && (
+                    {therapist.specialties?.length > 0 && (
                       <p className="font-sans text-[10px] uppercase tracking-eyebrow-wide text-gold-dim mt-2">
-                        {therapist.specialty}
+                        {therapist.specialties.map((s) => s.name).join(' · ')}
                       </p>
                     )}
                   </div>
                 </div>
 
                 {/* Precio */}
-                {therapist.priceAmountCents != null && (
-                  <div className="pt-5 border-t border-gold-faint">
-                    <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mb-2">
-                      Precio por sesión
-                    </p>
-                    <div className="flex items-baseline gap-2">
-                      <p className="font-serif font-normal text-xl text-white">
-                        {(therapist.priceAmountCents / 100).toLocaleString('es-AR', {
-                          style: 'currency',
-                          currency: therapist.priceCurrency || 'ARS',
-                        })}
+                {(() => {
+                  const prices = therapist.specialties?.map((s) => s.priceAmountCents || 0).filter((p) => p > 0) || [];
+                  if (prices.length === 0) return null;
+                  const minPrice = Math.min(...prices);
+                  const multiPrice = prices.some((p) => p !== prices[0]);
+                  return (
+                    <div className="pt-5 border-t border-gold-faint">
+                      <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mb-2">
+                        Precio por sesión
                       </p>
-                      <p className="font-sans text-[10px] uppercase tracking-suffix text-white-faint">
-                        Por sesión
-                      </p>
+                      <div className="flex items-baseline gap-2">
+                        <p className="font-serif font-normal text-xl text-white">
+                          {(minPrice / 100).toLocaleString('es-AR', {
+                            style: 'currency',
+                            currency: therapist.priceCurrency || 'ARS',
+                            maximumFractionDigits: 0,
+                          })}
+                        </p>
+                        <p className="font-sans text-[10px] uppercase tracking-suffix text-white-faint">
+                          {multiPrice ? 'Desde · Por sesión' : 'Por sesión'}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Bio */}
                 {therapist.bio && (

@@ -55,7 +55,7 @@ const DIAS = [
   { db: 0, label: 'Domingo' },
 ];
 
-const DURACIONES = [15, 30, 45, 60];
+const DURACIONES = [15, 30, 45, 60, 90, 120];
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DIAS_SEMANA = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 
