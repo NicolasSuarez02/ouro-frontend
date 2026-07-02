@@ -44,7 +44,9 @@ const Footer = () => {
               <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
             </a>
             <a
-              href="tel:+5493413021109"
+              href="https://wa.me/5493413021109?text=Hola%2C%20me%20gustar%C3%ADa%20saber%20m%C3%A1s%20sobre%20OURO"
+              target="_blank"
+              rel="noopener noreferrer"
               className="group relative font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-1"
             >
               +54 9 341 302-1109

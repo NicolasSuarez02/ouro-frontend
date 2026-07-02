@@ -29,6 +29,7 @@ import PrivateRoute from './components/PrivateRoute';
 import CustomCursor from './components/CustomCursor';
 import InitialLoader from './components/InitialLoader';
 import SideRail from './components/SideRail';
+import WhatsAppButton from './components/WhatsAppButton';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
       <CustomCursor />
       <Router>
         <SideRail />
+        <WhatsAppButton />
         <Routes>
         {/* Públicas */}
         <Route path="/" element={<Home />} />
