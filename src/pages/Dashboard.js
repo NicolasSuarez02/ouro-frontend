@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ZoomLinkNotice from '../components/ZoomLinkNotice';
-import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getAppointmentsByTherapist, getMpConnectUrl, getFreshZoomStartUrl } from '../services/api';
+import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getAppointmentsByTherapist, getMpConnectUrl, getFreshZoomStartUrl, getGoogleCalendarConnectUrl, disconnectGoogleCalendar } from '../services/api';
 
 // ---------------------------------------------------------------
 // Iconos inline — stroke 1.5px.
@@ -73,6 +73,9 @@ const Dashboard = () => {
   const [pageLoading, setPageLoading] = useState(true);
   const [mpStatus, setMpStatus] = useState(null); // 'success' | 'error' | null
   const [connectingMp, setConnectingMp] = useState(false);
+  const [googleStatus, setGoogleStatus] = useState(null); // 'success' | 'error' | null
+  const [connectingGoogle, setConnectingGoogle] = useState(false);
+  const [disconnectingGoogle, setDisconnectingGoogle] = useState(false);
   const [joiningZoom, setJoiningZoom] = useState(false);
   const [zoomError, setZoomError] = useState(false);
   const userRef = useRef(null);
@@ -93,6 +96,11 @@ const Dashboard = () => {
     const mp = params.get('mp');
     if (mp === 'success' || mp === 'error') {
       setMpStatus(mp);
+      window.history.replaceState({}, '', '/dashboard');
+    }
+    const google = params.get('google');
+    if (google === 'success' || google === 'error') {
+      setGoogleStatus(google);
       window.history.replaceState({}, '', '/dashboard');
     }
   }, [navigate, location.search]);
@@ -205,6 +213,33 @@ const Dashboard = () => {
     }
   };
 
+  const handleConnectGoogle = async () => {
+    try {
+      setConnectingGoogle(true);
+      const { authUrl } = await getGoogleCalendarConnectUrl();
+      window.location.href = authUrl;
+    } catch {
+      setGoogleStatus('error');
+      setConnectingGoogle(false);
+    }
+  };
+
+  const handleDisconnectGoogle = async () => {
+    try {
+      setDisconnectingGoogle(true);
+      await disconnectGoogleCalendar();
+      if (user.role === 'THERAPIST') {
+        getTherapistByUserId(user.id).then(setTherapist).catch(() => {});
+      } else if (user.role === 'USER') {
+        getClientByUserId(user.id).then(setClient).catch(() => {});
+      }
+    } catch {
+      // silencioso: si falla, el estado conectado sigue mostrándose y puede reintentar
+    } finally {
+      setDisconnectingGoogle(false);
+    }
+  };
+
   // ---------------------------------------------------------------
   // Loading
   // ---------------------------------------------------------------
@@ -287,6 +322,52 @@ const Dashboard = () => {
             </p>
             <button
               onClick={() => setMpStatus(null)}
+              aria-label="Cerrar"
+              className="hover:opacity-80 transition-opacity duration-300 flex-shrink-0"
+              style={{ color: '#A04A3A' }}
+            >
+              <CloseIcon />
+            </button>
+          </div>
+        )}
+
+        {/* Banner Google Calendar success */}
+        {googleStatus === 'success' && (
+          <div className="mb-8 border border-gold-faint bg-gold-ghost px-5 py-4 flex items-start gap-3" role="status">
+            <span
+              className="flex-shrink-0 w-1.5 h-1.5 mt-2.5 rounded-full bg-gold shadow-gold-glow-soft"
+              aria-hidden="true"
+            />
+            <p className="flex-1 font-serif font-light text-base text-white leading-relaxed">
+              Google Calendar conectado. Tus turnos van a aparecer en tu calendario.
+            </p>
+            <button
+              onClick={() => setGoogleStatus(null)}
+              aria-label="Cerrar"
+              className="text-white-faint hover:text-gold transition-colors duration-300 flex-shrink-0"
+            >
+              <CloseIcon />
+            </button>
+          </div>
+        )}
+
+        {/* Banner Google Calendar error */}
+        {googleStatus === 'error' && (
+          <div
+            className="mb-8 px-5 py-4 flex items-start gap-3"
+            style={{
+              borderTop: '1px solid rgba(160, 74, 58, 0.4)',
+              borderBottom: '1px solid rgba(160, 74, 58, 0.4)',
+              background: 'rgba(160, 74, 58, 0.08)',
+            }}
+            role="alert"
+          >
+            <AlertCircle className="flex-shrink-0 mt-0.5" style={{ color: '#A04A3A' }} />
+            <p className="flex-1 font-serif font-light text-base leading-relaxed" style={{ color: '#A04A3A' }}>
+              No pudimos conectar con Google Calendar. Intentá nuevamente.
+            </p>
+            <button
+              onClick={() => setGoogleStatus(null)}
               aria-label="Cerrar"
               className="hover:opacity-80 transition-opacity duration-300 flex-shrink-0"
               style={{ color: '#A04A3A' }}
@@ -513,6 +594,52 @@ const Dashboard = () => {
           </dl>
         </section>
 
+        {/* Card: Google Calendar (solo USER) */}
+        {user.role === 'USER' && client && (
+          <section className="bg-navy-elevated border border-gold-faint p-8 mb-6">
+            {client.googleCalendarConnected ? (
+              <div className="flex items-start gap-3">
+                <CheckIcon className="flex-shrink-0 mt-0.5 text-gold" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-1">
+                    Google Calendar conectado
+                  </p>
+                  <p className="font-serif font-light text-sm text-white-dim leading-relaxed">
+                    Tus turnos aparecen automáticamente en tu Google Calendar.
+                  </p>
+                </div>
+                <button
+                  onClick={handleDisconnectGoogle}
+                  disabled={disconnectingGoogle}
+                  className="flex-shrink-0 font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:opacity-80 transition-opacity duration-300 underline underline-offset-4 disabled:opacity-50"
+                >
+                  {disconnectingGoogle ? 'Desconectando...' : 'Desconectar'}
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-4">
+                  Calendario
+                </p>
+                <h2 className="font-serif font-light text-2xl text-white mb-3 leading-tight">
+                  Conectá tu Google Calendar
+                </h2>
+                <p className="font-serif font-light text-base text-white-dim leading-relaxed mb-6">
+                  Opcional: tus turnos van a aparecer automáticamente en tu calendario de Google.
+                </p>
+                <button
+                  onClick={handleConnectGoogle}
+                  disabled={connectingGoogle}
+                  className="group inline-flex items-center gap-3 bg-gold-gradient px-7 py-3 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span>{connectingGoogle ? 'Redirigiendo...' : 'Conectar'}</span>
+                  {!connectingGoogle && <span className="transition-transform duration-400 ease-expo-out group-hover:translate-x-2">→</span>}
+                </button>
+              </>
+            )}
+          </section>
+        )}
+
         {/* Card: Postulate como terapeuta (solo USER) */}
         {user.role === 'USER' && (
           <section className="bg-navy-elevated border border-gold-faint p-8 mb-6">
@@ -680,6 +807,54 @@ const Dashboard = () => {
                       </div>
                     </div>
                   )
+                )}
+
+                {/* Google Calendar */}
+                {therapist.googleCalendarConnected ? (
+                  <div className="pt-5 border-t border-gold-faint">
+                    <div className="bg-gold-ghost border border-gold-faint p-5 flex items-start gap-3">
+                      <CheckIcon className="flex-shrink-0 mt-0.5 text-gold" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-1">
+                          Google Calendar conectado
+                        </p>
+                        <p className="font-serif font-light text-sm text-white-dim leading-relaxed">
+                          Tus turnos aparecen automáticamente en tu Google Calendar.
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleDisconnectGoogle}
+                        disabled={disconnectingGoogle}
+                        className="flex-shrink-0 font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:opacity-80 transition-opacity duration-300 underline underline-offset-4 disabled:opacity-50"
+                      >
+                        {disconnectingGoogle ? 'Desconectando...' : 'Desconectar'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="pt-5 border-t border-gold-faint">
+                    <div className="border-l-2 border-gold pl-5 pr-4 py-4 bg-gold-ghost">
+                      <div className="flex items-start gap-3 mb-4">
+                        <CalendarIcon className="flex-shrink-0 mt-0.5 text-gold" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold mb-1">
+                            Conectá tu Google Calendar
+                          </p>
+                          <p className="font-serif font-light text-sm text-white leading-relaxed">
+                            Opcional: tus turnos van a aparecer automáticamente en tu calendario.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleConnectGoogle}
+                        disabled={connectingGoogle}
+                        className="inline-flex items-center gap-3 bg-gold-gradient px-6 py-2.5 font-sans text-[11px] font-semibold uppercase tracking-eyebrow text-navy transition-all duration-400 ease-expo-out hover:-translate-y-0.5 hover:shadow-gold-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span>{connectingGoogle ? 'Redirigiendo...' : 'Conectar'}</span>
+                        {!connectingGoogle && <span>→</span>}
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 {/* Estado de aprobación */}

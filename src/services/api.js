@@ -142,6 +142,16 @@ export const getMpConnectUrl = async () => {
   return response.data;
 };
 
+export const getGoogleCalendarConnectUrl = async () => {
+  const response = await api.get('/google-calendar/connect');
+  return response.data;
+};
+
+export const disconnectGoogleCalendar = async () => {
+  const response = await api.post('/google-calendar/disconnect');
+  return response.data;
+};
+
 export const getPendingTherapists = async () => {
   const response = await api.get('/therapists/pending');
   return response.data;
