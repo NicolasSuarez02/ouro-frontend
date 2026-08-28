@@ -10,6 +10,7 @@ import {
   rejectResource,
   getAllUsersPaginated,
   adminDeleteUser,
+  updateUser,
 } from '../services/api';
 
 // ---------------------------------------------------------------
@@ -30,6 +31,20 @@ const TrashIcon = ({ className = '' }) => (
     <path d="M10 11v6" />
     <path d="M14 11v6" />
     <path d="M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2" />
+  </svg>
+);
+
+const PencilIcon = ({ className = '' }) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+  </svg>
+);
+
+const CloseIcon = ({ className = '' }) => (
+  <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
@@ -69,6 +84,12 @@ const AdminDashboard = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Estado edición de usuario
+  const [editUser, setEditUser] = useState(null);
+  const [editForm, setEditForm] = useState({ fullName: '', email: '', phone: '', role: 'USER', password: '' });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
 
   useEffect(() => {
     const userData = localStorage.getItem('ouro_user');
@@ -112,6 +133,43 @@ const AdminDashboard = () => {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setSearch(searchInput);
+  };
+
+  const handleEditClick = (user) => {
+    setEditError('');
+    setEditForm({
+      fullName: user.fullName || '',
+      email: user.email || '',
+      phone: user.phone || '',
+      role: user.role || 'USER',
+      password: '',
+    });
+    setEditUser(user);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editUser) return;
+    setEditSaving(true);
+    setEditError('');
+    try {
+      const payload = {
+        fullName: editForm.fullName,
+        email: editForm.email,
+        phone: editForm.phone,
+        role: editForm.role,
+      };
+      if (editForm.password) {
+        payload.password = editForm.password;
+      }
+      await updateUser(editUser.id, payload);
+      setEditUser(null);
+      cargarUsuarios();
+    } catch (err) {
+      setEditError(err.response?.data?.message || 'No se pudo guardar los cambios. Verificá los datos e intentá de nuevo.');
+    } finally {
+      setEditSaving(false);
+    }
   };
 
   const handleDeleteUser = async (userId) => {
@@ -534,6 +592,22 @@ const AdminDashboard = () => {
                                 Sin verificar
                               </span>
                             )}
+                            {user.role === 'THERAPIST' && (
+                              <button
+                                onClick={() => navigate(`/admin/terapeutas/${user.id}/editar`)}
+                                className="hidden sm:inline-block px-2.5 py-1 border border-gold-faint hover:border-gold-dim font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-all duration-300"
+                              >
+                                Perfil terapeuta
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleEditClick(user)}
+                              aria-label="Editar usuario"
+                              title="Editar usuario"
+                              className="p-1.5 text-white-faint hover:text-gold transition-colors duration-300"
+                            >
+                              <PencilIcon />
+                            </button>
                             {user.role !== 'ADMIN' && (
                               deleteConfirm === user.id ? (
                                 <div className="flex items-center gap-2">
@@ -604,6 +678,127 @@ const AdminDashboard = () => {
           </div>
         )}
       </main>
+
+      {/* ═══════════════════════════════════════════════
+          Modal edición de usuario
+          ═══════════════════════════════════════════════ */}
+      {editUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(10,12,18,0.88)' }}
+          onClick={(e) => { if (e.target === e.currentTarget && !editSaving) setEditUser(null); }}
+        >
+          <div className="bg-navy border border-gold-faint w-full max-w-sm max-h-[90vh] overflow-y-auto p-7">
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1">Editar usuario</p>
+                <p className="font-serif font-light text-white text-lg leading-snug">{editUser.fullName}</p>
+              </div>
+              <button
+                onClick={() => !editSaving && setEditUser(null)}
+                aria-label="Cerrar"
+                className="text-white-faint hover:text-white transition-colors p-1 ml-4 flex-shrink-0"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1.5">
+                  Nombre completo
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.fullName}
+                  onChange={(e) => setEditForm((f) => ({ ...f, fullName: e.target.value }))}
+                  className="w-full px-3 py-2.5 bg-navy-soft/40 border border-gold-faint focus:border-gold-dim focus:outline-none font-serif font-light text-base text-white transition-colors duration-300"
+                />
+              </div>
+
+              <div>
+                <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1.5">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={editForm.email}
+                  onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))}
+                  className="w-full px-3 py-2.5 bg-navy-soft/40 border border-gold-faint focus:border-gold-dim focus:outline-none font-serif font-light text-base text-white transition-colors duration-300"
+                />
+              </div>
+
+              <div>
+                <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1.5">
+                  Teléfono
+                </label>
+                <input
+                  type="text"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm((f) => ({ ...f, phone: e.target.value }))}
+                  className="w-full px-3 py-2.5 bg-navy-soft/40 border border-gold-faint focus:border-gold-dim focus:outline-none font-serif font-light text-base text-white transition-colors duration-300"
+                />
+              </div>
+
+              <div>
+                <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1.5">
+                  Rol
+                </label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) => setEditForm((f) => ({ ...f, role: e.target.value }))}
+                  style={{ colorScheme: 'dark' }}
+                  className="w-full px-3 py-2.5 bg-navy-soft/40 border border-gold-faint focus:border-gold-dim focus:outline-none font-serif font-light text-base text-white cursor-pointer transition-colors duration-300"
+                >
+                  <option value="USER">Cliente</option>
+                  <option value="THERAPIST">Terapeuta</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1.5">
+                  Nueva contraseña <span className="normal-case text-white-faint">(opcional)</span>
+                </label>
+                <input
+                  type="password"
+                  minLength={6}
+                  placeholder="Dejar vacío para no cambiarla"
+                  value={editForm.password}
+                  onChange={(e) => setEditForm((f) => ({ ...f, password: e.target.value }))}
+                  className="w-full px-3 py-2.5 bg-navy-soft/40 border border-gold-faint focus:border-gold-dim focus:outline-none font-serif font-light text-base text-white placeholder:text-white-faint placeholder:italic transition-colors duration-300"
+                />
+              </div>
+
+              {editError && (
+                <p className="font-serif font-light text-sm leading-relaxed" style={{ color: TERRACOTA }}>
+                  {editError}
+                </p>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={editSaving}
+                  className="flex-1 px-5 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[11px] font-medium uppercase tracking-eyebrow text-gold disabled:opacity-50 transition-all duration-400 ease-expo-out"
+                >
+                  {editSaving ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+                <button
+                  type="button"
+                  disabled={editSaving}
+                  onClick={() => setEditUser(null)}
+                  className="px-5 py-2.5 border border-gold-faint hover:border-gold-dim font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-white disabled:opacity-50 transition-all duration-300"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

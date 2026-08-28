@@ -10,6 +10,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import RegisterClient from './pages/RegisterClient';
 import Success from './pages/Success';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminEditTherapist from './pages/AdminEditTherapist';
 import Dashboard from './pages/Dashboard';
 import RegisterTherapist from './pages/RegisterTherapist';
 import EditTherapist from './pages/EditTherapist';
@@ -69,6 +70,7 @@ function App() {
 
         {/* Protegida — solo ADMIN */}
         <Route path="/admin" element={<PrivateRoute requiredRole="ADMIN"><AdminDashboard /></PrivateRoute>} />
+        <Route path="/admin/terapeutas/:userId/editar" element={<PrivateRoute requiredRole="ADMIN"><AdminEditTherapist /></PrivateRoute>} />
         </Routes>
       </Router>
     </>
