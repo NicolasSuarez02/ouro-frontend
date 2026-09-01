@@ -267,6 +267,11 @@ export const rescheduleAppointment = async (id, newTimeSlotId) => {
   return response.data;
 };
 
+export const rebookAppointment = async (id, newTimeSlotId) => {
+  const response = await api.put(`/appointments/${id}/rebook`, { newTimeSlotId });
+  return response.data;
+};
+
 // ==================== RESOURCE ENDPOINTS ====================
 
 export const uploadResource = async (formData) => {

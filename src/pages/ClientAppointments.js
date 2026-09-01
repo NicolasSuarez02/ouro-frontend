@@ -12,6 +12,7 @@ import {
   getAvailableDays,
   getAvailableSlots,
   rescheduleAppointment,
+  rebookAppointment,
 } from '../services/api';
 
 const PAGE_SIZE = 5;
@@ -216,7 +217,7 @@ const RescheduleModal = ({ appt, onConfirm, onClose }) => {
             <p className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-1">Reprogramar turno</p>
             <p className="font-serif font-light text-white text-lg leading-snug">Elegí el nuevo horario</p>
             <p className="font-serif font-light text-white-dim text-sm mt-1.5">
-              Actual: {formatDatetime(appt.startAt)}
+              {appt.status === 'CANCELLED' ? 'Turno cancelado' : 'Actual'}: {formatDatetime(appt.startAt)}
             </p>
           </div>
           <button onClick={onClose} aria-label="Cerrar" className="text-white-faint hover:text-white transition-colors p-1 ml-4 flex-shrink-0">
@@ -496,6 +497,12 @@ const ClientAppointments = () => {
     setReschedulingAppt(null);
   };
 
+  const handleRebook = async (cancelledAppointmentId, newSlotId) => {
+    const created = await rebookAppointment(cancelledAppointmentId, newSlotId);
+    setProximos((prev) => [...prev, created].sort((a, b) => a.startAt.localeCompare(b.startAt)));
+    setReschedulingAppt(null);
+  };
+
   const handleComplete = async (appointmentId) => {
     setCompletingId(appointmentId);
     setErrorMsg('');
@@ -541,6 +548,7 @@ const ClientAppointments = () => {
     const canCancel = isFutureSection && appt.status !== 'CANCELLED';
     const canComplete = actingAsTherapist && isFutureSection && appt.status === 'RESERVED';
     const canReschedule = actingAsTherapist && isFutureSection && appt.status === 'RESERVED';
+    const canRebookFromCancelled = actingAsTherapist && appt.status === 'CANCELLED';
     const isConfirming = confirmId === appt.id;
 
     return (
@@ -673,7 +681,7 @@ const ClientAppointments = () => {
             </div>
 
             {/* Acciones */}
-            {(canCancel || canComplete || canReschedule) && (
+            {(canCancel || canComplete || canReschedule || canRebookFromCancelled) && (
               <div className="flex flex-col gap-2 flex-shrink-0 items-end">
                 {canComplete && (
                   <button
@@ -684,7 +692,7 @@ const ClientAppointments = () => {
                     {completingId === appt.id ? 'Guardando...' : 'Marcar completado'}
                   </button>
                 )}
-                {canReschedule && (
+                {(canReschedule || canRebookFromCancelled) && (
                   <button
                     onClick={() => setReschedulingAppt(appt)}
                     className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-white transition-colors duration-300 underline underline-offset-4"
@@ -917,7 +925,9 @@ const ClientAppointments = () => {
       {reschedulingAppt && (
         <RescheduleModal
           appt={reschedulingAppt}
-          onConfirm={(newSlotId) => handleReschedule(reschedulingAppt.id, newSlotId)}
+          onConfirm={(newSlotId) => reschedulingAppt.status === 'CANCELLED'
+            ? handleRebook(reschedulingAppt.id, newSlotId)
+            : handleReschedule(reschedulingAppt.id, newSlotId)}
           onClose={() => setReschedulingAppt(null)}
         />
       )}
