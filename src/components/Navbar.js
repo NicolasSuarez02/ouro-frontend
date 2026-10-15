@@ -48,6 +48,21 @@ const NavLink = ({ children, onClick }) => (
   </button>
 );
 
+// Link externo (abre en pestaña nueva), mismo estilo que NavLink
+const PODCAST_URL = 'https://open.spotify.com/show/3uUwSoXKNZZsM2boOAVsoY';
+
+const NavLinkExternal = ({ href, children }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="group relative font-sans text-[11px] font-medium uppercase tracking-eyebrow text-white-dim hover:text-gold transition-colors duration-300 py-2"
+  >
+    {children}
+    <span className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-gold origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-600 ease-expo-out" />
+  </a>
+);
+
 const NavLinkAsLink = ({ to, onClick, children }) => (
   <Link
     to={to}
@@ -313,11 +328,9 @@ const Navbar = () => {
               </div>
 
               {currentUser && (
-                <>
-                  <NavLinkAsLink to="/biblioteca">Biblioteca</NavLinkAsLink>
-                  <NavLinkAsLink to="/formaciones">Formaciones</NavLinkAsLink>
-                </>
+                <NavLinkAsLink to="/biblioteca">Biblioteca</NavLinkAsLink>
               )}
+              <NavLinkExternal href={PODCAST_URL}>Nuestro podcast</NavLinkExternal>
 
               <NavLink onClick={() => scrollToSection('como-empezar')}>Cómo empezar</NavLink>
               <NavLink onClick={() => scrollToSection('contacto')}>Contacto</NavLink>
@@ -383,11 +396,9 @@ const Navbar = () => {
               <MobileItem onClick={() => { setIsMenuOpen(false); navigate('/terapeutas'); }}>Terapeutas</MobileItem>
 
               {currentUser && (
-                <>
-                  <MobileItem onClick={() => { setIsMenuOpen(false); navigate('/biblioteca'); }}>Biblioteca</MobileItem>
-                  <MobileItem onClick={() => { setIsMenuOpen(false); navigate('/formaciones'); }}>Formaciones</MobileItem>
-                </>
+                <MobileItem onClick={() => { setIsMenuOpen(false); navigate('/biblioteca'); }}>Biblioteca</MobileItem>
               )}
+              <MobileItemExternal href={PODCAST_URL} onClick={() => setIsMenuOpen(false)}>Nuestro podcast</MobileItemExternal>
 
               <MobileItem onClick={() => scrollToSection('como-empezar')}>Cómo empezar</MobileItem>
               <MobileItem onClick={() => scrollToSection('contacto')}>Contacto</MobileItem>
@@ -436,6 +447,18 @@ const Navbar = () => {
 // ---------------------------------------------------------------
 // MobileItem — item del drawer mobile
 // ---------------------------------------------------------------
+const MobileItemExternal = ({ href, onClick, children }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    onClick={onClick}
+    className="block w-full text-left py-3 font-serif text-xl font-light text-white-dim hover:text-gold active:text-gold transition-colors duration-300"
+  >
+    {children}
+  </a>
+);
+
 const MobileItem = ({ onClick, children }) => (
   <button
     onClick={onClick}
