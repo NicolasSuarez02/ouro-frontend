@@ -63,6 +63,14 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Las opciones de los <select> heredan text-white, pero algunos navegadores
+   (Chrome en Windows) pintan la lista desplegable con fondo blanco e ignoran
+   color-scheme: dark → texto invisible. Fondo y color explícitos. */
+select option {
+  background-color: #16293D;
+  color: #FFFFFF;
+}
+
 body {
   margin: 0;
   background-color: var(--navy);

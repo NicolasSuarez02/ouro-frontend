@@ -8,6 +8,7 @@ import {
   saveTherapistAvailability,
   getTherapistTimeSlots,
   deleteTimeSlot,
+  restoreTimeSlot,
 } from '../services/api';
 
 // ---------------------------------------------------------------
@@ -78,6 +79,8 @@ const groupSlotsByDate = (slots) => {
   return groups;
 };
 
+const isFree = (slot) => slot.status !== 'BLOCKED';
+
 const formatHora = (isoStr) => {
   const d = new Date(isoStr);
   return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
@@ -113,6 +116,7 @@ const ManageAvailability = () => {
   const [slots, setSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [cancellingSlot, setCancellingSlot] = useState(null);
+  const [restoringSlot, setRestoringSlot] = useState(null);
   const [slotError, setSlotError] = useState('');
   const [confirmSlot, setConfirmSlot] = useState(null);
   const [confirmDia, setConfirmDia] = useState(null);
@@ -258,7 +262,7 @@ const ManageAvailability = () => {
     setSlotError('');
     try {
       await deleteTimeSlot(slot.id);
-      setSlots((prev) => prev.filter((s) => s.id !== slot.id));
+      setSlots((prev) => prev.map((s) => (s.id === slot.id ? { ...s, status: 'BLOCKED' } : s)));
     } catch (err) {
       setSlotError(err.response?.data?.message || 'No se pudo cancelar el turno.');
     } finally {
@@ -266,15 +270,28 @@ const ManageAvailability = () => {
     }
   };
 
+  const handleRestoreSlot = async (slot) => {
+    setRestoringSlot(slot.id);
+    setSlotError('');
+    try {
+      await restoreTimeSlot(slot.id);
+      setSlots((prev) => prev.map((s) => (s.id === slot.id ? { ...s, status: 'FREE' } : s)));
+    } catch (err) {
+      setSlotError(err.response?.data?.message || 'No se pudo restaurar el turno.');
+    } finally {
+      setRestoringSlot(null);
+    }
+  };
+
   const handleCancelDia = async (fecha) => {
     setConfirmDia(null);
-    const slotsDelDia = slotsByDate[fecha] || [];
+    const libresDelDia = (slotsByDate[fecha] || []).filter(isFree);
     setSlotError('');
-    for (const slot of slotsDelDia) {
-      try { await deleteTimeSlot(slot.id); } catch { /* continuar */ }
+    const cancelados = new Set();
+    for (const slot of libresDelDia) {
+      try { await deleteTimeSlot(slot.id); cancelados.add(slot.id); } catch { /* continuar */ }
     }
-    setSlots((prev) => prev.filter((s) => s.startAt.slice(0, 10) !== fecha));
-    setSelectedDate(null);
+    setSlots((prev) => prev.map((s) => (cancelados.has(s.id) ? { ...s, status: 'BLOCKED' } : s)));
   };
 
   // ---------------------------------------------------------------
@@ -298,6 +315,8 @@ const ManageAvailability = () => {
   const slotsByDate = groupSlotsByDate(slots);
   const calendarCells = getCalendarCells();
   const selectedDaySlots = selectedDate ? (slotsByDate[selectedDate] || []) : [];
+  const selectedDayFree = selectedDaySlots.filter(isFree);
+  const confirmDiaFree = confirmDia ? (slotsByDate[confirmDia] || []).filter(isFree).length : 0;
 
   // Clase reutilizable para botones de tab
   const tabBtnClass = (active) =>
@@ -368,7 +387,7 @@ const ManageAvailability = () => {
               {formatDayLabel(confirmDia)}
             </h3>
             <p className="font-serif italic font-light text-base text-white-dim text-center mb-8">
-              {slotsByDate[confirmDia]?.length} turno{slotsByDate[confirmDia]?.length !== 1 ? 's' : ''} disponible{slotsByDate[confirmDia]?.length !== 1 ? 's' : ''}
+              {confirmDiaFree} turno{confirmDiaFree !== 1 ? 's' : ''} disponible{confirmDiaFree !== 1 ? 's' : ''}
             </p>
             <div className="flex gap-3">
               <button
@@ -416,7 +435,7 @@ const ManageAvailability = () => {
             Gestionar disponibilidad
           </h1>
           <p className="font-serif font-light text-white-dim leading-relaxed" style={{ fontSize: 'clamp(15px, 1.1vw, 17px)' }}>
-            Configurá tu horario y cancelá turnos puntuales.
+            Configurá tu horario y cancelá o restaurá turnos puntuales.
           </p>
         </div>
 
@@ -591,7 +610,7 @@ const ManageAvailability = () => {
             {/* Banner informativo */}
             <div className="mb-6 border-l-2 border-gold pl-5 pr-4 py-4 bg-gold-ghost">
               <p className="font-serif font-light text-base text-white leading-relaxed">
-                Tus turnos libres para los próximos 60 días. Los reservados no aparecen acá.
+                Tus turnos libres para los próximos 60 días. Los reservados no aparecen acá. Si cancelaste uno por error, podés restaurarlo.
               </p>
             </div>
 
@@ -686,6 +705,7 @@ const ManageAvailability = () => {
                       const isPast = date < todayBase;
                       const slotsOnDay = slotsByDate[dateStr] || [];
                       const hasSlots = slotsOnDay.length > 0;
+                      const freeCount = slotsOnDay.filter(isFree).length;
                       const isSel = selectedDate === dateStr;
                       const isToday = dateStr === toDateStr(todayBase);
 
@@ -721,7 +741,7 @@ const ManageAvailability = () => {
                           <span className="leading-none">{date.getDate()}</span>
                           {hasSlots && !isPast && (
                             <span className={`font-sans text-[10px] font-medium tracking-eyebrow mt-1 leading-none ${countColor}`}>
-                              {slotsOnDay.length}
+                              {freeCount}
                             </span>
                           )}
                         </button>
@@ -762,10 +782,11 @@ const ManageAvailability = () => {
                           {formatDayLabel(selectedDate)}
                         </p>
                         <p className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint mt-1">
-                          {selectedDaySlots.length} turno{selectedDaySlots.length !== 1 ? 's' : ''} disponible{selectedDaySlots.length !== 1 ? 's' : ''}
+                          {selectedDayFree.length} turno{selectedDayFree.length !== 1 ? 's' : ''} disponible{selectedDayFree.length !== 1 ? 's' : ''}
+                          {selectedDaySlots.length > selectedDayFree.length && ` · ${selectedDaySlots.length - selectedDayFree.length} cancelado${selectedDaySlots.length - selectedDayFree.length !== 1 ? 's' : ''}`}
                         </p>
                       </div>
-                      {selectedDaySlots.length > 0 && (
+                      {selectedDayFree.length > 0 && (
                         <button
                           onClick={() => setConfirmDia(selectedDate)}
                           className="font-sans text-[10px] font-medium uppercase tracking-eyebrow hover:opacity-80 transition-opacity duration-300 underline underline-offset-4"
@@ -786,6 +807,32 @@ const ManageAvailability = () => {
                       <ul className="divide-y divide-gold-faint">
                         {selectedDaySlots.map((slot) => {
                           const cancelling = cancellingSlot === slot.id;
+                          const restoring = restoringSlot === slot.id;
+                          if (!isFree(slot)) {
+                            return (
+                              <li key={slot.id} className="flex items-center justify-between px-5 py-4">
+                                <div className="flex items-center gap-3">
+                                  <span
+                                    className="w-1.5 h-1.5 rounded-full border border-white-faint flex-shrink-0"
+                                    aria-hidden="true"
+                                  />
+                                  <span className="font-serif font-normal text-lg text-white-faint line-through">
+                                    {formatHora(slot.startAt)} – {formatHora(slot.endAt)} hs
+                                  </span>
+                                  <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-faint">
+                                    Cancelado
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={() => handleRestoreSlot(slot)}
+                                  disabled={restoring}
+                                  className="font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold hover:text-gold-bright transition-colors duration-300 disabled:opacity-50 underline underline-offset-4"
+                                >
+                                  {restoring ? 'Restaurando...' : 'Restaurar'}
+                                </button>
+                              </li>
+                            );
+                          }
                           return (
                             <li key={slot.id} className="flex items-center justify-between px-5 py-4">
                               <div className="flex items-center gap-3">

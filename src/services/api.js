@@ -334,6 +334,11 @@ export const deleteTimeSlot = async (slotId) => {
   return response.data;
 };
 
+export const restoreTimeSlot = async (slotId) => {
+  const response = await api.put(`/timeslots/${slotId}/restore`);
+  return response.data;
+};
+
 // ==================== RATING ENDPOINTS ====================
 
 export const createRating = async (data) => {
