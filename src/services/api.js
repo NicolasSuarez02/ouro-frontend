@@ -167,6 +167,11 @@ export const rejectTherapist = async (id) => {
   return response.data;
 };
 
+export const acceptTherapistGuidelines = async () => {
+  const response = await api.put('/therapists/me/accept-guidelines');
+  return response.data;
+};
+
 // ==================== CLIENT ENDPOINTS ====================
 
 export const createClient = async (clientData) => {

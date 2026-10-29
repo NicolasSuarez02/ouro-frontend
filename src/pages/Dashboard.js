@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ZoomLinkNotice from '../components/ZoomLinkNotice';
+import TherapistGuidelinesModal from '../components/TherapistGuidelinesModal';
 import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getAppointmentsByTherapist, getMpConnectUrl, getFreshZoomStartUrl, getGoogleCalendarConnectUrl, disconnectGoogleCalendar } from '../services/api';
 
 // ---------------------------------------------------------------
@@ -263,6 +264,10 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+
+      {therapist?.approvalStatus === 'APPROVED' && !therapist.guidelinesAccepted && (
+        <TherapistGuidelinesModal onAccepted={(updated) => setTherapist(updated)} />
+      )}
 
       <main className="flex-1 max-w-3xl mx-auto w-full px-6 lg:px-10 pt-24 lg:pt-32 pb-24">
 
