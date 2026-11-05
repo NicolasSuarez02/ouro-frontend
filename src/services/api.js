@@ -393,3 +393,33 @@ export const sendContactMessage = async ({ name, email, message }) => {
 };
 
 export default api;
+
+// ==================== PAYPAL ====================
+
+// Email de PayPal de la terapeuta logueada ({ email } o email null si no conectó)
+export const getMyPaypal = async () => {
+  const response = await api.get('/therapists/me/paypal');
+  return response.data;
+};
+
+export const connectPaypal = async (email, emailConfirmation) => {
+  const response = await api.put('/therapists/me/paypal', { email, emailConfirmation });
+  return response.data;
+};
+
+export const disconnectPaypal = async () => {
+  const response = await api.delete('/therapists/me/paypal');
+  return response.data;
+};
+
+// Crea la orden en PayPal; devuelve { orderId, approveUrl }
+export const createPaypalOrder = async (data) => {
+  const response = await api.post('/appointments/paypal/order', data);
+  return response.data;
+};
+
+// Cobra la orden aprobada y crea el turno; devuelve { status, appointment }
+export const capturePaypalOrder = async (orderId) => {
+  const response = await api.post(`/appointments/paypal/order/${encodeURIComponent(orderId)}/capture`);
+  return response.data;
+};

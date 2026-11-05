@@ -50,6 +50,7 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
   const [newSpecName, setNewSpecName] = useState('');
   const [newSpecLeadHours, setNewSpecLeadHours] = useState(1);
   const [newSpecPrice, setNewSpecPrice] = useState('');
+  const [newSpecPriceUsd, setNewSpecPriceUsd] = useState('');
   const [localError, setLocalError] = useState('');
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(initialValues.photoUrl || '');
@@ -89,6 +90,12 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
 
     if (specialties.length === 0) {
       setLocalError('Agregá al menos una especialidad');
+      return;
+    }
+
+    const badUsd = specialties.find((sp) => sp.priceUsdCents != null && sp.priceUsdCents < 100);
+    if (badUsd) {
+      setLocalError(`El precio en USD de "${badUsd.name}" tiene que ser de al menos USD 1 (o dejalo vacío)`);
       return;
     }
 
@@ -250,7 +257,7 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
           <ul className="space-y-2 mb-5">
             {specialties.map((sp, i) => (
               <li
-                key={i}
+                key={sp.name}
                 className="flex items-center gap-4 px-4 py-3 border border-gold-faint bg-navy-soft/30"
               >
                 <span className="flex-1 font-serif font-normal text-base text-white truncate">
@@ -259,6 +266,23 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
                 <span className="font-sans text-[10px] uppercase tracking-eyebrow text-white-dim flex-shrink-0">
                   {(sp.priceAmountCents / 100).toLocaleString('es-AR', { style: 'currency', currency: formData.priceCurrency, maximumFractionDigits: 0 })}
                 </span>
+                <label className="flex items-center gap-1 flex-shrink-0 font-sans text-[10px] uppercase tracking-eyebrow text-white-dim">
+                  <span>USD</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    aria-label={`Precio en USD de ${sp.name}`}
+                    defaultValue={sp.priceUsdCents > 0 ? sp.priceUsdCents / 100 : ''}
+                    placeholder="—"
+                    onChange={(e) => {
+                      const usd = parseFloat(e.target.value);
+                      const priceUsdCents = isNaN(usd) || usd <= 0 ? null : Math.round(usd * 100);
+                      setSpecialties(specialties.map((x, j) => (j === i ? { ...x, priceUsdCents } : x)));
+                    }}
+                    className="w-16 bg-transparent border-0 border-b border-gold-faint focus:border-gold focus:outline-none font-sans text-xs text-white text-right py-0.5"
+                  />
+                </label>
                 <span className="font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim flex-shrink-0">
                   {sp.minBookingLeadHours}h
                 </span>
@@ -284,7 +308,7 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
             placeholder="Nombre de la especialidad"
             className={inputClass}
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-2">
                 Precio
@@ -296,6 +320,20 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
                 value={newSpecPrice}
                 onChange={(e) => setNewSpecPrice(e.target.value)}
                 placeholder="5000"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block font-sans text-[10px] uppercase tracking-eyebrow text-gold-dim mb-2">
+                Precio USD (PayPal, opcional)
+              </label>
+              <input
+                type="number"
+                min="1"
+                step="0.01"
+                value={newSpecPriceUsd}
+                onChange={(e) => setNewSpecPriceUsd(e.target.value)}
+                placeholder="Sin PayPal"
                 className={inputClass}
               />
             </div>
@@ -319,15 +357,32 @@ const TherapistForm = ({ initialValues = {}, onSubmit, saving, apiError, submitL
             type="button"
             onClick={() => {
               if (!newSpecName.trim()) return;
+              if (specialties.some((x) => x.name.toLowerCase() === newSpecName.trim().toLowerCase())) {
+                setLocalError('Ya agregaste una especialidad con ese nombre');
+                return;
+              }
               const precio = parseFloat(newSpecPrice);
               if (isNaN(precio) || precio < 0) return;
+              // USD vacío = esta especialidad no se ofrece por PayPal
+              let priceUsdCents = null;
+              if (newSpecPriceUsd.trim() !== '') {
+                const usd = parseFloat(newSpecPriceUsd);
+                if (isNaN(usd) || usd < 1) {
+                  setLocalError('El precio en USD tiene que ser de al menos USD 1 (o dejalo vacío)');
+                  return;
+                }
+                priceUsdCents = Math.round(usd * 100);
+              }
+              setLocalError('');
               setSpecialties([...specialties, {
                 name: newSpecName.trim(),
                 minBookingLeadHours: newSpecLeadHours,
                 priceAmountCents: Math.round(precio * 100),
+                priceUsdCents,
               }]);
               setNewSpecName('');
               setNewSpecPrice('');
+              setNewSpecPriceUsd('');
               setNewSpecLeadHours(1);
             }}
             className="inline-flex items-center justify-center gap-2 px-6 py-2.5 border border-gold-dim hover:bg-gold hover:border-gold hover:text-navy font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold transition-all duration-400 ease-expo-out"

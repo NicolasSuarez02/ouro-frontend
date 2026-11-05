@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ZoomLinkNotice from '../components/ZoomLinkNotice';
 import TherapistGuidelinesModal from '../components/TherapistGuidelinesModal';
+import PayPalConnectPanel from '../components/PayPalConnectPanel';
 import { getTherapistByUserId, getClientByUserId, getAppointmentsByUser, getAppointmentsByTherapist, getMpConnectUrl, getFreshZoomStartUrl, getGoogleCalendarConnectUrl, disconnectGoogleCalendar } from '../services/api';
 
 // ---------------------------------------------------------------
@@ -813,6 +814,9 @@ const Dashboard = () => {
                     </div>
                   )
                 )}
+
+                {/* PayPal (opcional, cobros en USD) */}
+                {therapist.approvalStatus === 'APPROVED' && <PayPalConnectPanel />}
 
                 {/* Google Calendar */}
                 {therapist.googleCalendarConnected ? (

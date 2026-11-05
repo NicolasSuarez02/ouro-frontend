@@ -26,6 +26,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentPending from './pages/PaymentPending';
 import PaymentFailure from './pages/PaymentFailure';
+import PayPalReturn from './pages/PayPalReturn';
 import PrivateRoute from './components/PrivateRoute';
 import CustomCursor from './components/CustomCursor';
 import InitialLoader from './components/InitialLoader';
@@ -58,6 +59,8 @@ function App() {
         <Route path="/pago/exitoso" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
         <Route path="/pago/pendiente" element={<PrivateRoute><PaymentPending /></PrivateRoute>} />
         <Route path="/pago/fallido" element={<PrivateRoute><PaymentFailure /></PrivateRoute>} />
+        <Route path="/pago/paypal/retorno" element={<PrivateRoute><PayPalReturn /></PrivateRoute>} />
+        <Route path="/pago/paypal/cancelado" element={<PrivateRoute><PayPalReturn cancelled /></PrivateRoute>} />
 
         {/* Protegidas — requieren sesión */}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />

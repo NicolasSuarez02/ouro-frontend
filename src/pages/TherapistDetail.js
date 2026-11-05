@@ -8,6 +8,7 @@ import {
   getAvailableDays,
   getAvailableSlots,
   bookAppointment,
+  createPaypalOrder,
   getRatingStatus,
   createRating,
 } from '../services/api';
@@ -75,6 +76,7 @@ const TherapistDetail = () => {
 
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [booking, setBooking] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('MERCADOPAGO'); // 'MERCADOPAGO' | 'PAYPAL'
   const [bookingSuccess, setBookingSuccess] = useState('');
   const [bookingError, setBookingError] = useState('');
 
@@ -162,6 +164,15 @@ const TherapistDetail = () => {
     }
   };
 
+  const currentSpecialty = therapist?.specialties?.find((s) => s.name === selectedSpecialty) || null;
+  // PayPal solo si la terapeuta lo conectó y la especialidad tiene precio en USD (y no es gratis)
+  const paypalAvailable = Boolean(
+    therapist?.paypalConnected &&
+    currentSpecialty?.priceUsdCents >= 100 &&
+    currentSpecialty?.priceAmountCents > 0
+  );
+  const usePaypal = paypalAvailable && paymentMethod === 'PAYPAL';
+
   const handleBook = async () => {
     if (!currentUser) {
       navigate('/login', { state: { from: `/terapeutas/${slug}` } });
@@ -171,6 +182,12 @@ const TherapistDetail = () => {
     setBooking(true);
     setBookingError('');
     try {
+      if (usePaypal) {
+        const { approveUrl } = await createPaypalOrder({ timeSlotId: selectedSlot.id, specialtyName: selectedSpecialty });
+        window.location.href = approveUrl;
+        return;
+      }
+
       const result = await bookAppointment({ timeSlotId: selectedSlot.id, specialtyName: selectedSpecialty });
 
       // Si hay URL de pago, redirigir a Mercado Pago
@@ -794,6 +811,51 @@ const TherapistDetail = () => {
                   </div>
                 )}
 
+                {paypalAvailable && (
+                  <fieldset className="mb-5">
+                    <legend className="block font-sans text-[10px] font-medium uppercase tracking-eyebrow text-gold mb-3">
+                      ¿Cómo querés pagar?
+                    </legend>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {[
+                        {
+                          value: 'MERCADOPAGO',
+                          title: 'Mercado Pago',
+                          price: (currentSpecialty.priceAmountCents / 100).toLocaleString('es-AR', { style: 'currency', currency: therapist.priceCurrency || 'ARS', maximumFractionDigits: 0 }),
+                          hint: 'En pesos, desde Argentina',
+                        },
+                        {
+                          value: 'PAYPAL',
+                          title: 'PayPal',
+                          price: `USD ${(currentSpecialty.priceUsdCents / 100).toLocaleString('es-AR', { maximumFractionDigits: 2 })}`,
+                          hint: 'En dólares, desde cualquier país',
+                        },
+                      ].map((opt) => {
+                        const active = paymentMethod === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setPaymentMethod(opt.value)}
+                            aria-pressed={active}
+                            className={`text-left px-4 py-3 border transition-all duration-300 ease-expo-out ${
+                              active ? 'border-gold bg-gold-ghost' : 'border-gold-faint hover:border-gold-dim'
+                            }`}
+                          >
+                            <span className="flex items-baseline justify-between gap-2">
+                              <span className={`font-sans text-[11px] font-semibold uppercase tracking-eyebrow ${active ? 'text-gold' : 'text-white-dim'}`}>
+                                {opt.title}
+                              </span>
+                              <span className="font-serif text-base text-white">{opt.price}</span>
+                            </span>
+                            <span className="block mt-1 font-serif italic font-light text-sm text-white-faint">{opt.hint}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                )}
+
                 {bookingError && (
                   <div
                     className="mb-5 px-5 py-4 flex items-start gap-3"
@@ -823,7 +885,9 @@ const TherapistDetail = () => {
                   <span>
                     {booking
                       ? 'Procesando...'
-                      : (therapist.priceAmountCents > 0 ? 'Reservar y pagar' : 'Reservar turno')
+                      : usePaypal
+                        ? 'Pagar con PayPal'
+                        : (currentSpecialty?.priceAmountCents > 0 ? 'Reservar y pagar' : 'Reservar turno')
                     }
                   </span>
                   {!booking && selectedSlot && <span>→</span>}
