@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import AdminStats from '../components/AdminStats';
 import { ReactComponent as Isotipo } from '../assets/logo/ouro-isotipo.svg';
 import {
   getPendingTherapists,
@@ -290,6 +291,7 @@ const AdminDashboard = () => {
     { key: 'terapeutas', label: 'Terapeutas', badge: therapists.length },
     { key: 'recursos', label: 'Recursos', badge: recursos.length },
     { key: 'usuarios', label: 'Usuarios', badge: 0 },
+    { key: 'estadisticas', label: 'Estadísticas', badge: 0 },
   ];
 
   return (
@@ -363,6 +365,9 @@ const AdminDashboard = () => {
             );
           })}
         </div>
+
+        {/* ── TAB ESTADÍSTICAS ── */}
+        {tab === 'estadisticas' && <AdminStats />}
 
         {/* ── TAB TERAPEUTAS ── */}
         {tab === 'terapeutas' && (

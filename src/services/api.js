@@ -375,6 +375,16 @@ export const adminDeleteUser = async (userId) => {
   return response.data;
 };
 
+// ==================== ADMIN STATS ====================
+
+export const getAdminStats = async ({ period = 'MONTH', date = null, therapistId = null }) => {
+  const params = new URLSearchParams({ period });
+  if (date) params.append('date', date);
+  if (therapistId) params.append('therapistId', therapistId);
+  const response = await api.get(`/admin/stats?${params.toString()}`);
+  return response.data;
+};
+
 // ==================== EMAIL ENDPOINTS ====================
 
 export const sendEmail = async (emailData) => {
